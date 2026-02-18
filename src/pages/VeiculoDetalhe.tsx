@@ -33,7 +33,8 @@ import {
   RotateCcw,
   FileText,
   Timer,
-  FileCheck
+  FileCheck,
+  Tag
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -49,6 +50,9 @@ export default function VeiculoDetalhe() {
   const [kmEdit, setKmEdit] = useState<number | null>(null);
   const [horaEdit, setHoraEdit] = useState<number | null>(null);
   const [isEditing, setIsEditing] = useState(false);
+
+  const [tagObraEdit, setTagObraEdit] = useState<string>('');
+  const [isEditingTagObra, setIsEditingTagObra] = useState(false);
 
   const handleStartEdit = () => {
     if (veiculo) {
@@ -77,6 +81,33 @@ export default function VeiculoDetalhe() {
       setIsEditing(false);
     } catch (err) {
       toast.error('Erro ao atualizar valores');
+    }
+  };
+
+  const handleStartEditTagObra = () => {
+    if (veiculo) {
+      setTagObraEdit(veiculo.tag_obra || '');
+      setIsEditingTagObra(true);
+    }
+  };
+
+  const handleCancelEditTagObra = () => {
+    setIsEditingTagObra(false);
+    setTagObraEdit('');
+  };
+
+  const handleSaveTagObra = async () => {
+    if (!veiculo) return;
+
+    try {
+      await updateVeiculo.mutateAsync({
+        id: veiculo.id,
+        tag_obra: tagObraEdit.trim() || null,
+      });
+      toast.success('Tag da Obra atualizada com sucesso!');
+      setIsEditingTagObra(false);
+    } catch (err) {
+      toast.error('Erro ao atualizar Tag da Obra');
     }
   };
 
@@ -329,6 +360,28 @@ export default function VeiculoDetalhe() {
                 )}
               </div>
 
+              {/* Tag da Obra */}
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <Tag className="h-4 w-4" />
+                  <span className="text-sm">Tag da Obra</span>
+                </div>
+                {isEditingTagObra ? (
+                  <Input
+                    type="text"
+                    value={tagObraEdit}
+                    onChange={(e) => setTagObraEdit(e.target.value)}
+                    className="font-semibold"
+                    placeholder="Ex: Obra Centro"
+                    autoFocus
+                  />
+                ) : (
+                  <p className="text-lg font-medium">
+                    {veiculo.tag_obra || 'Não definida'}
+                  </p>
+                )}
+              </div>
+
               {/* Empresa */}
               <div className="space-y-2">
                 <div className="flex items-center gap-2 text-muted-foreground">
@@ -341,7 +394,7 @@ export default function VeiculoDetalhe() {
               </div>
 
               {/* Última Atualização */}
-              <div className="space-y-2">
+              <div className="space-y-2 md:col-span-2 lg:col-span-4">
                 <div className="flex items-center gap-2 text-muted-foreground">
                   <Calendar className="h-4 w-4" />
                   <span className="text-sm">Última Atualização</span>
@@ -355,21 +408,48 @@ export default function VeiculoDetalhe() {
             </div>
 
             {/* Edit Buttons */}
-            <div className="flex gap-2 mt-6 pt-4 border-t">
+            <div className="flex flex-wrap gap-2 mt-6 pt-4 border-t">
+              {/* KM/Horímetro edit flow */}
               {isEditing ? (
                 <>
                   <Button onClick={handleSaveEdit} disabled={updateVeiculo.isPending}>
                     <Save className="h-4 w-4 mr-2" />
-                    Salvar Alterações
+                    Salvar KM/Horímetro
                   </Button>
                   <Button variant="outline" onClick={handleCancelEdit}>
                     Cancelar
                   </Button>
                 </>
               ) : (
-                <Button variant="outline" onClick={handleStartEdit}>
+                <Button
+                  variant="outline"
+                  onClick={handleStartEdit}
+                  disabled={isEditingTagObra}
+                >
                   <RotateCcw className="h-4 w-4 mr-2" />
                   Atualizar KM/Horímetro
+                </Button>
+              )}
+
+              {/* Tag da Obra edit flow */}
+              {isEditingTagObra ? (
+                <>
+                  <Button onClick={handleSaveTagObra} disabled={updateVeiculo.isPending}>
+                    <Save className="h-4 w-4 mr-2" />
+                    Salvar Tag da Obra
+                  </Button>
+                  <Button variant="outline" onClick={handleCancelEditTagObra}>
+                    Cancelar
+                  </Button>
+                </>
+              ) : (
+                <Button
+                  variant="outline"
+                  onClick={handleStartEditTagObra}
+                  disabled={isEditing}
+                >
+                  <Tag className="h-4 w-4 mr-2" />
+                  Atualizar Tag da Obra
                 </Button>
               )}
             </div>
