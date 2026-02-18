@@ -1,7 +1,7 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { AppLayout } from '@/components/layout/AppLayout';
-import { useVeiculoDetalhe, useUpdateVeiculo, useMarcarRevisaoRealizada, useUpdateStatusExecucao } from '@/hooks/useFleetData';
+import { useVeiculoDetalhe, useUpdateVeiculo, useMarcarRevisaoRealizada, useUpdateStatusExecucao, useEmpresas } from '@/hooks/useFleetData';
 import { formatarKmOuHora, getStatusLabel } from '@/lib/revisionCalculations';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { StatusExecucaoSelect } from '@/components/revisions/StatusExecucaoSelect';
@@ -46,6 +47,7 @@ export default function VeiculoDetalhe() {
   const updateVeiculo = useUpdateVeiculo();
   const marcarRevisao = useMarcarRevisaoRealizada();
   const updateStatusExecucao = useUpdateStatusExecucao();
+  const { data: empresas } = useEmpresas();
 
   const [kmEdit, setKmEdit] = useState<number | null>(null);
   const [horaEdit, setHoraEdit] = useState<number | null>(null);
@@ -53,6 +55,9 @@ export default function VeiculoDetalhe() {
 
   const [tagObraEdit, setTagObraEdit] = useState<string>('');
   const [isEditingTagObra, setIsEditingTagObra] = useState(false);
+
+  const [empresaIdEdit, setEmpresaIdEdit] = useState<string>('');
+  const [isEditingEmpresa, setIsEditingEmpresa] = useState(false);
 
   const handleStartEdit = () => {
     if (veiculo) {
@@ -108,6 +113,33 @@ export default function VeiculoDetalhe() {
       setIsEditingTagObra(false);
     } catch (err) {
       toast.error('Erro ao atualizar Tag da Obra');
+    }
+  };
+
+  const handleStartEditEmpresa = () => {
+    if (veiculo) {
+      setEmpresaIdEdit(veiculo.empresa_id || '');
+      setIsEditingEmpresa(true);
+    }
+  };
+
+  const handleCancelEditEmpresa = () => {
+    setIsEditingEmpresa(false);
+    setEmpresaIdEdit('');
+  };
+
+  const handleSaveEmpresa = async () => {
+    if (!veiculo) return;
+
+    try {
+      await updateVeiculo.mutateAsync({
+        id: veiculo.id,
+        empresa_id: empresaIdEdit || null,
+      });
+      toast.success('Empresa atualizada com sucesso!');
+      setIsEditingEmpresa(false);
+    } catch (err) {
+      toast.error('Erro ao atualizar Empresa');
     }
   };
 
@@ -388,9 +420,25 @@ export default function VeiculoDetalhe() {
                   <Building2 className="h-4 w-4" />
                   <span className="text-sm">Empresa</span>
                 </div>
-                <p className="text-lg font-medium">
-                  {veiculo.empresa?.nome || 'Não definida'}
-                </p>
+                {isEditingEmpresa ? (
+                  <Select value={empresaIdEdit} onValueChange={setEmpresaIdEdit}>
+                    <SelectTrigger className="font-semibold bg-background">
+                      <SelectValue placeholder="Selecione a empresa..." />
+                    </SelectTrigger>
+                    <SelectContent className="bg-popover border shadow-md z-50">
+                      <SelectItem value="none">Nenhuma</SelectItem>
+                      {empresas?.map((emp) => (
+                        <SelectItem key={emp.id} value={emp.id}>
+                          {emp.nome}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                ) : (
+                  <p className="text-lg font-medium">
+                    {veiculo.empresa?.nome || 'Não definida'}
+                  </p>
+                )}
               </div>
 
               {/* Última Atualização */}
@@ -424,7 +472,7 @@ export default function VeiculoDetalhe() {
                 <Button
                   variant="outline"
                   onClick={handleStartEdit}
-                  disabled={isEditingTagObra}
+                  disabled={isEditingTagObra || isEditingEmpresa}
                 >
                   <RotateCcw className="h-4 w-4 mr-2" />
                   Atualizar KM/Horímetro
@@ -446,10 +494,32 @@ export default function VeiculoDetalhe() {
                 <Button
                   variant="outline"
                   onClick={handleStartEditTagObra}
-                  disabled={isEditing}
+                  disabled={isEditing || isEditingEmpresa}
                 >
                   <Tag className="h-4 w-4 mr-2" />
                   Atualizar Tag da Obra
+                </Button>
+              )}
+
+              {/* Empresa edit flow */}
+              {isEditingEmpresa ? (
+                <>
+                  <Button onClick={handleSaveEmpresa} disabled={updateVeiculo.isPending}>
+                    <Save className="h-4 w-4 mr-2" />
+                    Salvar Empresa
+                  </Button>
+                  <Button variant="outline" onClick={handleCancelEditEmpresa}>
+                    Cancelar
+                  </Button>
+                </>
+              ) : (
+                <Button
+                  variant="outline"
+                  onClick={handleStartEditEmpresa}
+                  disabled={isEditing || isEditingTagObra}
+                >
+                  <Building2 className="h-4 w-4 mr-2" />
+                  Atualizar Empresa
                 </Button>
               )}
             </div>

@@ -147,6 +147,7 @@ export function useUpdateVeiculo() {
       crlv_validade,
       tacografo_validade,
       tag_obra,
+      empresa_id,
     }: { 
       id: string; 
       km_atual?: number; 
@@ -157,6 +158,7 @@ export function useUpdateVeiculo() {
       crlv_validade?: string | null;
       tacografo_validade?: string | null;
       tag_obra?: string | null;
+      empresa_id?: string | null;
     }) => {
       const updateData: Record<string, any> = {};
       
@@ -168,6 +170,7 @@ export function useUpdateVeiculo() {
       if (crlv_validade !== undefined) updateData.crlv_validade = crlv_validade;
       if (tacografo_validade !== undefined) updateData.tacografo_validade = tacografo_validade;
       if (tag_obra !== undefined) updateData.tag_obra = tag_obra;
+      if (empresa_id !== undefined) updateData.empresa_id = empresa_id;
       
       // Only add ultima_atualizacao if km or hora was updated
       if (km_atual !== undefined || hora_atual !== undefined) {
