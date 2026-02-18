@@ -35,7 +35,8 @@ import {
   FileText,
   Timer,
   FileCheck,
-  Tag
+  Tag,
+  FileSignature
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -55,6 +56,9 @@ export default function VeiculoDetalhe() {
 
   const [tagObraEdit, setTagObraEdit] = useState<string>('');
   const [isEditingTagObra, setIsEditingTagObra] = useState(false);
+
+  const [contratoEdit, setContratoEdit] = useState<string>('');
+  const [isEditingContrato, setIsEditingContrato] = useState(false);
 
   const [empresaIdEdit, setEmpresaIdEdit] = useState<string>('');
   const [isEditingEmpresa, setIsEditingEmpresa] = useState(false);
@@ -113,6 +117,33 @@ export default function VeiculoDetalhe() {
       setIsEditingTagObra(false);
     } catch (err) {
       toast.error('Erro ao atualizar Tag da Obra');
+    }
+  };
+
+  const handleStartEditContrato = () => {
+    if (veiculo) {
+      setContratoEdit(veiculo.contrato || '');
+      setIsEditingContrato(true);
+    }
+  };
+
+  const handleCancelEditContrato = () => {
+    setIsEditingContrato(false);
+    setContratoEdit('');
+  };
+
+  const handleSaveContrato = async () => {
+    if (!veiculo) return;
+
+    try {
+      await updateVeiculo.mutateAsync({
+        id: veiculo.id,
+        contrato: contratoEdit.trim() || null,
+      });
+      toast.success('Contrato atualizado com sucesso!');
+      setIsEditingContrato(false);
+    } catch (err) {
+      toast.error('Erro ao atualizar Contrato');
     }
   };
 
@@ -414,6 +445,28 @@ export default function VeiculoDetalhe() {
                 )}
               </div>
 
+              {/* Contrato */}
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <FileSignature className="h-4 w-4" />
+                  <span className="text-sm">Contrato</span>
+                </div>
+                {isEditingContrato ? (
+                  <Input
+                    type="text"
+                    value={contratoEdit}
+                    onChange={(e) => setContratoEdit(e.target.value)}
+                    className="font-semibold"
+                    placeholder="Ex: CT-2024-001"
+                    autoFocus
+                  />
+                ) : (
+                  <p className="text-lg font-medium">
+                    {veiculo.contrato || 'Não definido'}
+                  </p>
+                )}
+              </div>
+
               {/* Empresa */}
               <div className="space-y-2">
                 <div className="flex items-center gap-2 text-muted-foreground">
@@ -472,7 +525,7 @@ export default function VeiculoDetalhe() {
                 <Button
                   variant="outline"
                   onClick={handleStartEdit}
-                  disabled={isEditingTagObra || isEditingEmpresa}
+                  disabled={isEditingTagObra || isEditingEmpresa || isEditingContrato}
                 >
                   <RotateCcw className="h-4 w-4 mr-2" />
                   Atualizar KM/Horímetro
@@ -494,10 +547,32 @@ export default function VeiculoDetalhe() {
                 <Button
                   variant="outline"
                   onClick={handleStartEditTagObra}
-                  disabled={isEditing || isEditingEmpresa}
+                  disabled={isEditing || isEditingEmpresa || isEditingContrato}
                 >
                   <Tag className="h-4 w-4 mr-2" />
                   Atualizar Tag da Obra
+                </Button>
+              )}
+
+              {/* Contrato edit flow */}
+              {isEditingContrato ? (
+                <>
+                  <Button onClick={handleSaveContrato} disabled={updateVeiculo.isPending}>
+                    <Save className="h-4 w-4 mr-2" />
+                    Salvar Contrato
+                  </Button>
+                  <Button variant="outline" onClick={handleCancelEditContrato}>
+                    Cancelar
+                  </Button>
+                </>
+              ) : (
+                <Button
+                  variant="outline"
+                  onClick={handleStartEditContrato}
+                  disabled={isEditing || isEditingTagObra || isEditingEmpresa}
+                >
+                  <FileSignature className="h-4 w-4 mr-2" />
+                  Atualizar Contrato
                 </Button>
               )}
 
@@ -516,7 +591,7 @@ export default function VeiculoDetalhe() {
                 <Button
                   variant="outline"
                   onClick={handleStartEditEmpresa}
-                  disabled={isEditing || isEditingTagObra}
+                  disabled={isEditing || isEditingTagObra || isEditingContrato}
                 >
                   <Building2 className="h-4 w-4 mr-2" />
                   Atualizar Empresa

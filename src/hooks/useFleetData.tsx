@@ -148,6 +148,7 @@ export function useUpdateVeiculo() {
       tacografo_validade,
       tag_obra,
       empresa_id,
+      contrato,
     }: { 
       id: string; 
       km_atual?: number; 
@@ -159,6 +160,7 @@ export function useUpdateVeiculo() {
       tacografo_validade?: string | null;
       tag_obra?: string | null;
       empresa_id?: string | null;
+      contrato?: string | null;
     }) => {
       const updateData: Record<string, any> = {};
       
@@ -171,6 +173,7 @@ export function useUpdateVeiculo() {
       if (tacografo_validade !== undefined) updateData.tacografo_validade = tacografo_validade;
       if (tag_obra !== undefined) updateData.tag_obra = tag_obra;
       if (empresa_id !== undefined) updateData.empresa_id = empresa_id;
+      if (contrato !== undefined) updateData.contrato = contrato;
       
       // Only add ultima_atualizacao if km or hora was updated
       if (km_atual !== undefined || hora_atual !== undefined) {
