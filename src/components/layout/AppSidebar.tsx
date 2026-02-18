@@ -9,7 +9,7 @@ import {
   FileBarChart,
   Truck
 } from 'lucide-react';
-import logoMC from '@/assets/logo-mc.png';
+import logoMC from '@/assets/logo-mc-20anos.jpg';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useSidebarStats } from '@/hooks/useSidebarStats';

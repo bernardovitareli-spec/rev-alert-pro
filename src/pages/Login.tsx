@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
-import logoMC from '@/assets/logo-mc.png';
+import logoMC from '@/assets/logo-mc-20anos.jpg';
 
 export default function Login() {
   const [email, setEmail] = useState('');
