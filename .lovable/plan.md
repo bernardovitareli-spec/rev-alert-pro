@@ -1,61 +1,73 @@
 
-## Adicionar "Atualizar Tag da Obra" na Tela de Detalhamento do Veículo
+## Adicionar "Atualizar Empresa" e "Atualizar Contrato" na Tela de Detalhamento do Veículo
 
 ### Objetivo
-Adicionar um botão e fluxo de edição para o campo **Tag da Obra** na tela de detalhamento do veículo (`/veiculos/:id`), semelhante ao fluxo já existente de "Atualizar KM/Horímetro".
+Adicionar dois novos fluxos de edição inline na tela de detalhamento do veículo:
+1. **Empresa** — alterar a empresa vinculada ao veículo (campo `empresa_id`, já existe no banco)
+2. **Contrato** — registrar um número/identificação de contrato (campo `contrato`, novo, será adicionado ao banco)
 
-### Situação Atual
-Na página `src/pages/VeiculoDetalhe.tsx`:
-- Existe um botão "Atualizar KM/Horímetro" que abre campos de edição inline para `km_atual` e `hora_atual`
-- O campo `tag_obra` é exibido apenas no cabeçalho da página (abaixo da placa), de forma somente leitura
-- A função `useUpdateVeiculo` já suporta atualizar qualquer campo do veículo no banco de dados
+---
 
-### O que será feito
+### Banco de Dados — Migração Necessária
 
-**1. Adicionar estado de edição para Tag da Obra**
+Será criada uma migration SQL para adicionar a coluna `contrato` na tabela `veiculos`:
 
-Novos estados no componente:
-- `tagObraEdit` — valor atual sendo editado
-- `isEditingTagObra` — controla se o campo está em modo de edição
-
-**2. Adicionar funções de controle**
-- `handleStartEditTagObra` — inicializa a edição com o valor atual
-- `handleCancelEditTagObra` — cancela e restaura o estado original
-- `handleSaveTagObra` — salva via `updateVeiculo.mutateAsync({ id, tag_obra: tagObraEdit })` e exibe toast de sucesso/erro
-
-**3. Atualizar a exibição do campo Tag da Obra**
-
-O campo `tag_obra` aparece no cabeçalho da página. Será adicionada uma seção dedicada dentro do card "Informações do Veículo", com:
-- Rótulo com ícone (ex: `Tag` da biblioteca lucide-react)
-- Valor exibido em modo leitura (ou "Não definida" se vazio)
-- Modo de edição com `Input` de texto
-
-**4. Adicionar botão "Atualizar Tag da Obra"**
-
-Na área de botões do card (onde já existe "Atualizar KM/Horímetro"), será adicionado um segundo botão independente:
-
-```
-[ ↺ Atualizar KM/Horímetro ]  [ 🏷 Atualizar Tag da Obra ]
+```sql
+ALTER TABLE public.veiculos
+ADD COLUMN contrato text NULL;
 ```
 
-Cada botão terá seu próprio fluxo de edição independente — ao clicar em um, o outro continua em modo de exibição.
+Nenhuma outra alteração é necessária no banco — `empresa_id` já existe e as políticas de segurança (RLS) para atualizar veículos já estão habilitadas.
 
-### Arquivos a modificar
+---
 
-- `src/pages/VeiculoDetalhe.tsx` — único arquivo a ser alterado:
-  - Adicionar novos estados
-  - Adicionar novas funções de edição/salvamento
-  - Adicionar campo Tag da Obra no grid de informações do veículo
-  - Adicionar botão "Atualizar Tag da Obra" na barra de ações
+### Arquivos a Modificar
 
-### Banco de Dados
-Nenhuma migração necessária — a coluna `tag_obra` já existe na tabela `veiculos` e o hook `useUpdateVeiculo` já aceita esse campo (basta passar como parâmetro no objeto de atualização, que está tipado como `Record<string, any>`).
+**1. `src/hooks/useFleetData.tsx`**
+- Adicionar `empresa_id` e `contrato` como parâmetros aceitos pelo hook `useUpdateVeiculo`
+- Incluir os campos no objeto `updateData` enviado ao banco
 
-### Fluxo do Usuário
-1. Usuário acessa a tela de detalhamento de um veículo
-2. Vê as informações do veículo, incluindo "Tag da Obra" (ex: "Obra Centro" ou "Não definida")
-3. Clica em "Atualizar Tag da Obra"
-4. O campo vira um `Input` de texto editável
-5. Usuário digita o novo valor e clica em "Salvar Alterações"
-6. O sistema salva no banco de dados e exibe mensagem de sucesso
-7. A tela volta ao modo de exibição com o novo valor
+**2. `src/types/fleet.ts`**
+- Adicionar o campo `contrato: string | null` na interface `Veiculo`
+
+**3. `src/pages/VeiculoDetalhe.tsx`**
+- Adicionar novos estados:
+  - `empresaIdEdit` e `isEditingEmpresa` para o fluxo de Empresa
+  - `contratoEdit` e `isEditingContrato` para o fluxo de Contrato
+- Adicionar funções de controle:
+  - `handleStartEditEmpresa`, `handleCancelEditEmpresa`, `handleSaveEmpresa`
+  - `handleStartEditContrato`, `handleCancelEditContrato`, `handleSaveContrato`
+- Atualizar o campo **Empresa** no grid de informações: ao clicar em "Atualizar Empresa", o campo vira um `Select` com todas as empresas cadastradas (usando o hook `useEmpresas` já existente)
+- Adicionar novo campo **Contrato** no grid de informações com modo de edição via `Input` de texto
+- Adicionar dois novos botões na barra de ações (junto aos botões KM/Horímetro e Tag da Obra):
+  - `[ 🏢 Atualizar Empresa ]`
+  - `[ 📄 Atualizar Contrato ]`
+
+---
+
+### Fluxo do Usuário — Empresa
+
+1. Usuário vê o campo "Empresa" exibindo o nome atual (ex: "Empresa ABC" ou "Não definida")
+2. Clica em "Atualizar Empresa"
+3. O campo vira um dropdown com lista de todas as empresas cadastradas
+4. Usuário seleciona a empresa desejada e clica em "Salvar Empresa"
+5. O sistema salva o `empresa_id` no banco e exibe mensagem de sucesso
+6. O campo volta ao modo de exibição com o novo nome
+
+### Fluxo do Usuário — Contrato
+
+1. Usuário vê o campo "Contrato" exibindo o valor atual (ex: "CT-2025-001" ou "Não definido")
+2. Clica em "Atualizar Contrato"
+3. O campo vira um `Input` de texto editável
+4. Usuário digita o número/identificação do contrato e clica em "Salvar Contrato"
+5. O sistema salva o valor no banco e exibe mensagem de sucesso
+6. O campo volta ao modo de exibição com o novo valor
+
+---
+
+### Detalhes Técnicos
+
+- **Seleção de empresa:** O hook `useEmpresas()` já existe em `useFleetData.tsx` e retorna a lista de empresas. Será importado e usado para montar o `Select` com as opções disponíveis.
+- **Independência dos fluxos:** Cada botão de edição bloqueia os demais enquanto está ativo, exatamente como funciona o botão de Tag da Obra hoje.
+- **Nenhum campo obrigatório novo:** `contrato` terá valor padrão `NULL`, sem impacto em dados existentes.
+- **Nenhuma nova dependência de pacote:** O componente `Select` do Radix UI já está instalado e em uso no projeto.
