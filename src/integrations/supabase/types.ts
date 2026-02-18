@@ -322,6 +322,7 @@ export type Database = {
       }
       veiculos: {
         Row: {
+          contrato: string | null
           created_at: string
           crlv_url: string | null
           crlv_validade: string | null
@@ -339,6 +340,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          contrato?: string | null
           created_at?: string
           crlv_url?: string | null
           crlv_validade?: string | null
@@ -356,6 +358,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          contrato?: string | null
           created_at?: string
           crlv_url?: string | null
           crlv_validade?: string | null

@@ -100,6 +100,7 @@ export interface ImportedRow {
   hora_revisao?: number;
   intervalo?: number;
   unidade?: RevisionUnit;
+  contrato?: string;
   empresa?: string;
 }
 
