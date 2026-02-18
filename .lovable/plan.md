@@ -1,73 +1,67 @@
 
-## Adicionar "Atualizar Empresa" e "Atualizar Contrato" na Tela de Detalhamento do Veículo
+## Atualizar Mapeamento de Colunas e Planilha Modelo de Importação
 
-### Objetivo
-Adicionar dois novos fluxos de edição inline na tela de detalhamento do veículo:
-1. **Empresa** — alterar a empresa vinculada ao veículo (campo `empresa_id`, já existe no banco)
-2. **Contrato** — registrar um número/identificação de contrato (campo `contrato`, novo, será adicionado ao banco)
+### O que foi identificado
 
----
+Comparando o novo arquivo enviado com o código atual, há 3 correções de nomes de colunas e 1 coluna nova:
 
-### Banco de Dados — Migração Necessária
+| # | Situação | Coluna Atual (incorreta) | Coluna Nova (correta) |
+|---|---|---|---|
+| 1 | Renomeada | `Tag Obra` | `Tag da Obra` |
+| 2 | Renomeada | `Tipo de Revisao` | `Tipo de Revisão` |
+| 3 | Renomeada/Separada | `Empresa de Contrato` | `Empresa` |
+| 4 | Nova coluna | _(não existia)_ | `Contrato` |
 
-Será criada uma migration SQL para adicionar a coluna `contrato` na tabela `veiculos`:
+### Banco de Dados
+
+A coluna `contrato` ainda não existe na tabela `veiculos`. Será criada uma migration SQL:
 
 ```sql
-ALTER TABLE public.veiculos
-ADD COLUMN contrato text NULL;
+ALTER TABLE public.veiculos ADD COLUMN contrato text NULL;
 ```
 
-Nenhuma outra alteração é necessária no banco — `empresa_id` já existe e as políticas de segurança (RLS) para atualizar veículos já estão habilitadas.
-
----
+O tipo `ImportedRow` em `src/types/fleet.ts` também receberá o campo `contrato?: string`.
 
 ### Arquivos a Modificar
 
-**1. `src/hooks/useFleetData.tsx`**
-- Adicionar `empresa_id` e `contrato` como parâmetros aceitos pelo hook `useUpdateVeiculo`
-- Incluir os campos no objeto `updateData` enviado ao banco
+**1. `src/hooks/useImportExcel.tsx`**
 
-**2. `src/types/fleet.ts`**
-- Adicionar o campo `contrato: string | null` na interface `Veiculo`
+Atualizar o `COLUMN_MAP` com os novos nomes exatos das colunas:
 
-**3. `src/pages/VeiculoDetalhe.tsx`**
-- Adicionar novos estados:
-  - `empresaIdEdit` e `isEditingEmpresa` para o fluxo de Empresa
-  - `contratoEdit` e `isEditingContrato` para o fluxo de Contrato
-- Adicionar funções de controle:
-  - `handleStartEditEmpresa`, `handleCancelEditEmpresa`, `handleSaveEmpresa`
-  - `handleStartEditContrato`, `handleCancelEditContrato`, `handleSaveContrato`
-- Atualizar o campo **Empresa** no grid de informações: ao clicar em "Atualizar Empresa", o campo vira um `Select` com todas as empresas cadastradas (usando o hook `useEmpresas` já existente)
-- Adicionar novo campo **Contrato** no grid de informações com modo de edição via `Input` de texto
-- Adicionar dois novos botões na barra de ações (junto aos botões KM/Horímetro e Tag da Obra):
-  - `[ 🏢 Atualizar Empresa ]`
-  - `[ 📄 Atualizar Contrato ]`
+```
+'Tag da Obra'      → tag_obra
+'Tipo de Revisão'  → tipo_revisao
+'Empresa'          → empresa
+'Contrato'         → contrato   (novo)
+```
 
----
+Também será necessário tratar o campo `contrato` no processamento da linha (string simples, sem transformação especial).
 
-### Fluxo do Usuário — Empresa
+**2. `src/components/import/ImportExcel.tsx`**
 
-1. Usuário vê o campo "Empresa" exibindo o nome atual (ex: "Empresa ABC" ou "Não definida")
-2. Clica em "Atualizar Empresa"
-3. O campo vira um dropdown com lista de todas as empresas cadastradas
-4. Usuário seleciona a empresa desejada e clica em "Salvar Empresa"
-5. O sistema salva o `empresa_id` no banco e exibe mensagem de sucesso
-6. O campo volta ao modo de exibição com o novo nome
+Atualizar dois pontos:
 
-### Fluxo do Usuário — Contrato
+- `TEMPLATE_COLUMNS` — a lista de cabeçalhos usados para gerar o arquivo .xlsx ao clicar em "Baixar Planilha Modelo"
+- `EXAMPLE_DATA` — os dados de exemplo embutidos no arquivo gerado
 
-1. Usuário vê o campo "Contrato" exibindo o valor atual (ex: "CT-2025-001" ou "Não definido")
-2. Clica em "Atualizar Contrato"
-3. O campo vira um `Input` de texto editável
-4. Usuário digita o número/identificação do contrato e clica em "Salvar Contrato"
-5. O sistema salva o valor no banco e exibe mensagem de sucesso
-6. O campo volta ao modo de exibição com o novo valor
+Os nomes das colunas passarão a ser exatamente os mesmos do arquivo enviado:
+`Placa ou Serie`, `Tag da Obra`, `Última Atualização`, `KM Atual`, `Hora Atual`, `Retorno ao Pátio`, `Tipo de Revisão`, `Data da Revisão`, `KM da Revisão`, `Hora da Revisão`, `Intervalo`, `Revisão Por`, `Contrato`, `Empresa`
 
----
+O exemplo de dados também incluirá a coluna `Contrato` com valores ilustrativos.
 
-### Detalhes Técnicos
+**3. `src/types/fleet.ts`**
 
-- **Seleção de empresa:** O hook `useEmpresas()` já existe em `useFleetData.tsx` e retorna a lista de empresas. Será importado e usado para montar o `Select` com as opções disponíveis.
-- **Independência dos fluxos:** Cada botão de edição bloqueia os demais enquanto está ativo, exatamente como funciona o botão de Tag da Obra hoje.
-- **Nenhum campo obrigatório novo:** `contrato` terá valor padrão `NULL`, sem impacto em dados existentes.
-- **Nenhuma nova dependência de pacote:** O componente `Select` do Radix UI já está instalado e em uso no projeto.
+Adicionar o campo `contrato?: string` na interface `ImportedRow`.
+
+### Fluxo após a correção
+
+1. O usuário clica em "Baixar Planilha Modelo"
+2. O arquivo gerado terá exatamente os mesmos cabeçalhos do novo modelo enviado
+3. Ao importar uma planilha com esses novos nomes, o sistema reconhecerá todas as colunas corretamente
+4. O campo `Contrato` será salvo na tabela `veiculos` na coluna `contrato`
+5. O campo `Empresa` (antes chamado `Empresa de Contrato`) continuará sendo vinculado ao `empresa_id`
+
+### Nenhuma quebra de compatibilidade
+
+- Planilhas antigas com `Tag Obra`, `Tipo de Revisao` e `Empresa de Contrato` deixarão de ser reconhecidas automaticamente — isso é esperado, pois o modelo foi corrigido.
+- Dados já importados no banco não são afetados.
