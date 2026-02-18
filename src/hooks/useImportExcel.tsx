@@ -13,18 +13,19 @@ interface ImportResult {
 // Column mapping from spreadsheet to our system
 const COLUMN_MAP: Record<string, keyof ImportedRow> = {
   'Placa ou Serie': 'placa_serie',
-  'Tag Obra': 'tag_obra',
+  'Tag da Obra': 'tag_obra',
   'Última Atualização': 'ultima_atualizacao',
   'KM Atual': 'km_atual',
   'Hora Atual': 'hora_atual',
   'Retorno ao Pátio': 'retorno_patio',
-  'Tipo de Revisao': 'tipo_revisao',
+  'Tipo de Revisão': 'tipo_revisao',
   'Data da Revisão': 'data_revisao',
   'KM da Revisão': 'km_revisao',
   'Hora da Revisão': 'hora_revisao',
   'Intervalo': 'intervalo',
   'Revisão Por': 'unidade',
-  'Empresa de Contrato': 'empresa',
+  'Contrato': 'contrato',
+  'Empresa': 'empresa',
 };
 
 // Parse numbers with comma as thousands separator (e.g., "5,930" -> 5930)
@@ -186,6 +187,7 @@ export function useImportExcel() {
               ultima_atualizacao: firstRow.ultima_atualizacao || null,
               retorno_patio: firstRow.retorno_patio || null,
               empresa_id: empresaId,
+              contrato: firstRow.contrato || null,
             }, { onConflict: 'placa_serie' })
             .select('id')
             .single();

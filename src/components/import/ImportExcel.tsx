@@ -12,51 +12,54 @@ import * as XLSX from 'xlsx';
 // Template columns definition
 const TEMPLATE_COLUMNS = [
   'Placa ou Serie',
-  'Tag Obra',
+  'Tag da Obra',
   'Última Atualização',
   'KM Atual',
   'Hora Atual',
   'Retorno ao Pátio',
-  'Tipo de Revisao',
+  'Tipo de Revisão',
   'Data da Revisão',
   'KM da Revisão',
   'Hora da Revisão',
   'Intervalo',
   'Revisão Por',
-  'Empresa de Contrato',
+  'Contrato',
+  'Empresa',
 ];
 
 // Example data for the template
 const EXAMPLE_DATA = [
   {
     'Placa ou Serie': 'ABC-1234',
-    'Tag Obra': 'OBRA-001',
+    'Tag da Obra': 'OBRA-001',
     'Última Atualização': '15/01/2026',
     'KM Atual': '45000',
     'Hora Atual': '1200',
     'Retorno ao Pátio': '20/01/2026',
-    'Tipo de Revisao': 'Troca de Óleo',
+    'Tipo de Revisão': 'Troca de Óleo',
     'Data da Revisão': '10/01/2026',
     'KM da Revisão': '40000',
     'Hora da Revisão': '',
     'Intervalo': '5000',
     'Revisão Por': 'Km',
-    'Empresa de Contrato': 'Empresa ABC',
+    'Contrato': 'CONT-2026-001',
+    'Empresa': 'Empresa ABC',
   },
   {
     'Placa ou Serie': 'XYZ-5678',
-    'Tag Obra': 'OBRA-002',
+    'Tag da Obra': 'OBRA-002',
     'Última Atualização': '14/01/2026',
     'KM Atual': '',
     'Hora Atual': '3500',
     'Retorno ao Pátio': '',
-    'Tipo de Revisao': 'Revisão Geral',
+    'Tipo de Revisão': 'Revisão Geral',
     'Data da Revisão': '01/01/2026',
     'KM da Revisão': '',
     'Hora da Revisão': '3000',
     'Intervalo': '500',
     'Revisão Por': 'Hr',
-    'Empresa de Contrato': 'Empresa XYZ',
+    'Contrato': 'CONT-2026-002',
+    'Empresa': 'Empresa XYZ',
   },
 ];
 
@@ -237,7 +240,7 @@ export function ImportExcel() {
                 <thead>
                   <tr className="border-b">
                     <th className="text-left py-2 px-3">Placa/Série</th>
-                    <th className="text-left py-2 px-3">Tag Obra</th>
+                    <th className="text-left py-2 px-3">Tag da Obra</th>
                     <th className="text-left py-2 px-3">KM Atual</th>
                     <th className="text-left py-2 px-3">Hora Atual</th>
                     <th className="text-left py-2 px-3">Tipo Revisão</th>
@@ -347,8 +350,8 @@ export function ImportExcel() {
                     <p className="font-medium">Placa ou Serie</p>
                     <p className="text-muted-foreground">Identificação única do veículo. Exemplo: ABC-1234 ou SERIE001</p>
                   </div>
-                  <div className="p-3 bg-muted rounded-lg">
-                    <p className="font-medium">Tipo de Revisao</p>
+                   <div className="p-3 bg-muted rounded-lg">
+                    <p className="font-medium">Tipo de Revisão</p>
                     <p className="text-muted-foreground">Nome da revisão. Exemplo: Troca de Óleo, Revisão Geral, Filtros</p>
                   </div>
                   <div className="p-3 bg-muted rounded-lg">
