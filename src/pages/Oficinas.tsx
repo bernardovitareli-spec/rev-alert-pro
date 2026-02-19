@@ -94,14 +94,14 @@ export default function Oficinas() {
           id: editingOficina.id,
           ...formData,
         });
-        toast.success('Oficina atualizada com sucesso!');
+        toast.success('Mecânico atualizado com sucesso!');
       } else {
         await createOficina.mutateAsync(formData);
-        toast.success('Oficina criada com sucesso!');
+        toast.success('Mecânico criado com sucesso!');
       }
       setFormOpen(false);
     } catch (err) {
-      toast.error('Erro ao salvar oficina');
+      toast.error('Erro ao salvar mecânico');
     }
   };
 
@@ -110,26 +110,26 @@ export default function Oficinas() {
 
     try {
       await deleteOficina.mutateAsync(deletingOficina.id);
-      toast.success('Oficina excluída com sucesso!');
+      toast.success('Mecânico excluído com sucesso!');
       setDeleteOpen(false);
     } catch (err) {
-      toast.error('Erro ao excluir oficina');
+      toast.error('Erro ao excluir mecânico');
     }
   };
 
   return (
-    <AppLayout title="Oficinas">
+    <AppLayout title="Mecânicos">
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-lg font-semibold">Gerenciar Oficinas</h2>
+            <h2 className="text-lg font-semibold">Gerenciar Mecânicos</h2>
             <p className="text-sm text-muted-foreground">
-              Cadastre as oficinas para associar às revisões em serviço
+              Cadastre os mecânicos para associar às revisões em serviço
             </p>
           </div>
           <Button onClick={handleOpenCreate}>
             <Plus className="h-4 w-4 mr-2" />
-            Nova Oficina
+            Novo Mecânico
           </Button>
         </div>
 
@@ -137,7 +137,7 @@ export default function Oficinas() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
               <Wrench className="h-4 w-4" />
-              Oficinas Cadastradas
+              Mecânicos Cadastrados
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -150,10 +150,10 @@ export default function Oficinas() {
             ) : oficinas?.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">
                 <Wrench className="h-12 w-12 mx-auto mb-3 opacity-50" />
-                <p>Nenhuma oficina cadastrada</p>
+                <p>Nenhum mecânico cadastrado</p>
                 <Button variant="outline" className="mt-4" onClick={handleOpenCreate}>
                   <Plus className="h-4 w-4 mr-2" />
-                  Cadastrar primeira oficina
+                  Cadastrar primeiro mecânico
                 </Button>
               </div>
             ) : (
@@ -207,8 +207,8 @@ export default function Oficinas() {
       <Dialog open={formOpen} onOpenChange={setFormOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>
-              {editingOficina ? 'Editar Oficina' : 'Nova Oficina'}
+          <DialogTitle>
+              {editingOficina ? 'Editar Mecânico' : 'Novo Mecânico'}
             </DialogTitle>
           </DialogHeader>
           <form onSubmit={handleSubmit}>
@@ -219,7 +219,7 @@ export default function Oficinas() {
                   id="nome"
                   value={formData.nome}
                   onChange={(e) => setFormData({ ...formData, nome: e.target.value })}
-                  placeholder="Nome da oficina"
+                  placeholder="Nome do mecânico"
                 />
               </div>
               <div className="space-y-2">
@@ -228,7 +228,7 @@ export default function Oficinas() {
                   id="endereco"
                   value={formData.endereco}
                   onChange={(e) => setFormData({ ...formData, endereco: e.target.value })}
-                  placeholder="Endereço da oficina"
+                  placeholder="Endereço do mecânico"
                 />
               </div>
               <div className="space-y-2">
@@ -260,9 +260,9 @@ export default function Oficinas() {
       <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Excluir Oficina</AlertDialogTitle>
+            <AlertDialogTitle>Excluir Mecânico</AlertDialogTitle>
             <AlertDialogDescription>
-              Tem certeza que deseja excluir a oficina "{deletingOficina?.nome}"?
+              Tem certeza que deseja excluir o mecânico "{deletingOficina?.nome}"?
               Esta ação não pode ser desfeita.
             </AlertDialogDescription>
           </AlertDialogHeader>
