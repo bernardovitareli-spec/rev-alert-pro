@@ -718,7 +718,7 @@ export default function VeiculoDetalhe() {
                         <TableHead>Última Realizada</TableHead>
                         <TableHead>Faltam</TableHead>
                         <TableHead>Execução</TableHead>
-                        <TableHead>Oficina</TableHead>
+                        <TableHead>Mecânicos</TableHead>
                         <TableHead>Prev. Entrega</TableHead>
                         <TableHead>Ordem de Serviço</TableHead>
                         <TableHead>Valor (R$)</TableHead>
