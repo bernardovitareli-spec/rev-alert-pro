@@ -30,22 +30,22 @@ export const OficinaSelect = forwardRef<HTMLButtonElement, OficinaSelectProps>(
           ref={ref}
           className={compact ? "w-[140px] h-8 text-xs" : "w-full"}
         >
-          <SelectValue placeholder="Selecionar oficina">
+          <SelectValue placeholder="Selecionar mecânico">
             {value ? (
               <div className="flex items-center gap-1.5">
                 <Wrench className="h-3.5 w-3.5" />
                 <span className="truncate">
-                  {oficinas?.find(o => o.id === value)?.nome || 'Oficina'}
+                  {oficinas?.find(o => o.id === value)?.nome || 'Mecânico'}
                 </span>
               </div>
             ) : (
-              <span className="text-muted-foreground">Oficina...</span>
+              <span className="text-muted-foreground">Mecânico...</span>
             )}
           </SelectValue>
         </SelectTrigger>
         <SelectContent className="bg-popover">
           <SelectItem value="none">
-            <span className="text-muted-foreground">Sem oficina</span>
+            <span className="text-muted-foreground">Sem mecânico</span>
           </SelectItem>
           {oficinas?.map((oficina) => (
             <SelectItem key={oficina.id} value={oficina.id}>

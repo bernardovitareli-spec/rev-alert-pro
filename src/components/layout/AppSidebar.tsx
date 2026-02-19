@@ -90,10 +90,10 @@ export function AppSidebar() {
       tooltip: 'Gerenciar empresas contratantes',
     },
     { 
-      title: 'Oficinas', 
+      title: 'Mecânicos', 
       icon: Settings, 
       path: '/oficinas',
-      tooltip: 'Cadastrar oficinas parceiras',
+      tooltip: 'Cadastrar mecânicos parceiros',
     },
   ];
 
