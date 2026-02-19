@@ -76,13 +76,13 @@
     /* ============================================
        Sidebar — Deep Royal Blue (#0F2462)
        ============================================ */
-    --sidebar-background: 222 74% 22%;
+    --sidebar-background: 222 74% 15%;
     --sidebar-foreground: 0 0% 100%;
     --sidebar-primary: 217 91% 60%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 222 60% 30%;
+    --sidebar-accent: 222 60% 24%;
     --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 222 60% 28%;
+    --sidebar-border: 222 60% 22%;
     --sidebar-ring: 217 91% 60%;
   }
 
