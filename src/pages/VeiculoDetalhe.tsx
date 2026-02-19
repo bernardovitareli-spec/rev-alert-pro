@@ -2,6 +2,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useVeiculoDetalhe, useUpdateVeiculo, useMarcarRevisaoRealizada, useUpdateStatusExecucao, useEmpresas } from '@/hooks/useFleetData';
+import { useContratos } from '@/hooks/useContratos';
 import { formatarKmOuHora, getStatusLabel } from '@/lib/revisionCalculations';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -50,6 +51,10 @@ export default function VeiculoDetalhe() {
   const updateStatusExecucao = useUpdateStatusExecucao();
   const { data: empresas } = useEmpresas();
 
+  // Contratos filtrados pela empresa do veículo
+  const empresaIdParaContrato = veiculo?.empresa_id || undefined;
+  const { data: contratosDisponiveis } = useContratos(empresaIdParaContrato);
+
   const [kmEdit, setKmEdit] = useState<number | null>(null);
   const [horaEdit, setHoraEdit] = useState<number | null>(null);
   const [isEditing, setIsEditing] = useState(false);
@@ -57,7 +62,7 @@ export default function VeiculoDetalhe() {
   const [tagObraEdit, setTagObraEdit] = useState<string>('');
   const [isEditingTagObra, setIsEditingTagObra] = useState(false);
 
-  const [contratoEdit, setContratoEdit] = useState<string>('');
+  const [contratoIdEdit, setContratoIdEdit] = useState<string>('');
   const [isEditingContrato, setIsEditingContrato] = useState(false);
 
   const [empresaIdEdit, setEmpresaIdEdit] = useState<string>('');
@@ -122,14 +127,15 @@ export default function VeiculoDetalhe() {
 
   const handleStartEditContrato = () => {
     if (veiculo) {
-      setContratoEdit(veiculo.contrato || '');
+      // @ts-ignore - contrato_id pode existir após migração
+      setContratoIdEdit((veiculo as any).contrato_id || 'none');
       setIsEditingContrato(true);
     }
   };
 
   const handleCancelEditContrato = () => {
     setIsEditingContrato(false);
-    setContratoEdit('');
+    setContratoIdEdit('');
   };
 
   const handleSaveContrato = async () => {
@@ -138,7 +144,7 @@ export default function VeiculoDetalhe() {
     try {
       await updateVeiculo.mutateAsync({
         id: veiculo.id,
-        contrato: contratoEdit.trim() || null,
+        contrato_id: contratoIdEdit === 'none' ? null : (contratoIdEdit || null),
       });
       toast.success('Contrato atualizado com sucesso!');
       setIsEditingContrato(false);
@@ -452,17 +458,26 @@ export default function VeiculoDetalhe() {
                   <span className="text-sm">Contrato</span>
                 </div>
                 {isEditingContrato ? (
-                  <Input
-                    type="text"
-                    value={contratoEdit}
-                    onChange={(e) => setContratoEdit(e.target.value)}
-                    className="font-semibold"
-                    placeholder="Ex: CT-2024-001"
-                    autoFocus
-                  />
+                  <Select value={contratoIdEdit} onValueChange={setContratoIdEdit}>
+                    <SelectTrigger className="font-semibold bg-background">
+                      <SelectValue placeholder="Selecione o contrato..." />
+                    </SelectTrigger>
+                    <SelectContent className="bg-popover border shadow-md z-50">
+                      <SelectItem value="none">Nenhum</SelectItem>
+                      {contratosDisponiveis?.map((c) => (
+                        <SelectItem key={c.id} value={c.id}>
+                          {c.nome}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 ) : (
                   <p className="text-lg font-medium">
-                    {veiculo.contrato || 'Não definido'}
+                    {(() => {
+                      const contratoId = (veiculo as any).contrato_id;
+                      const contratoNome = contratosDisponiveis?.find(c => c.id === contratoId)?.nome;
+                      return contratoNome || veiculo.contrato || 'Não definido';
+                    })()}
                   </p>
                 )}
               </div>

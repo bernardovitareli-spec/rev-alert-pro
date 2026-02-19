@@ -14,6 +14,38 @@ export type Database = {
   }
   public: {
     Tables: {
+      contratos: {
+        Row: {
+          created_at: string
+          descricao: string | null
+          empresa_id: string
+          id: string
+          nome: string
+        }
+        Insert: {
+          created_at?: string
+          descricao?: string | null
+          empresa_id: string
+          id?: string
+          nome: string
+        }
+        Update: {
+          created_at?: string
+          descricao?: string | null
+          empresa_id?: string
+          id?: string
+          nome?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contratos_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       empresas: {
         Row: {
           created_at: string
@@ -323,6 +355,7 @@ export type Database = {
       veiculos: {
         Row: {
           contrato: string | null
+          contrato_id: string | null
           created_at: string
           crlv_url: string | null
           crlv_validade: string | null
@@ -341,6 +374,7 @@ export type Database = {
         }
         Insert: {
           contrato?: string | null
+          contrato_id?: string | null
           created_at?: string
           crlv_url?: string | null
           crlv_validade?: string | null
@@ -359,6 +393,7 @@ export type Database = {
         }
         Update: {
           contrato?: string | null
+          contrato_id?: string | null
           created_at?: string
           crlv_url?: string | null
           crlv_validade?: string | null
@@ -376,6 +411,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "veiculos_contrato_id_fkey"
+            columns: ["contrato_id"]
+            isOneToOne: false
+            referencedRelation: "contratos"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "veiculos_empresa_id_fkey"
             columns: ["empresa_id"]

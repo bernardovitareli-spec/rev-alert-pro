@@ -154,6 +154,7 @@ export function useUpdateVeiculo() {
       tag_obra,
       empresa_id,
       contrato,
+      contrato_id,
     }: { 
       id: string; 
       km_atual?: number; 
@@ -166,6 +167,7 @@ export function useUpdateVeiculo() {
       tag_obra?: string | null;
       empresa_id?: string | null;
       contrato?: string | null;
+      contrato_id?: string | null;
     }) => {
       const updateData: Record<string, any> = {};
       
@@ -179,6 +181,7 @@ export function useUpdateVeiculo() {
       if (tag_obra !== undefined) updateData.tag_obra = tag_obra;
       if (empresa_id !== undefined) updateData.empresa_id = empresa_id;
       if (contrato !== undefined) updateData.contrato = contrato;
+      if (contrato_id !== undefined) updateData.contrato_id = contrato_id;
       
       // Only add ultima_atualizacao if km or hora was updated
       if (km_atual !== undefined || hora_atual !== undefined) {
