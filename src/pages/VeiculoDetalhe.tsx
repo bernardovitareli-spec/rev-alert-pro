@@ -771,16 +771,12 @@ export default function VeiculoDetalhe() {
                           />
                         </TableCell>
                         <TableCell>
-                          {revisao.status_execucao === 'em_servico' ? (
-                            <OficinaSelect
-                              value={revisao.oficina_id}
-                              onChange={(oficinaId) => handleOficinaChange(revisao.id, oficinaId)}
-                              disabled={updateStatusExecucao.isPending}
-                              compact
-                            />
-                          ) : (
-                            <span className="text-xs text-muted-foreground">-</span>
-                          )}
+                          <OficinaSelect
+                            value={revisao.oficina_id}
+                            onChange={(oficinaId) => handleOficinaChange(revisao.id, oficinaId)}
+                            disabled={updateStatusExecucao.isPending}
+                            compact
+                          />
                         </TableCell>
                         <TableCell>
                           <PrevisaoEntregaInput
