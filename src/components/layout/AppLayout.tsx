@@ -12,10 +12,13 @@ export function AppLayout({ children, title }: AppLayoutProps) {
     <SidebarProvider>
       <AppSidebar />
       <SidebarInset>
-        <header className="flex h-16 shrink-0 items-center gap-2 border-b bg-background px-6">
-          <SidebarTrigger className="-ml-2" />
+        <header className="flex h-16 shrink-0 items-center gap-3 border-b border-border/60 bg-card shadow-sm px-6">
+          <SidebarTrigger className="-ml-2 text-muted-foreground hover:text-foreground transition-colors" />
           {title && (
-            <h1 className="text-xl font-semibold text-foreground">{title}</h1>
+            <div className="flex items-center gap-2">
+              <div className="h-5 w-0.5 rounded-full bg-primary/30" />
+              <h1 className="text-lg font-bold text-foreground tracking-tight">{title}</h1>
+            </div>
           )}
         </header>
         <main className="flex-1 overflow-auto p-6">
