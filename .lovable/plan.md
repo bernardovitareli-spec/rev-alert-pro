@@ -1,67 +1,97 @@
 
-## Atualizar Mapeamento de Colunas e Planilha Modelo de Importação
+## Adicionar Gestão de Contratos por Empresa
 
-### O que foi identificado
+### Contexto
 
-Comparando o novo arquivo enviado com o código atual, há 3 correções de nomes de colunas e 1 coluna nova:
+Atualmente, o campo `contrato` em veículos é um texto livre sem vínculo estruturado. O usuário quer que contratos sejam entidades próprias, cada uma **pertencendo a uma empresa específica**, e que um veículo possa ser associado a um contrato específico (e não apenas digitar um texto).
 
-| # | Situação | Coluna Atual (incorreta) | Coluna Nova (correta) |
-|---|---|---|---|
-| 1 | Renomeada | `Tag Obra` | `Tag da Obra` |
-| 2 | Renomeada | `Tipo de Revisao` | `Tipo de Revisão` |
-| 3 | Renomeada/Separada | `Empresa de Contrato` | `Empresa` |
-| 4 | Nova coluna | _(não existia)_ | `Contrato` |
+---
 
-### Banco de Dados
+### O que será criado
 
-A coluna `contrato` ainda não existe na tabela `veiculos`. Será criada uma migration SQL:
+#### 1. Nova tabela no banco de dados: `contratos`
 
 ```sql
-ALTER TABLE public.veiculos ADD COLUMN contrato text NULL;
+CREATE TABLE public.contratos (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  empresa_id uuid NOT NULL REFERENCES public.empresas(id) ON DELETE CASCADE,
+  nome text NOT NULL,
+  descricao text NULL,
+  created_at timestamptz NOT NULL DEFAULT now()
+);
 ```
 
-O tipo `ImportedRow` em `src/types/fleet.ts` também receberá o campo `contrato?: string`.
+Com políticas RLS para usuários autenticados (SELECT, INSERT, UPDATE, DELETE).
 
-### Arquivos a Modificar
+---
 
-**1. `src/hooks/useImportExcel.tsx`**
+#### 2. Nova coluna na tabela `veiculos`: `contrato_id`
 
-Atualizar o `COLUMN_MAP` com os novos nomes exatos das colunas:
+Além do campo texto livre `contrato` já existente, será adicionada a coluna `contrato_id` (FK para a nova tabela), permitindo vincular formalmente o veículo a um contrato cadastrado.
 
-```
-'Tag da Obra'      → tag_obra
-'Tipo de Revisão'  → tipo_revisao
-'Empresa'          → empresa
-'Contrato'         → contrato   (novo)
+```sql
+ALTER TABLE public.veiculos ADD COLUMN contrato_id uuid REFERENCES public.contratos(id) ON DELETE SET NULL;
 ```
 
-Também será necessário tratar o campo `contrato` no processamento da linha (string simples, sem transformação especial).
+---
 
-**2. `src/components/import/ImportExcel.tsx`**
+#### 3. Página `Empresas.tsx` — novo visual expandido
 
-Atualizar dois pontos:
+Cada empresa na tabela ganhará um botão **"+ Novo Contrato"** e uma seção expansível (accordion/collapse) exibindo os contratos vinculados:
 
-- `TEMPLATE_COLUMNS` — a lista de cabeçalhos usados para gerar o arquivo .xlsx ao clicar em "Baixar Planilha Modelo"
-- `EXAMPLE_DATA` — os dados de exemplo embutidos no arquivo gerado
+```
+┌─────────────────────────────────────────────────────────┐
+│ Nome            │ Criado em   │ Ações                   │
+├─────────────────────────────────────────────────────────┤
+│ ▶ Civil Master  │ 18/02/2026  │ ✏️  🗑️  + Novo Contrato │
+│   └── Contrato 001 - Terraplanagem S11D    ✏️  🗑️       │
+│   └── Contrato 002 - Manutenção Geral      ✏️  🗑️       │
+├─────────────────────────────────────────────────────────┤
+│ ▶ Ápia          │ 18/02/2026  │ ✏️  🗑️  + Novo Contrato │
+│   └── (Nenhum contrato)                                 │
+└─────────────────────────────────────────────────────────┘
+```
 
-Os nomes das colunas passarão a ser exatamente os mesmos do arquivo enviado:
-`Placa ou Serie`, `Tag da Obra`, `Última Atualização`, `KM Atual`, `Hora Atual`, `Retorno ao Pátio`, `Tipo de Revisão`, `Data da Revisão`, `KM da Revisão`, `Hora da Revisão`, `Intervalo`, `Revisão Por`, `Contrato`, `Empresa`
+O dialog de criação/edição de contrato pedirá apenas **Nome** e **Descrição (opcional)**, já pré-vinculado à empresa selecionada.
 
-O exemplo de dados também incluirá a coluna `Contrato` com valores ilustrativos.
+---
 
-**3. `src/types/fleet.ts`**
+#### 4. Hook `useContratos.tsx` (novo)
 
-Adicionar o campo `contrato?: string` na interface `ImportedRow`.
+Novo hook para consultar, criar, editar e excluir contratos, similar ao padrão já existente em `useOficinas.tsx`:
 
-### Fluxo após a correção
+- `useContratos(empresaId?)` — lista todos ou filtra por empresa
+- `useCreateContrato()`
+- `useUpdateContrato()`
+- `useDeleteContrato()`
 
-1. O usuário clica em "Baixar Planilha Modelo"
-2. O arquivo gerado terá exatamente os mesmos cabeçalhos do novo modelo enviado
-3. Ao importar uma planilha com esses novos nomes, o sistema reconhecerá todas as colunas corretamente
-4. O campo `Contrato` será salvo na tabela `veiculos` na coluna `contrato`
-5. O campo `Empresa` (antes chamado `Empresa de Contrato`) continuará sendo vinculado ao `empresa_id`
+---
 
-### Nenhuma quebra de compatibilidade
+#### 5. Tela de detalhamento do veículo (`VeiculoDetalhe.tsx`)
 
-- Planilhas antigas com `Tag Obra`, `Tipo de Revisao` e `Empresa de Contrato` deixarão de ser reconhecidas automaticamente — isso é esperado, pois o modelo foi corrigido.
-- Dados já importados no banco não são afetados.
+O campo "Atualizar Contrato" que hoje aceita texto livre será **substituído por um Select** que lista os contratos cadastrados, filtrando automaticamente pelos contratos da empresa vinculada ao veículo. Isso garante consistência de dados.
+
+---
+
+#### 6. Importação via planilha (`useImportExcel.tsx`)
+
+O campo `Contrato` da planilha (coluna texto livre) continuará funcionando para inserir o **nome do contrato como texto** na coluna `contrato` (legacy), sem quebrar o fluxo atual. A vinculação por `contrato_id` fica disponível somente via UI.
+
+---
+
+### Arquivos afetados
+
+| Arquivo | Operação |
+|---|---|
+| Migration SQL | **CRIAR** tabela `contratos` + coluna `contrato_id` em `veiculos` |
+| `src/hooks/useContratos.tsx` | **CRIAR** hook completo |
+| `src/types/fleet.ts` | Adicionar interface `Contrato` |
+| `src/pages/Empresas.tsx` | Expandir com sublistagem de contratos e dialog de contrato |
+| `src/pages/VeiculoDetalhe.tsx` | Substituir campo texto de contrato por Select de contratos |
+| `src/hooks/useFleetData.tsx` | Atualizar `useVeiculoDetalhe` para incluir `contrato` relacionado |
+
+### Nenhuma quebra de dados existentes
+
+- O campo texto `contrato` na tabela `veiculos` permanece (compatibilidade com importações)
+- A nova coluna `contrato_id` é nullable — veículos sem vínculo formal não são afetados
+- Contratos com CASCADE DELETE: ao excluir empresa, seus contratos também são removidos; veículos têm `SET NULL` no `contrato_id`
