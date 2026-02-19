@@ -1,97 +1,95 @@
 
-## Adicionar Gestão de Contratos por Empresa
+## Redesign Visual Completo — MC Terraplenagem
 
-### Contexto
+### Visão Geral da Transformação
 
-Atualmente, o campo `contrato` em veículos é um texto livre sem vínculo estruturado. O usuário quer que contratos sejam entidades próprias, cada uma **pertencendo a uma empresa específica**, e que um veículo possa ser associado a um contrato específico (e não apenas digitar um texto).
+O sistema passará de uma aparência genérica e apagada para uma identidade visual profissional com:
+- Sidebar em Azul Royal Escuro (identidade de marca forte)
+- Cards com profundidade, sombras e hierarquia clara
+- Paleta de cores sólidas e funcionais
+- Tela de Login moderna em layout split-screen
+- Header renovado com mais personalidade
+- Tipografia e espaçamentos refinados
 
 ---
 
-### O que será criado
+### Nova Paleta de Cores
 
-#### 1. Nova tabela no banco de dados: `contratos`
+```text
+AZUL ROYAL ESCURO (Sidebar):    #0F2462
+AZUL ROYAL PRINCIPAL (Primary): #1D4ED8
+AZUL VIVO (Accent):             #3B82F6
+AZUL CLARO (Hover):             #EFF6FF
 
-```sql
-CREATE TABLE public.contratos (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  empresa_id uuid NOT NULL REFERENCES public.empresas(id) ON DELETE CASCADE,
-  nome text NOT NULL,
-  descricao text NULL,
-  created_at timestamptz NOT NULL DEFAULT now()
-);
+BRANCO (Cards):                 #FFFFFF
+FUNDO GERAL:                    #F0F4F9
+
+CRÍTICO (Vermelho sólido):      #DC2626
+ALERTA  (Âmbar sólido):        #D97706
+OK      (Verde sólido):         #16A34A
+EM SERVIÇO (Violeta):           #7C3AED
+
+TEXTO PRINCIPAL:                #0F172A
+TEXTO SECUNDÁRIO:               #475569
 ```
 
-Com políticas RLS para usuários autenticados (SELECT, INSERT, UPDATE, DELETE).
+---
+
+### Arquivos que serão alterados
+
+#### 1. `src/index.css` — Sistema de cores redesenhado
+
+Todas as variáveis CSS serão substituídas pela nova paleta:
+- `--background`: `#F0F4F9` (cinza-azulado suave, não o cinza genérico)
+- `--primary`: Azul Royal vivo `#1D4ED8`
+- `--sidebar-background`: Azul Royal Escuro `#0F2462`
+- Status colors: tons sólidos contrastantes para crítico, alerta, ok
+- Novos utilitários CSS para scrollbar personalizada e animações de hover
+
+#### 2. `src/components/layout/AppSidebar.tsx` — Sidebar com identidade de marca
+
+- Fundo: Azul Royal Escuro com ícones e texto brancos
+- Logo mantida no topo com área bem delimitada
+- Item ativo: realce com barra lateral esquerda azul viva + fundo branco translúcido
+- Grupo "Configurações" com separador e label mais sutil
+- Footer com usuário e botão de sair com melhor contraste
+- Badges de alerta mais vibrantes e legíveis no fundo escuro
+
+#### 3. `src/components/layout/AppLayout.tsx` — Header profissional
+
+- Header com fundo branco e sombra sutil `shadow-sm`
+- Título da página com tipografia mais expressiva (peso 700, ligeiro gradiente)
+- Breadcrumb implícito e linha de separação mais limpa
+
+#### 4. `src/pages/Login.tsx` — Tela de login split-screen
+
+- **Lado esquerdo** (40%): fundo Azul Royal com gradiente, logo centralizada, tagline e decoração geométrica sutil
+- **Lado direito** (60%): formulário sobre fundo branco puro, campos com bordas definidas e botão com gradiente azul
+- Tabs de Login/Cadastrar com visual mais limpo
+- Mobile-first: empilhamento vertical no mobile
+
+#### 5. `src/components/dashboard/StatusCard.tsx` — Cards KPI renovados
+
+- Fundo sólido com leve gradiente direcional (não mais flat)
+- Ícone em círculo com fundo semitransparente branco
+- Número grande mais destacado (text-5xl)
+- Sombra colorida combinando com o status (ex: `shadow-red-200` para crítico)
+- Borda superior colorida como indicador visual adicional
+
+#### 6. `src/components/ui/card.tsx` — Card base com mais profundidade
+
+- Sombra padrão levemente mais pronunciada: `shadow-sm` → `shadow-md`
+- Borda mais sutil (`border-slate-200/60`)
+- Hover com elevação suave para cards interativos
 
 ---
 
-#### 2. Nova coluna na tabela `veiculos`: `contrato_id`
+### Sem alteração em dados ou lógica
 
-Além do campo texto livre `contrato` já existente, será adicionada a coluna `contrato_id` (FK para a nova tabela), permitindo vincular formalmente o veículo a um contrato cadastrado.
-
-```sql
-ALTER TABLE public.veiculos ADD COLUMN contrato_id uuid REFERENCES public.contratos(id) ON DELETE SET NULL;
-```
+Nenhuma mudança em banco de dados, hooks, roteamento ou regras de negócio. 100% visual/CSS/JSX.
 
 ---
 
-#### 3. Página `Empresas.tsx` — novo visual expandido
+### Reversão
 
-Cada empresa na tabela ganhará um botão **"+ Novo Contrato"** e uma seção expansível (accordion/collapse) exibindo os contratos vinculados:
-
-```
-┌─────────────────────────────────────────────────────────┐
-│ Nome            │ Criado em   │ Ações                   │
-├─────────────────────────────────────────────────────────┤
-│ ▶ Civil Master  │ 18/02/2026  │ ✏️  🗑️  + Novo Contrato │
-│   └── Contrato 001 - Terraplanagem S11D    ✏️  🗑️       │
-│   └── Contrato 002 - Manutenção Geral      ✏️  🗑️       │
-├─────────────────────────────────────────────────────────┤
-│ ▶ Ápia          │ 18/02/2026  │ ✏️  🗑️  + Novo Contrato │
-│   └── (Nenhum contrato)                                 │
-└─────────────────────────────────────────────────────────┘
-```
-
-O dialog de criação/edição de contrato pedirá apenas **Nome** e **Descrição (opcional)**, já pré-vinculado à empresa selecionada.
-
----
-
-#### 4. Hook `useContratos.tsx` (novo)
-
-Novo hook para consultar, criar, editar e excluir contratos, similar ao padrão já existente em `useOficinas.tsx`:
-
-- `useContratos(empresaId?)` — lista todos ou filtra por empresa
-- `useCreateContrato()`
-- `useUpdateContrato()`
-- `useDeleteContrato()`
-
----
-
-#### 5. Tela de detalhamento do veículo (`VeiculoDetalhe.tsx`)
-
-O campo "Atualizar Contrato" que hoje aceita texto livre será **substituído por um Select** que lista os contratos cadastrados, filtrando automaticamente pelos contratos da empresa vinculada ao veículo. Isso garante consistência de dados.
-
----
-
-#### 6. Importação via planilha (`useImportExcel.tsx`)
-
-O campo `Contrato` da planilha (coluna texto livre) continuará funcionando para inserir o **nome do contrato como texto** na coluna `contrato` (legacy), sem quebrar o fluxo atual. A vinculação por `contrato_id` fica disponível somente via UI.
-
----
-
-### Arquivos afetados
-
-| Arquivo | Operação |
-|---|---|
-| Migration SQL | **CRIAR** tabela `contratos` + coluna `contrato_id` em `veiculos` |
-| `src/hooks/useContratos.tsx` | **CRIAR** hook completo |
-| `src/types/fleet.ts` | Adicionar interface `Contrato` |
-| `src/pages/Empresas.tsx` | Expandir com sublistagem de contratos e dialog de contrato |
-| `src/pages/VeiculoDetalhe.tsx` | Substituir campo texto de contrato por Select de contratos |
-| `src/hooks/useFleetData.tsx` | Atualizar `useVeiculoDetalhe` para incluir `contrato` relacionado |
-
-### Nenhuma quebra de dados existentes
-
-- O campo texto `contrato` na tabela `veiculos` permanece (compatibilidade com importações)
-- A nova coluna `contrato_id` é nullable — veículos sem vínculo formal não são afetados
-- Contratos com CASCADE DELETE: ao excluir empresa, seus contratos também são removidos; veículos têm `SET NULL` no `contrato_id`
+Caso não goste do resultado, o histórico de versões da ferramenta permite reverter com um clique ao estado anterior.
