@@ -272,13 +272,13 @@ export default function Relatorios() {
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label>Oficina</Label>
+                <Label>Mecânico</Label>
                 <Select value={filtros.oficinaId} onValueChange={(v) => setFiltros(prev => ({ ...prev, oficinaId: v }))}>
                   <SelectTrigger className="w-48">
                     <SelectValue placeholder="Todas" />
                   </SelectTrigger>
                   <SelectContent className="bg-popover">
-                    <SelectItem value="all">Todas</SelectItem>
+                    <SelectItem value="all">Todos</SelectItem>
                     {oficinas?.map(o => (
                       <SelectItem key={o.id} value={o.id}>{o.nome}</SelectItem>
                     ))}
@@ -312,7 +312,7 @@ export default function Relatorios() {
         <Tabs defaultValue="veiculos" className="space-y-4">
           <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="veiculos">Por Veículo</TabsTrigger>
-            <TabsTrigger value="oficinas">Por Oficina</TabsTrigger>
+            <TabsTrigger value="oficinas">Por Mecânico</TabsTrigger>
             <TabsTrigger value="tipos">Por Tipo</TabsTrigger>
             <TabsTrigger value="historico">Histórico</TabsTrigger>
           </TabsList>
@@ -366,7 +366,7 @@ export default function Relatorios() {
                 <CardHeader className="flex flex-row items-center justify-between">
                   <CardTitle className="flex items-center gap-2">
                     <Wrench className="h-5 w-5" />
-                    Gastos por Oficina
+                    Gastos por Mecânico
                   </CardTitle>
                   <Button variant="outline" size="sm" onClick={handleExportGastosPorOficina}>
                     <FileSpreadsheet className="h-4 w-4 mr-2" />
@@ -380,7 +380,7 @@ export default function Relatorios() {
                     <Table>
                       <TableHeader>
                         <TableRow>
-                          <TableHead>Oficina</TableHead>
+                           <TableHead>Mecânico</TableHead>
                           <TableHead className="text-right">Serviços</TableHead>
                           <TableHead className="text-right">Tempo Médio</TableHead>
                           <TableHead className="text-right">Total</TableHead>
@@ -403,7 +403,7 @@ export default function Relatorios() {
 
               <Card>
                 <CardHeader>
-                  <CardTitle>Distribuição por Oficina</CardTitle>
+                  <CardTitle>Distribuição por Mecânico</CardTitle>
                 </CardHeader>
                 <CardContent>
                   {chartDataOficinas.length === 0 ? (
