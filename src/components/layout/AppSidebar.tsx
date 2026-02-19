@@ -7,7 +7,8 @@ import {
   Building2,
   Calendar,
   FileBarChart,
-  Truck
+  Truck,
+  ChevronRight
 } from 'lucide-react';
 import logoMC from '@/assets/logo-mc-20anos.jpg';
 import { Link, useLocation } from 'react-router-dom';
@@ -97,48 +98,69 @@ export function AppSidebar() {
     },
   ];
 
+  const isActive = (path: string) => location.pathname === path;
+
   return (
-    <Sidebar className="border-r border-sidebar-border shadow-sm">
-      <SidebarHeader className="border-b border-sidebar-border px-3 py-4">
-        <div className="flex flex-col items-center justify-center w-full">
+    <Sidebar className="border-r border-sidebar-border">
+      {/* Header com logo */}
+      <SidebarHeader className="border-b border-sidebar-border px-4 py-5">
+        <div className="flex flex-col items-center justify-center w-full gap-1">
           <img 
             src={logoMC} 
             alt="MC Terraplenagem" 
-            className="w-full h-auto object-contain scale-125"
+            className="w-full h-auto object-contain"
+            style={{ filter: 'brightness(1.05) contrast(1.05)' }}
           />
-          <span className="text-base font-semibold text-sidebar-foreground -mt-3">
-            Controle de Revisões
-          </span>
+          <div className="flex items-center gap-1.5 mt-1">
+            <div className="h-1.5 w-1.5 rounded-full bg-sidebar-primary opacity-80" />
+            <span className="text-xs font-medium text-sidebar-foreground/60 tracking-widest uppercase">
+              Controle de Revisões
+            </span>
+            <div className="h-1.5 w-1.5 rounded-full bg-sidebar-primary opacity-80" />
+          </div>
         </div>
       </SidebarHeader>
 
-      <SidebarContent>
+      <SidebarContent className="px-2 py-3">
+        {/* Menu Principal */}
         <SidebarGroup>
-          <SidebarGroupLabel className="text-xs uppercase tracking-wider text-muted-foreground/70">
+          <SidebarGroupLabel className="text-[10px] font-semibold uppercase tracking-widest text-sidebar-foreground/40 px-3 mb-1">
             Menu Principal
           </SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu>
+            <SidebarMenu className="gap-0.5">
               {menuItems.map((item) => (
                 <SidebarMenuItem key={item.path}>
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <SidebarMenuButton 
-                        asChild 
-                        isActive={location.pathname === item.path}
-                        className="transition-all duration-200 hover:translate-x-1"
+                        asChild
+                        isActive={isActive(item.path)}
+                        className={`
+                          relative h-10 rounded-lg transition-all duration-200
+                          text-sidebar-foreground/70 hover:text-sidebar-foreground
+                          hover:bg-sidebar-accent/60
+                          data-[active=true]:bg-sidebar-primary/20
+                          data-[active=true]:text-sidebar-foreground
+                          data-[active=true]:font-medium
+                        `}
                       >
-                        <Link to={item.path} className="flex items-center justify-between w-full">
+                        <Link to={item.path} className="flex items-center justify-between w-full px-3">
                           <span className="flex items-center gap-3">
-                            <item.icon className="h-5 w-5" />
-                            <span>{item.title}</span>
+                            <item.icon className="h-4 w-4 shrink-0" />
+                            <span className="text-sm">{item.title}</span>
                           </span>
-                          {item.badge && (
-                            <MenuBadge 
-                              count={item.badge.count} 
-                              variant={item.badge.variant}
-                            />
-                          )}
+                          <div className="flex items-center gap-1.5">
+                            {item.badge && (
+                              <MenuBadge 
+                                count={item.badge.count} 
+                                variant={item.badge.variant}
+                              />
+                            )}
+                            {isActive(item.path) && (
+                              <ChevronRight className="h-3 w-3 text-sidebar-primary opacity-70" />
+                            )}
+                          </div>
                         </Link>
                       </SidebarMenuButton>
                     </TooltipTrigger>
@@ -146,30 +168,46 @@ export function AppSidebar() {
                       {item.tooltip}
                     </TooltipContent>
                   </Tooltip>
+
+                  {/* Active indicator bar */}
+                  {isActive(item.path) && (
+                    <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-6 bg-sidebar-primary rounded-r-full" />
+                  )}
                 </SidebarMenuItem>
               ))}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
 
+        {/* Divisor */}
+        <div className="mx-3 my-3 border-t border-sidebar-border/50" />
+
+        {/* Configurações */}
         <SidebarGroup>
-          <SidebarGroupLabel className="text-xs uppercase tracking-wider text-muted-foreground/70">
+          <SidebarGroupLabel className="text-[10px] font-semibold uppercase tracking-widest text-sidebar-foreground/40 px-3 mb-1">
             Configurações
           </SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu>
+            <SidebarMenu className="gap-0.5">
               {configItems.map((item) => (
                 <SidebarMenuItem key={item.path}>
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <SidebarMenuButton 
-                        asChild 
-                        isActive={location.pathname === item.path}
-                        className="transition-all duration-200 hover:translate-x-1"
+                        asChild
+                        isActive={isActive(item.path)}
+                        className={`
+                          relative h-9 rounded-lg transition-all duration-200
+                          text-sidebar-foreground/60 hover:text-sidebar-foreground
+                          hover:bg-sidebar-accent/60
+                          data-[active=true]:bg-sidebar-primary/20
+                          data-[active=true]:text-sidebar-foreground
+                          data-[active=true]:font-medium
+                        `}
                       >
-                        <Link to={item.path}>
-                          <item.icon className="h-5 w-5" />
-                          <span>{item.title}</span>
+                        <Link to={item.path} className="flex items-center gap-3 px-3">
+                          <item.icon className="h-4 w-4 shrink-0" />
+                          <span className="text-sm">{item.title}</span>
                         </Link>
                       </SidebarMenuButton>
                     </TooltipTrigger>
@@ -184,19 +222,28 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter className="border-t border-sidebar-border p-4">
+      {/* Footer */}
+      <SidebarFooter className="border-t border-sidebar-border/50 px-3 py-4">
         <div className="flex flex-col gap-2">
-          <div className="text-sm text-sidebar-foreground/80 truncate">
-            {user?.email}
+          <div className="flex items-center gap-2 px-2">
+            <div className="h-7 w-7 rounded-full bg-sidebar-primary/30 flex items-center justify-center shrink-0">
+              <span className="text-xs font-semibold text-sidebar-foreground">
+                {user?.email?.[0]?.toUpperCase() ?? 'U'}
+              </span>
+            </div>
+            <div className="min-w-0">
+              <p className="text-xs text-sidebar-foreground/50 uppercase tracking-wider">Usuário</p>
+              <p className="text-xs text-sidebar-foreground/80 truncate">{user?.email}</p>
+            </div>
           </div>
           <Button 
             variant="ghost" 
             size="sm" 
             onClick={signOut}
-            className="justify-start text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-accent transition-all duration-200"
+            className="justify-start text-sidebar-foreground/50 hover:text-sidebar-foreground hover:bg-sidebar-accent/60 transition-all duration-200 h-9 px-3 rounded-lg"
           >
             <LogOut className="h-4 w-4 mr-2" />
-            Sair
+            <span className="text-sm">Sair</span>
           </Button>
         </div>
       </SidebarFooter>

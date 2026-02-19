@@ -7,95 +7,122 @@
 
 @layer base {
   :root {
-    /* MC Terraplenagem Color Palette - Professional Light Theme */
-    /* Main content area - Light gray background */
-    --background: 215 25% 95%;
-    --foreground: 215 55% 15%;
+    /* ============================================
+       MC Terraplenagem — Royal Blue Design System
+       ============================================ */
 
+    /* Background: cinza-azulado suave (#F0F4F9) */
+    --background: 214 32% 96%;
+    --foreground: 222 47% 11%;
+
+    /* Cards: branco puro */
     --card: 0 0% 100%;
-    --card-foreground: 215 55% 15%;
+    --card-foreground: 222 47% 11%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 215 55% 15%;
+    --popover-foreground: 222 47% 11%;
 
-    /* Azul marinho do logo - Primary accent */
-    --primary: 215 55% 25%;
+    /* Primary: Azul Royal (#1D4ED8) */
+    --primary: 221 73% 48%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 210 30% 92%;
-    --secondary-foreground: 215 55% 25%;
+    /* Secondary: Azul claro suave */
+    --secondary: 214 100% 97%;
+    --secondary-foreground: 221 73% 35%;
 
-    --muted: 210 20% 92%;
-    --muted-foreground: 215 25% 45%;
+    /* Muted */
+    --muted: 214 25% 93%;
+    --muted-foreground: 215 20% 37%;
 
-    --accent: 210 30% 90%;
-    --accent-foreground: 215 55% 25%;
+    /* Accent: Azul vivo (#3B82F6) */
+    --accent: 217 91% 60%;
+    --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 84.2% 60.2%;
+    --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 214 25% 88%;
-    --input: 214 25% 88%;
-    --ring: 215 55% 35%;
+    --border: 214 20% 88%;
+    --input: 214 20% 88%;
+    --ring: 221 73% 48%;
 
     --radius: 0.75rem;
 
-    /* Traffic Light Status Colors */
+    /* ============================================
+       Status Colors — Solid & High-Contrast
+       ============================================ */
+    /* Crítico: Vermelho (#DC2626) */
     --status-critical: 0 72% 51%;
     --status-critical-foreground: 0 0% 100%;
+    --status-critical-light: 0 86% 97%;
+    --status-critical-border: 0 72% 80%;
+
+    /* Alerta: Âmbar (#D97706) */
     --status-warning: 38 92% 50%;
     --status-warning-foreground: 0 0% 100%;
-    --status-ok: 142 71% 45%;
-    --status-ok-foreground: 0 0% 100%;
+    --status-warning-light: 48 100% 96%;
+    --status-warning-border: 38 92% 78%;
 
-    /* Sidebar - White with blue accents */
-    --sidebar-background: 0 0% 100%;
-    --sidebar-foreground: 215 55% 25%;
-    --sidebar-primary: 215 55% 25%;
+    /* OK: Verde (#16A34A) */
+    --status-ok: 142 71% 36%;
+    --status-ok-foreground: 0 0% 100%;
+    --status-ok-light: 142 76% 95%;
+    --status-ok-border: 142 71% 72%;
+
+    /* Em Serviço: Violeta (#7C3AED) */
+    --status-service: 263 81% 57%;
+    --status-service-foreground: 0 0% 100%;
+    --status-service-light: 263 100% 97%;
+
+    /* ============================================
+       Sidebar — Deep Royal Blue (#0F2462)
+       ============================================ */
+    --sidebar-background: 222 74% 22%;
+    --sidebar-foreground: 0 0% 100%;
+    --sidebar-primary: 217 91% 60%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 215 50% 96%;
-    --sidebar-accent-foreground: 215 55% 25%;
-    --sidebar-border: 214 25% 92%;
-    --sidebar-ring: 215 55% 35%;
+    --sidebar-accent: 222 60% 30%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 222 60% 28%;
+    --sidebar-ring: 217 91% 60%;
   }
 
   .dark {
-    --background: 215 50% 10%;
+    --background: 222 47% 9%;
     --foreground: 0 0% 95%;
 
-    --card: 215 50% 12%;
+    --card: 222 47% 12%;
     --card-foreground: 0 0% 95%;
 
-    --popover: 215 50% 12%;
+    --popover: 222 47% 12%;
     --popover-foreground: 0 0% 95%;
 
-    --primary: 210 70% 55%;
+    --primary: 217 91% 60%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 215 45% 20%;
+    --secondary: 222 45% 20%;
     --secondary-foreground: 0 0% 95%;
 
-    --muted: 215 45% 18%;
-    --muted-foreground: 210 20% 65%;
+    --muted: 222 45% 18%;
+    --muted-foreground: 215 20% 65%;
 
-    --accent: 215 45% 20%;
-    --accent-foreground: 0 0% 95%;
+    --accent: 217 91% 60%;
+    --accent-foreground: 0 0% 100%;
 
     --destructive: 0 70% 50%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 215 40% 20%;
-    --input: 215 40% 18%;
-    --ring: 210 70% 55%;
+    --border: 222 40% 20%;
+    --input: 222 40% 18%;
+    --ring: 217 91% 60%;
 
-    --sidebar-background: 215 55% 12%;
+    --sidebar-background: 222 74% 12%;
     --sidebar-foreground: 0 0% 95%;
-    --sidebar-primary: 0 0% 100%;
-    --sidebar-primary-foreground: 215 55% 12%;
-    --sidebar-accent: 215 50% 18%;
+    --sidebar-primary: 217 91% 60%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 222 60% 20%;
     --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 215 50% 16%;
-    --sidebar-ring: 215 60% 50%;
+    --sidebar-border: 222 60% 18%;
+    --sidebar-ring: 217 91% 60%;
   }
 }
 
@@ -108,44 +135,87 @@
     font-feature-settings: "rlig" 1, "calt" 1;
     font-family: 'Inter', system-ui, sans-serif;
   }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: hsl(var(--background));
+  }
+  ::-webkit-scrollbar-thumb {
+    background: hsl(var(--border));
+    border-radius: 3px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--muted-foreground));
+  }
 }
 
 @layer components {
-  /* Status badge styles */
-  .status-badge-critical {
-    background-color: hsl(var(--status-critical));
+  /* ============================================
+     Status Card — Solid color backgrounds
+     ============================================ */
+  .status-card-critical {
+    background: linear-gradient(135deg, hsl(var(--status-critical)), hsl(0 72% 42%));
     color: hsl(var(--status-critical-foreground));
+    box-shadow: 0 8px 24px -4px hsl(var(--status-critical) / 0.4);
+  }
+  .status-card-warning {
+    background: linear-gradient(135deg, hsl(var(--status-warning)), hsl(38 92% 40%));
+    color: hsl(var(--status-warning-foreground));
+    box-shadow: 0 8px 24px -4px hsl(var(--status-warning) / 0.4);
+  }
+  .status-card-ok {
+    background: linear-gradient(135deg, hsl(var(--status-ok)), hsl(142 71% 28%));
+    color: hsl(var(--status-ok-foreground));
+    box-shadow: 0 8px 24px -4px hsl(var(--status-ok) / 0.4);
+  }
+
+  /* ============================================
+     Status Badges — Light background variant
+     ============================================ */
+  .status-badge-critical {
+    background-color: hsl(var(--status-critical-light));
+    color: hsl(var(--status-critical));
+    border: 1px solid hsl(var(--status-critical-border));
   }
   .status-badge-warning {
-    background-color: hsl(var(--status-warning));
-    color: hsl(var(--status-warning-foreground));
+    background-color: hsl(var(--status-warning-light));
+    color: hsl(var(--status-warning));
+    border: 1px solid hsl(var(--status-warning-border));
   }
   .status-badge-ok {
-    background-color: hsl(var(--status-ok));
-    color: hsl(var(--status-ok-foreground));
+    background-color: hsl(var(--status-ok-light));
+    color: hsl(var(--status-ok));
+    border: 1px solid hsl(var(--status-ok-border));
   }
 
-  /* Interactive card with hover effects */
+  /* ============================================
+     Interaction & Animation Utilities
+     ============================================ */
   .interactive-card {
     @apply transition-all duration-300 ease-out cursor-pointer;
-    @apply hover:shadow-lg hover:-translate-y-1 hover:scale-[1.02];
-    @apply active:scale-[0.98] active:shadow-md;
+    @apply hover:shadow-xl hover:-translate-y-1;
   }
 
-  /* Subtle card hover */
   .card-hover {
     @apply transition-all duration-200 ease-out;
     @apply hover:shadow-md hover:-translate-y-0.5;
   }
 
-  /* Glassmorphism effect */
+  /* Glassmorphism */
   .glass {
     @apply bg-white/80 backdrop-blur-sm border border-white/20;
   }
 
   /* Gradient text */
   .gradient-text {
-    @apply bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent;
+    background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent)));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
   }
 
   /* Pulse animation for critical items */
@@ -154,23 +224,19 @@
   }
 
   @keyframes pulse-critical {
-    0%, 100% {
-      opacity: 1;
-    }
-    50% {
-      opacity: 0.7;
-    }
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
   }
 
   /* Fade in animation */
   .animate-fade-in {
-    animation: fadeIn 0.3s ease-out forwards;
+    animation: fadeIn 0.35s ease-out forwards;
   }
 
   @keyframes fadeIn {
     from {
       opacity: 0;
-      transform: translateY(8px);
+      transform: translateY(10px);
     }
     to {
       opacity: 1;
@@ -179,40 +245,38 @@
   }
 
   /* Staggered children animation */
-  .stagger-children > * {
-    @apply animate-fade-in;
-  }
+  .stagger-children > * { @apply animate-fade-in; }
   .stagger-children > *:nth-child(1) { animation-delay: 0ms; }
-  .stagger-children > *:nth-child(2) { animation-delay: 50ms; }
-  .stagger-children > *:nth-child(3) { animation-delay: 100ms; }
-  .stagger-children > *:nth-child(4) { animation-delay: 150ms; }
-  .stagger-children > *:nth-child(5) { animation-delay: 200ms; }
-  .stagger-children > *:nth-child(6) { animation-delay: 250ms; }
-  .stagger-children > *:nth-child(7) { animation-delay: 300ms; }
-}
+  .stagger-children > *:nth-child(2) { animation-delay: 60ms; }
+  .stagger-children > *:nth-child(3) { animation-delay: 120ms; }
+  .stagger-children > *:nth-child(4) { animation-delay: 180ms; }
+  .stagger-children > *:nth-child(5) { animation-delay: 240ms; }
+  .stagger-children > *:nth-child(6) { animation-delay: 300ms; }
+  .stagger-children > *:nth-child(7) { animation-delay: 360ms; }
 
-@layer components {
-  .status-card-critical {
-    @apply bg-[hsl(var(--status-critical))] text-[hsl(var(--status-critical-foreground))];
+  /* ============================================
+     Sidebar active item indicator
+     ============================================ */
+  .sidebar-item-active {
+    position: relative;
+    background: hsl(var(--sidebar-primary) / 0.15) !important;
+    color: hsl(var(--sidebar-foreground)) !important;
   }
-  
-  .status-card-warning {
-    @apply bg-[hsl(var(--status-warning))] text-[hsl(var(--status-warning-foreground))];
-  }
-  
-  .status-card-ok {
-    @apply bg-[hsl(var(--status-ok))] text-[hsl(var(--status-ok-foreground))];
+  .sidebar-item-active::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 3px;
+    height: 70%;
+    background: hsl(var(--sidebar-primary));
+    border-radius: 0 2px 2px 0;
   }
 
-  .status-badge-critical {
-    @apply bg-[hsl(var(--status-critical)/0.15)] text-[hsl(var(--status-critical))] border-[hsl(var(--status-critical)/0.3)];
-  }
-  
-  .status-badge-warning {
-    @apply bg-[hsl(var(--status-warning)/0.15)] text-[hsl(var(--status-warning))] border-[hsl(var(--status-warning)/0.3)];
-  }
-  
-  .status-badge-ok {
-    @apply bg-[hsl(var(--status-ok)/0.15)] text-[hsl(var(--status-ok))] border-[hsl(var(--status-ok)/0.3)];
+  /* Section header utility */
+  .section-header {
+    @apply text-xs font-semibold uppercase tracking-widest;
+    color: hsl(var(--muted-foreground));
   }
 }
