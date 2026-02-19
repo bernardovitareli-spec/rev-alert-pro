@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, addMonths, subMonths, isToday } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, AlertTriangle, AlertCircle, CheckCircle, Search, X, Edit2 } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, AlertTriangle, AlertCircle, CheckCircle, Search, X, Edit2, Wrench } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -15,6 +15,7 @@ import { RevisionEditModal, RevisionWithDetails } from '@/components/calendar/Re
 import { StatusExecucaoBadge } from '@/components/revisions/StatusExecucaoSelect';
 import { cn } from '@/lib/utils';
 import { getStatusLabel, formatarKmOuHora } from '@/lib/revisionCalculations';
+
 
 interface DayRevisions {
   date: Date;
@@ -418,6 +419,12 @@ export default function Calendario() {
                           </div>
                           <StatusExecucaoBadge status={rev.status_execucao} />
                         </div>
+                        {rev.status_execucao === 'em_servico' && rev.oficina && (
+                          <div className="mt-1.5 flex items-center gap-1.5 text-xs text-muted-foreground">
+                            <Wrench className="h-3 w-3 shrink-0" />
+                            <span className="font-medium">{rev.oficina.nome}</span>
+                          </div>
+                        )}
                       </button>
                     ))}
                   </div>

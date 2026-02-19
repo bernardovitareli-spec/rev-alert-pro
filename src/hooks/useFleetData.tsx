@@ -65,7 +65,8 @@ export function useRevisoes() {
         .select(`
           *,
           veiculo:veiculos(*),
-          tipo_revisao:tipos_revisao(*)
+          tipo_revisao:tipos_revisao(*),
+          oficina:oficinas(*)
         `);
       
       if (error) throw error;
@@ -91,11 +92,15 @@ export function useVeiculosComRevisoes() {
       const revisoesVeiculo = revisoes.filter(r => r.veiculo_id === veiculo.id);
       const veiculoComRevisoes = calcularStatusVeiculo(veiculo, revisoesVeiculo);
       
-      // Add tipo_revisao info to each revisao
-      veiculoComRevisoes.revisoes = veiculoComRevisoes.revisoes.map(rev => ({
-        ...rev,
-        tipo_revisao: tiposRevisao?.find(t => t.id === rev.tipo_revisao_id),
-      }));
+      // Add tipo_revisao and oficina info to each revisao
+      veiculoComRevisoes.revisoes = veiculoComRevisoes.revisoes.map(rev => {
+        const original = revisoes.find(r => r.id === rev.id);
+        return {
+          ...rev,
+          tipo_revisao: tiposRevisao?.find(t => t.id === rev.tipo_revisao_id),
+          oficina: original?.oficina,
+        };
+      });
       
       return veiculoComRevisoes;
     });
@@ -219,7 +224,8 @@ export function useVeiculoDetalhe(id: string) {
         .from('revisoes')
         .select(`
           *,
-          tipo_revisao:tipos_revisao(*)
+          tipo_revisao:tipos_revisao(*),
+          oficina:oficinas(*)
         `)
         .eq('veiculo_id', id);
       
@@ -228,11 +234,15 @@ export function useVeiculoDetalhe(id: string) {
       // Calculate status for vehicle with its revisions
       const veiculoComRevisoes = calcularStatusVeiculo(veiculo as Veiculo, revisoes as Revisao[]);
       
-      // Add tipo_revisao info to each revisao
-      veiculoComRevisoes.revisoes = veiculoComRevisoes.revisoes.map(rev => ({
-        ...rev,
-        tipo_revisao: tiposRevisao?.find(t => t.id === rev.tipo_revisao_id),
-      }));
+      // Add tipo_revisao and oficina info to each revisao
+      veiculoComRevisoes.revisoes = veiculoComRevisoes.revisoes.map(rev => {
+        const original = revisoes.find(r => r.id === rev.id);
+        return {
+          ...rev,
+          tipo_revisao: tiposRevisao?.find(t => t.id === rev.tipo_revisao_id),
+          oficina: original?.oficina,
+        };
+      });
 
       return veiculoComRevisoes;
     },

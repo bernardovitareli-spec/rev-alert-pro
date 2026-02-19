@@ -97,22 +97,40 @@ export function VehicleCard({ veiculo, showDeliveryInfo = false }: VehicleCardPr
 
           {/* Delivery info when in service filter is active */}
           {showDeliveryInfo && emServicoRevisoes.length > 0 && (
-            <div className="flex items-center gap-2 text-sm bg-purple-500/10 rounded-md p-2">
-              <Wrench className="h-4 w-4 text-purple-600" />
-              <div className="flex-1">
-                <span className="text-muted-foreground">Em Serviço:</span>
-                <span className="ml-1 font-medium">{emServicoRevisoes.length} revisão(ões)</span>
+            <div className="flex flex-col gap-1.5 text-sm bg-purple-500/10 rounded-md p-2">
+              <div className="flex items-center gap-2">
+                <Wrench className="h-4 w-4 text-purple-600 shrink-0" />
+                <div className="flex-1">
+                  <span className="text-muted-foreground">Em Serviço:</span>
+                  <span className="ml-1 font-medium">{emServicoRevisoes.length} revisão(ões)</span>
+                </div>
+                {earliestDelivery && (
+                  <Badge 
+                    variant="outline" 
+                    className={cn(
+                      'text-xs',
+                      getPrevisaoColor(earliestDelivery.previsao_entrega)
+                    )}
+                  >
+                    {getPrevisaoLabel(earliestDelivery.previsao_entrega)}
+                  </Badge>
+                )}
               </div>
-              {earliestDelivery && (
-                <Badge 
-                  variant="outline" 
-                  className={cn(
-                    'text-xs',
-                    getPrevisaoColor(earliestDelivery.previsao_entrega)
-                  )}
-                >
-                  {getPrevisaoLabel(earliestDelivery.previsao_entrega)}
-                </Badge>
+              {/* Mecânicos associados */}
+              {emServicoRevisoes.some(r => r.oficina) && (
+                <div className="flex flex-col gap-0.5 pl-6">
+                  {emServicoRevisoes
+                    .filter(r => r.oficina)
+                    .map(r => (
+                      <span key={r.id} className="text-xs text-muted-foreground">
+                        🔧 {r.oficina!.nome}
+                        {r.tipo_revisao && (
+                          <span className="opacity-70"> · {r.tipo_revisao.nome}</span>
+                        )}
+                      </span>
+                    ))
+                  }
+                </div>
               )}
             </div>
           )}
