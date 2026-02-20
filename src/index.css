@@ -2,127 +2,93 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Import Google Fonts for better typography */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
 @layer base {
   :root {
     /* ============================================
-       MC Terraplenagem — Royal Blue Design System
+       MC Terraplenagem — Dark Teal Design System
+       Inspirado no screenshot de referência
        ============================================ */
 
-    /* Background: cinza-azulado suave (#F0F4F9) */
-    --background: 214 32% 96%;
-    --foreground: 222 47% 11%;
+    /* Background: muito escuro azul-petróleo */
+    --background: 220 50% 7%;
+    --foreground: 0 0% 95%;
 
-    /* Cards: branco puro */
-    --card: 0 0% 100%;
-    --card-foreground: 222 47% 11%;
+    /* Cards: escuro com borda teal sutil */
+    --card: 220 45% 10%;
+    --card-foreground: 0 0% 95%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222 47% 11%;
+    --popover: 220 45% 10%;
+    --popover-foreground: 0 0% 95%;
 
-    /* Primary: Azul Royal (#1D4ED8) */
-    --primary: 221 73% 48%;
-    --primary-foreground: 0 0% 100%;
+    /* Primary: Teal/Emerald (#10B981) */
+    --primary: 160 84% 39%;
+    --primary-foreground: 220 50% 7%;
 
-    /* Secondary: Azul claro suave */
-    --secondary: 214 100% 97%;
-    --secondary-foreground: 221 73% 35%;
+    /* Secondary: tons escuros sutis */
+    --secondary: 220 40% 14%;
+    --secondary-foreground: 0 0% 85%;
 
     /* Muted */
-    --muted: 214 25% 93%;
-    --muted-foreground: 215 20% 37%;
+    --muted: 220 35% 13%;
+    --muted-foreground: 215 15% 55%;
 
-    /* Accent: Azul vivo (#3B82F6) */
-    --accent: 217 91% 60%;
-    --accent-foreground: 0 0% 100%;
+    /* Accent: Teal mais brilhante */
+    --accent: 160 84% 39%;
+    --accent-foreground: 220 50% 7%;
 
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 214 20% 88%;
-    --input: 214 20% 88%;
-    --ring: 221 73% 48%;
+    --border: 220 30% 16%;
+    --input: 220 30% 16%;
+    --ring: 160 84% 39%;
 
     --radius: 0.75rem;
 
     /* ============================================
-       Status Colors — Solid & High-Contrast
+       Status Colors — Vibrantes no fundo escuro
        ============================================ */
-    /* Crítico: Vermelho (#DC2626) */
     --status-critical: 0 72% 51%;
     --status-critical-foreground: 0 0% 100%;
-    --status-critical-light: 0 86% 97%;
-    --status-critical-border: 0 72% 80%;
+    --status-critical-light: 0 60% 15%;
+    --status-critical-border: 0 72% 35%;
 
-    /* Alerta: Âmbar (#D97706) */
     --status-warning: 38 92% 50%;
     --status-warning-foreground: 0 0% 100%;
-    --status-warning-light: 48 100% 96%;
-    --status-warning-border: 38 92% 78%;
+    --status-warning-light: 38 60% 15%;
+    --status-warning-border: 38 92% 40%;
 
-    /* OK: Verde (#16A34A) */
-    --status-ok: 142 71% 36%;
+    --status-ok: 160 84% 39%;
     --status-ok-foreground: 0 0% 100%;
-    --status-ok-light: 142 76% 95%;
-    --status-ok-border: 142 71% 72%;
+    --status-ok-light: 160 60% 12%;
+    --status-ok-border: 160 84% 30%;
 
-    /* Em Serviço: Violeta (#7C3AED) */
     --status-service: 263 81% 57%;
     --status-service-foreground: 0 0% 100%;
-    --status-service-light: 263 100% 97%;
+    --status-service-light: 263 50% 15%;
 
     /* ============================================
-       Sidebar — Deep Royal Blue (#0F2462)
+       Sidebar — Mesmo tom escuro, levemente mais fundo
        ============================================ */
-    --sidebar-background: 222 74% 15%;
-    --sidebar-foreground: 0 0% 100%;
-    --sidebar-primary: 217 91% 60%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 222 60% 24%;
-    --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 222 60% 22%;
-    --sidebar-ring: 217 91% 60%;
-  }
+    --sidebar-background: 220 55% 5%;
+    --sidebar-foreground: 0 0% 92%;
+    --sidebar-primary: 160 84% 39%;
+    --sidebar-primary-foreground: 220 50% 7%;
+    --sidebar-accent: 220 40% 12%;
+    --sidebar-accent-foreground: 0 0% 92%;
+    --sidebar-border: 220 35% 13%;
+    --sidebar-ring: 160 84% 39%;
 
-  .dark {
-    --background: 222 47% 9%;
-    --foreground: 0 0% 95%;
-
-    --card: 222 47% 12%;
-    --card-foreground: 0 0% 95%;
-
-    --popover: 222 47% 12%;
-    --popover-foreground: 0 0% 95%;
-
-    --primary: 217 91% 60%;
-    --primary-foreground: 0 0% 100%;
-
-    --secondary: 222 45% 20%;
-    --secondary-foreground: 0 0% 95%;
-
-    --muted: 222 45% 18%;
-    --muted-foreground: 215 20% 65%;
-
-    --accent: 217 91% 60%;
-    --accent-foreground: 0 0% 100%;
-
-    --destructive: 0 70% 50%;
-    --destructive-foreground: 0 0% 100%;
-
-    --border: 222 40% 20%;
-    --input: 222 40% 18%;
-    --ring: 217 91% 60%;
-
-    --sidebar-background: 222 74% 12%;
-    --sidebar-foreground: 0 0% 95%;
-    --sidebar-primary: 217 91% 60%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 222 60% 20%;
-    --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 222 60% 18%;
-    --sidebar-ring: 217 91% 60%;
+    /* ============================================
+       Chart colors — paleta teal harmonizada
+       ============================================ */
+    --chart-1: 160 84% 39%;
+    --chart-2: 190 80% 45%;
+    --chart-3: 38 92% 50%;
+    --chart-4: 263 81% 57%;
+    --chart-5: 0 72% 51%;
   }
 }
 
@@ -136,7 +102,7 @@
     font-family: 'Inter', system-ui, sans-serif;
   }
 
-  /* Custom scrollbar */
+  /* Custom scrollbar - dark theme */
   ::-webkit-scrollbar {
     width: 6px;
     height: 6px;
@@ -155,40 +121,40 @@
 
 @layer components {
   /* ============================================
-     Status Card — Solid color backgrounds
+     Status Card — Gradientes no dark
      ============================================ */
   .status-card-critical {
-    background: linear-gradient(135deg, hsl(var(--status-critical)), hsl(0 72% 42%));
-    color: hsl(var(--status-critical-foreground));
-    box-shadow: 0 8px 24px -4px hsl(var(--status-critical) / 0.4);
+    background: linear-gradient(135deg, hsl(var(--status-critical) / 0.2), hsl(0 72% 42% / 0.1));
+    border: 1px solid hsl(var(--status-critical) / 0.3);
+    color: hsl(var(--foreground));
   }
   .status-card-warning {
-    background: linear-gradient(135deg, hsl(var(--status-warning)), hsl(38 92% 40%));
-    color: hsl(var(--status-warning-foreground));
-    box-shadow: 0 8px 24px -4px hsl(var(--status-warning) / 0.4);
+    background: linear-gradient(135deg, hsl(var(--status-warning) / 0.2), hsl(38 92% 40% / 0.1));
+    border: 1px solid hsl(var(--status-warning) / 0.3);
+    color: hsl(var(--foreground));
   }
   .status-card-ok {
-    background: linear-gradient(135deg, hsl(var(--status-ok)), hsl(142 71% 28%));
-    color: hsl(var(--status-ok-foreground));
-    box-shadow: 0 8px 24px -4px hsl(var(--status-ok) / 0.4);
+    background: linear-gradient(135deg, hsl(var(--status-ok) / 0.15), hsl(160 84% 30% / 0.05));
+    border: 1px solid hsl(var(--status-ok) / 0.3);
+    color: hsl(var(--foreground));
   }
 
   /* ============================================
-     Status Badges — Light background variant
+     Status Badges — Adaptados ao dark
      ============================================ */
   .status-badge-critical {
     background-color: hsl(var(--status-critical-light));
-    color: hsl(var(--status-critical));
+    color: hsl(0 72% 65%);
     border: 1px solid hsl(var(--status-critical-border));
   }
   .status-badge-warning {
     background-color: hsl(var(--status-warning-light));
-    color: hsl(var(--status-warning));
+    color: hsl(38 92% 65%);
     border: 1px solid hsl(var(--status-warning-border));
   }
   .status-badge-ok {
     background-color: hsl(var(--status-ok-light));
-    color: hsl(var(--status-ok));
+    color: hsl(160 84% 55%);
     border: 1px solid hsl(var(--status-ok-border));
   }
 
@@ -205,17 +171,24 @@
     @apply hover:shadow-md hover:-translate-y-0.5;
   }
 
-  /* Glassmorphism */
+  /* Glassmorphism - dark variant */
   .glass {
-    @apply bg-white/80 backdrop-blur-sm border border-white/20;
+    background: hsl(var(--card) / 0.6);
+    backdrop-filter: blur(12px);
+    border: 1px solid hsl(var(--border) / 0.5);
   }
 
-  /* Gradient text */
+  /* Gradient text - teal */
   .gradient-text {
-    background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent)));
+    background: linear-gradient(135deg, hsl(var(--primary)), hsl(190 80% 50%));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+  }
+
+  /* Teal glow effect */
+  .glow-teal {
+    box-shadow: 0 0 20px -5px hsl(var(--primary) / 0.3);
   }
 
   /* Pulse animation for critical items */
@@ -259,8 +232,8 @@
      ============================================ */
   .sidebar-item-active {
     position: relative;
-    background: hsl(var(--sidebar-primary) / 0.15) !important;
-    color: hsl(var(--sidebar-foreground)) !important;
+    background: hsl(var(--sidebar-primary) / 0.12) !important;
+    color: hsl(var(--sidebar-primary)) !important;
   }
   .sidebar-item-active::before {
     content: '';

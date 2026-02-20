@@ -43,29 +43,29 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex">
-      {/* Lado esquerdo — Identidade de marca */}
+    <div className="min-h-screen flex bg-background">
+      {/* Lado esquerdo — Identidade de marca dark */}
       <div
-        className="hidden lg:flex lg:w-[42%] flex-col items-center justify-between p-10 relative overflow-hidden"
+        className="hidden lg:flex lg:w-[42%] flex-col items-center justify-between p-10 relative overflow-hidden border-r border-border/30"
         style={{
-          background: 'linear-gradient(155deg, hsl(222 74% 15%), hsl(221 73% 32%), hsl(217 91% 48%))',
+          background: 'linear-gradient(155deg, hsl(220 55% 5%), hsl(220 50% 9%), hsl(220 45% 12%))',
         }}
       >
-        {/* Decoração geométrica de fundo */}
+        {/* Decoração geométrica teal */}
         <div
-          className="absolute inset-0 opacity-10"
+          className="absolute inset-0 opacity-5"
           style={{
             backgroundImage: `
-              radial-gradient(circle at 20% 20%, white 1px, transparent 1px),
-              radial-gradient(circle at 80% 80%, white 1px, transparent 1px)
+              radial-gradient(circle at 20% 20%, hsl(160 84% 39%) 1px, transparent 1px),
+              radial-gradient(circle at 80% 80%, hsl(160 84% 39%) 1px, transparent 1px)
             `,
             backgroundSize: '48px 48px',
           }}
         />
         <div className="absolute top-0 right-0 w-64 h-64 rounded-full opacity-5"
-          style={{ background: 'white', transform: 'translate(30%, -30%)' }} />
-        <div className="absolute bottom-0 left-0 w-96 h-96 rounded-full opacity-5"
-          style={{ background: 'white', transform: 'translate(-30%, 30%)' }} />
+          style={{ background: 'hsl(160 84% 39%)', transform: 'translate(30%, -30%)' }} />
+        <div className="absolute bottom-0 left-0 w-96 h-96 rounded-full opacity-3"
+          style={{ background: 'hsl(160 84% 39%)', transform: 'translate(-30%, 30%)' }} />
 
         {/* Logo */}
         <div className="relative z-10 w-full max-w-[280px]">
@@ -79,10 +79,10 @@ export default function Login() {
         {/* Tagline e features */}
         <div className="relative z-10 text-center space-y-8">
           <div>
-            <h2 className="text-2xl font-bold text-white mb-2">
+            <h2 className="text-2xl font-bold text-foreground mb-2">
               Gestão de Frota Inteligente
             </h2>
-            <p className="text-white/60 text-sm leading-relaxed max-w-xs mx-auto">
+            <p className="text-muted-foreground text-sm leading-relaxed max-w-xs mx-auto">
               Controle completo das revisões, documentos e manutenção da sua frota em um só lugar.
             </p>
           </div>
@@ -94,23 +94,23 @@ export default function Login() {
               { icon: BarChart3, label: 'Relatórios e análises em tempo real' },
             ].map(({ icon: Icon, label }) => (
               <div key={label} className="flex items-center gap-3">
-                <div className="h-8 w-8 rounded-lg bg-white/10 flex items-center justify-center shrink-0">
-                  <Icon className="h-4 w-4 text-white/80" />
+                <div className="h-8 w-8 rounded-lg bg-primary/15 flex items-center justify-center shrink-0">
+                  <Icon className="h-4 w-4 text-primary" />
                 </div>
-                <span className="text-white/70 text-sm">{label}</span>
+                <span className="text-muted-foreground text-sm">{label}</span>
               </div>
             ))}
           </div>
         </div>
 
         {/* Rodapé */}
-        <p className="relative z-10 text-white/30 text-xs">
+        <p className="relative z-10 text-muted-foreground/50 text-xs">
           © {new Date().getFullYear()} MC Terraplenagem — Todos os direitos reservados
         </p>
       </div>
 
       {/* Lado direito — Formulário */}
-      <div className="flex-1 flex items-center justify-center bg-background p-6">
+      <div className="flex-1 flex items-center justify-center p-6">
         <div className="w-full max-w-sm space-y-8">
           {/* Logo mobile */}
           <div className="lg:hidden flex justify-center">
@@ -129,16 +129,16 @@ export default function Login() {
 
           {/* Tabs de login/cadastro */}
           <Tabs defaultValue="login" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-2 h-10 bg-muted/60 p-1 rounded-lg">
+            <TabsList className="grid w-full grid-cols-2 h-10 bg-secondary p-1 rounded-lg">
               <TabsTrigger
                 value="login"
-                className="rounded-md text-sm font-medium data-[state=active]:bg-card data-[state=active]:shadow-sm data-[state=active]:text-foreground"
+                className="rounded-md text-sm font-medium data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm"
               >
                 Entrar
               </TabsTrigger>
               <TabsTrigger
                 value="register"
-                className="rounded-md text-sm font-medium data-[state=active]:bg-card data-[state=active]:shadow-sm data-[state=active]:text-foreground"
+                className="rounded-md text-sm font-medium data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm"
               >
                 Cadastrar
               </TabsTrigger>
@@ -156,7 +156,7 @@ export default function Login() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
-                    className="h-11 border-border/70 focus-visible:ring-primary/50 focus-visible:border-primary/50 bg-card"
+                    className="h-11 bg-secondary border-border/60 focus-visible:ring-primary/50 focus-visible:border-primary/50"
                   />
                 </div>
                 <div className="space-y-1.5">
@@ -168,15 +168,12 @@ export default function Login() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
-                    className="h-11 border-border/70 focus-visible:ring-primary/50 focus-visible:border-primary/50 bg-card"
+                    className="h-11 bg-secondary border-border/60 focus-visible:ring-primary/50 focus-visible:border-primary/50"
                   />
                 </div>
                 <Button
                   type="submit"
-                  className="w-full h-11 font-semibold text-sm rounded-lg shadow-sm"
-                  style={{
-                    background: 'linear-gradient(135deg, hsl(221 73% 48%), hsl(221 73% 38%))',
-                  }}
+                  className="w-full h-11 font-semibold text-sm rounded-lg"
                   disabled={isLoading}
                 >
                   {isLoading ? (
@@ -199,7 +196,7 @@ export default function Login() {
                     value={nome}
                     onChange={(e) => setNome(e.target.value)}
                     required
-                    className="h-11 border-border/70 focus-visible:ring-primary/50 focus-visible:border-primary/50 bg-card"
+                    className="h-11 bg-secondary border-border/60 focus-visible:ring-primary/50 focus-visible:border-primary/50"
                   />
                 </div>
                 <div className="space-y-1.5">
@@ -211,7 +208,7 @@ export default function Login() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
-                    className="h-11 border-border/70 focus-visible:ring-primary/50 focus-visible:border-primary/50 bg-card"
+                    className="h-11 bg-secondary border-border/60 focus-visible:ring-primary/50 focus-visible:border-primary/50"
                   />
                 </div>
                 <div className="space-y-1.5">
@@ -224,15 +221,12 @@ export default function Login() {
                     onChange={(e) => setPassword(e.target.value)}
                     required
                     minLength={6}
-                    className="h-11 border-border/70 focus-visible:ring-primary/50 focus-visible:border-primary/50 bg-card"
+                    className="h-11 bg-secondary border-border/60 focus-visible:ring-primary/50 focus-visible:border-primary/50"
                   />
                 </div>
                 <Button
                   type="submit"
-                  className="w-full h-11 font-semibold text-sm rounded-lg shadow-sm"
-                  style={{
-                    background: 'linear-gradient(135deg, hsl(221 73% 48%), hsl(221 73% 38%))',
-                  }}
+                  className="w-full h-11 font-semibold text-sm rounded-lg"
                   disabled={isLoading}
                 >
                   {isLoading ? (

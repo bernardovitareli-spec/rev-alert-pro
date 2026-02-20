@@ -12,11 +12,11 @@ export function AppLayout({ children, title }: AppLayoutProps) {
     <SidebarProvider>
       <AppSidebar />
       <SidebarInset>
-        <header className="flex h-16 shrink-0 items-center gap-3 border-b border-border/60 bg-card shadow-sm px-6">
+        <header className="flex h-16 shrink-0 items-center gap-3 border-b border-border/40 bg-card/80 backdrop-blur-sm px-6">
           <SidebarTrigger className="-ml-2 text-muted-foreground hover:text-foreground transition-colors" />
           {title && (
             <div className="flex items-center gap-2">
-              <div className="h-5 w-0.5 rounded-full bg-primary/30" />
+              <div className="h-5 w-0.5 rounded-full bg-primary/40" />
               <h1 className="text-lg font-bold text-foreground tracking-tight">{title}</h1>
             </div>
           )}
