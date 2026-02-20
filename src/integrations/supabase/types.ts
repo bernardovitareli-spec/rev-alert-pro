@@ -354,6 +354,8 @@ export type Database = {
       }
       veiculos: {
         Row: {
+          art_url: string | null
+          art_validade: string | null
           contrato: string | null
           contrato_id: string | null
           created_at: string
@@ -373,6 +375,8 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          art_url?: string | null
+          art_validade?: string | null
           contrato?: string | null
           contrato_id?: string | null
           created_at?: string
@@ -392,6 +396,8 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          art_url?: string | null
+          art_validade?: string | null
           contrato?: string | null
           contrato_id?: string | null
           created_at?: string

@@ -4,7 +4,7 @@ export type RevisionStatus = 'critical' | 'warning' | 'ok';
 
 export type ExecutionStatus = 'nao_realizada' | 'em_servico' | 'realizada';
 
-export type TipoDocumentoVeiculo = 'crlv' | 'tacografo' | 'documento';
+export type TipoDocumentoVeiculo = 'crlv' | 'tacografo' | 'documento' | 'art';
 
 export interface Oficina {
   id: string;
@@ -44,6 +44,8 @@ export interface Veiculo {
   documento_url: string | null;
   crlv_validade: string | null;
   tacografo_validade: string | null;
+  art_url: string | null;
+  art_validade: string | null;
   created_at: string;
   updated_at: string;
   empresa?: Empresa | null;
@@ -202,6 +204,7 @@ export interface VeiculoDocumentosStatus {
   empresaNome: string | null;
   crlv: DocumentoStatusInfo;
   tacografo: DocumentoStatusInfo;
+  art: DocumentoStatusInfo;
 }
 
 // ===== ANALYTICS E KPIs =====

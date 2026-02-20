@@ -6,7 +6,7 @@ import { toast } from 'sonner';
 
 interface DocumentoVeiculoUploadProps {
   veiculoId: string;
-  tipoDocumento: 'crlv' | 'tacografo' | 'documento';
+  tipoDocumento: 'crlv' | 'tacografo' | 'documento' | 'art';
   label: string;
   value: string | null;
   onChange: (url: string | null) => Promise<void>;

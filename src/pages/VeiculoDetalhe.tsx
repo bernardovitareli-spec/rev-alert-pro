@@ -282,6 +282,7 @@ export default function VeiculoDetalhe() {
       if (tipoDocumento === 'crlv') updateData.crlv_url = url;
       if (tipoDocumento === 'tacografo') updateData.tacografo_url = url;
       if (tipoDocumento === 'documento') updateData.documento_url = url;
+      if (tipoDocumento === 'art') updateData.art_url = url;
 
       await updateVeiculo.mutateAsync({
         id: veiculo.id,
@@ -292,13 +293,14 @@ export default function VeiculoDetalhe() {
     }
   };
 
-  const handleValidadeChange = async (tipo: 'crlv' | 'tacografo', validade: string | null) => {
+  const handleValidadeChange = async (tipo: 'crlv' | 'tacografo' | 'art', validade: string | null) => {
     if (!veiculo) return;
 
     try {
       const updateData: Record<string, string | null> = {};
       if (tipo === 'crlv') updateData.crlv_validade = validade;
       if (tipo === 'tacografo') updateData.tacografo_validade = validade;
+      if (tipo === 'art') updateData.art_validade = validade;
 
       await updateVeiculo.mutateAsync({
         id: veiculo.id,
@@ -693,6 +695,32 @@ export default function VeiculoDetalhe() {
                     onChange={(url) => handleDocumentoChange('documento', url)}
                     disabled={updateVeiculo.isPending}
                   />
+                </CardContent>
+              </Card>
+
+              {/* ART */}
+              <Card className="border-2">
+                <CardContent className="pt-4">
+                  <div className="flex items-center gap-2 mb-3">
+                    <FileSignature className="h-5 w-5 text-primary" />
+                    <span className="font-medium">ART</span>
+                  </div>
+                  <DocumentoVeiculoUpload
+                    veiculoId={veiculo.id}
+                    tipoDocumento="art"
+                    label="ART"
+                    value={(veiculo as any).art_url || null}
+                    onChange={(url) => handleDocumentoChange('art', url)}
+                    disabled={updateVeiculo.isPending}
+                  />
+                  <div className="mt-3">
+                    <label className="text-xs text-muted-foreground mb-1 block">Validade</label>
+                    <ValidadeDocumentoInput
+                      value={(veiculo as any).art_validade || null}
+                      onChange={(v) => handleValidadeChange('art', v)}
+                      disabled={updateVeiculo.isPending}
+                    />
+                  </div>
                 </CardContent>
               </Card>
             </div>
