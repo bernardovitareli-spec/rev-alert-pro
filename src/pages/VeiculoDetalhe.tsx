@@ -683,7 +683,7 @@ export default function VeiculoDetalhe() {
                 <CardContent className="pt-4">
                   <div className="flex items-center gap-2 mb-3">
                     <FileText className="h-5 w-5 text-primary" />
-                    <span className="font-medium">Documento do Veículo</span>
+                    <span className="font-medium">Nota Fiscal</span>
                   </div>
                   <DocumentoVeiculoUpload
                     veiculoId={veiculo.id}
