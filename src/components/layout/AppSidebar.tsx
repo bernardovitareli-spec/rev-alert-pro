@@ -103,7 +103,7 @@ export function AppSidebar() {
   return (
     <Sidebar className="border-r border-sidebar-border">
       {/* Header com logo */}
-      <SidebarHeader className="border-b border-sidebar-border px-4 py-5">
+      <SidebarHeader className="border-b border-sidebar-border/50 px-4 py-5">
         <div className="flex flex-col items-center justify-center w-full gap-1">
           <img 
             src={logoMC} 
@@ -112,11 +112,11 @@ export function AppSidebar() {
             style={{ filter: 'brightness(1.05) contrast(1.05)' }}
           />
           <div className="flex items-center gap-1.5 mt-1">
-            <div className="h-1.5 w-1.5 rounded-full bg-sidebar-primary opacity-80" />
-            <span className="text-xs font-medium text-sidebar-foreground/60 tracking-widest uppercase">
+            <div className="h-1.5 w-1.5 rounded-full bg-primary opacity-80" />
+            <span className="text-xs font-medium text-sidebar-foreground/50 tracking-widest uppercase">
               Controle de Revisões
             </span>
-            <div className="h-1.5 w-1.5 rounded-full bg-sidebar-primary opacity-80" />
+            <div className="h-1.5 w-1.5 rounded-full bg-primary opacity-80" />
           </div>
         </div>
       </SidebarHeader>
@@ -124,7 +124,7 @@ export function AppSidebar() {
       <SidebarContent className="px-2 py-3">
         {/* Menu Principal */}
         <SidebarGroup>
-          <SidebarGroupLabel className="text-[10px] font-semibold uppercase tracking-widest text-sidebar-foreground/40 px-3 mb-1">
+          <SidebarGroupLabel className="text-[10px] font-semibold uppercase tracking-widest text-sidebar-foreground/35 px-3 mb-1">
             Menu Principal
           </SidebarGroupLabel>
           <SidebarGroupContent>
@@ -138,10 +138,10 @@ export function AppSidebar() {
                         isActive={isActive(item.path)}
                         className={`
                           relative h-10 rounded-lg transition-all duration-200
-                          text-sidebar-foreground/70 hover:text-sidebar-foreground
+                          text-sidebar-foreground/60 hover:text-sidebar-foreground
                           hover:bg-sidebar-accent/60
-                          data-[active=true]:bg-sidebar-primary/20
-                          data-[active=true]:text-sidebar-foreground
+                          data-[active=true]:bg-primary/12
+                          data-[active=true]:text-primary
                           data-[active=true]:font-medium
                         `}
                       >
@@ -158,7 +158,7 @@ export function AppSidebar() {
                               />
                             )}
                             {isActive(item.path) && (
-                              <ChevronRight className="h-3 w-3 text-sidebar-primary opacity-70" />
+                              <ChevronRight className="h-3 w-3 text-primary opacity-70" />
                             )}
                           </div>
                         </Link>
@@ -171,7 +171,7 @@ export function AppSidebar() {
 
                   {/* Active indicator bar */}
                   {isActive(item.path) && (
-                    <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-6 bg-sidebar-primary rounded-r-full" />
+                    <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-6 bg-primary rounded-r-full" />
                   )}
                 </SidebarMenuItem>
               ))}
@@ -180,11 +180,11 @@ export function AppSidebar() {
         </SidebarGroup>
 
         {/* Divisor */}
-        <div className="mx-3 my-3 border-t border-sidebar-border/50" />
+        <div className="mx-3 my-3 border-t border-sidebar-border/40" />
 
         {/* Configurações */}
         <SidebarGroup>
-          <SidebarGroupLabel className="text-[10px] font-semibold uppercase tracking-widest text-sidebar-foreground/40 px-3 mb-1">
+          <SidebarGroupLabel className="text-[10px] font-semibold uppercase tracking-widest text-sidebar-foreground/35 px-3 mb-1">
             Configurações
           </SidebarGroupLabel>
           <SidebarGroupContent>
@@ -198,10 +198,10 @@ export function AppSidebar() {
                         isActive={isActive(item.path)}
                         className={`
                           relative h-9 rounded-lg transition-all duration-200
-                          text-sidebar-foreground/60 hover:text-sidebar-foreground
+                          text-sidebar-foreground/50 hover:text-sidebar-foreground
                           hover:bg-sidebar-accent/60
-                          data-[active=true]:bg-sidebar-primary/20
-                          data-[active=true]:text-sidebar-foreground
+                          data-[active=true]:bg-primary/12
+                          data-[active=true]:text-primary
                           data-[active=true]:font-medium
                         `}
                       >
@@ -223,24 +223,24 @@ export function AppSidebar() {
       </SidebarContent>
 
       {/* Footer */}
-      <SidebarFooter className="border-t border-sidebar-border/50 px-3 py-4">
+      <SidebarFooter className="border-t border-sidebar-border/40 px-3 py-4">
         <div className="flex flex-col gap-2">
           <div className="flex items-center gap-2 px-2">
-            <div className="h-7 w-7 rounded-full bg-sidebar-primary/30 flex items-center justify-center shrink-0">
-              <span className="text-xs font-semibold text-sidebar-foreground">
+            <div className="h-7 w-7 rounded-full bg-primary/20 flex items-center justify-center shrink-0">
+              <span className="text-xs font-semibold text-primary">
                 {user?.email?.[0]?.toUpperCase() ?? 'U'}
               </span>
             </div>
             <div className="min-w-0">
-              <p className="text-xs text-sidebar-foreground/50 uppercase tracking-wider">Usuário</p>
-              <p className="text-xs text-sidebar-foreground/80 truncate">{user?.email}</p>
+              <p className="text-xs text-sidebar-foreground/40 uppercase tracking-wider">Usuário</p>
+              <p className="text-xs text-sidebar-foreground/70 truncate">{user?.email}</p>
             </div>
           </div>
           <Button 
             variant="ghost" 
             size="sm" 
             onClick={signOut}
-            className="justify-start text-sidebar-foreground/50 hover:text-sidebar-foreground hover:bg-sidebar-accent/60 transition-all duration-200 h-9 px-3 rounded-lg"
+            className="justify-start text-sidebar-foreground/40 hover:text-sidebar-foreground hover:bg-sidebar-accent/60 transition-all duration-200 h-9 px-3 rounded-lg"
           >
             <LogOut className="h-4 w-4 mr-2" />
             <span className="text-sm">Sair</span>
