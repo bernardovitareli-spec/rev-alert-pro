@@ -236,6 +236,7 @@ export function useDocumentosVencidos() {
           placa_serie,
           crlv_validade,
           tacografo_validade,
+          art_validade,
           empresa:empresas(nome)
         `);
 
@@ -247,15 +248,16 @@ export function useDocumentosVencidos() {
         empresaNome: v.empresa?.nome || null,
         crlv: calcularStatusDocumento(v.crlv_validade),
         tacografo: calcularStatusDocumento(v.tacografo_validade),
+        art: calcularStatusDocumento(v.art_validade),
       }));
 
       // Separate vencidos and atenção
       const vencidos = documentosStatus.filter(d => 
-        d.crlv.status === 'vencido' || d.tacografo.status === 'vencido'
+        d.crlv.status === 'vencido' || d.tacografo.status === 'vencido' || d.art.status === 'vencido'
       );
       const atencao = documentosStatus.filter(d => 
-        (d.crlv.status === 'atencao' || d.tacografo.status === 'atencao') &&
-        d.crlv.status !== 'vencido' && d.tacografo.status !== 'vencido'
+        (d.crlv.status === 'atencao' || d.tacografo.status === 'atencao' || d.art.status === 'atencao') &&
+        d.crlv.status !== 'vencido' && d.tacografo.status !== 'vencido' && d.art.status !== 'vencido'
       );
 
       return {
