@@ -98,6 +98,43 @@ export function VehicleCard({ veiculo, showDeliveryInfo = false, insightFilter }
             </div>
           )}
 
+          {/* Insight contextual info */}
+          {insightFilter === 'km_desatualizado' && (
+            <div className="flex items-center gap-2 text-sm bg-status-warning/10 rounded-md p-2">
+              <CalendarClock className="h-4 w-4 text-status-warning shrink-0" />
+              <span className="font-medium text-status-warning">
+                {veiculo.ultima_atualizacao 
+                  ? `${differenceInDays(hoje, parseISO(veiculo.ultima_atualizacao))} dias sem atualização`
+                  : 'Nunca atualizado'}
+              </span>
+            </div>
+          )}
+
+          {insightFilter === 'retorno_atrasado' && veiculo.retorno_patio && (
+            <div className="flex items-center gap-2 text-sm bg-status-critical/10 rounded-md p-2">
+              <AlertTriangle className="h-4 w-4 text-status-critical shrink-0" />
+              <span className="font-medium text-status-critical">
+                {differenceInDays(hoje, parseISO(veiculo.retorno_patio))} dias de atraso no retorno
+              </span>
+            </div>
+          )}
+
+          {insightFilter === 'entregas_atrasadas' && (() => {
+            const atrasadas = veiculo.revisoes.filter(r => 
+              r.status_execucao === 'em_servico' && r.previsao_entrega && parseISO(r.previsao_entrega) < hoje
+            );
+            if (atrasadas.length === 0) return null;
+            const maisDias = Math.max(...atrasadas.map(r => differenceInDays(hoje, parseISO(r.previsao_entrega!))));
+            return (
+              <div className="flex items-center gap-2 text-sm bg-status-critical/10 rounded-md p-2">
+                <Clock className="h-4 w-4 text-status-critical shrink-0" />
+                <span className="font-medium text-status-critical">
+                  {atrasadas.length} entrega{atrasadas.length > 1 ? 's' : ''} atrasada{atrasadas.length > 1 ? 's' : ''} ({maisDias} dias)
+                </span>
+              </div>
+            );
+          })()}
+
           {/* Delivery info when in service filter is active */}
           {showDeliveryInfo && emServicoRevisoes.length > 0 && (
             <div className="flex flex-col gap-1.5 text-sm bg-purple-500/10 rounded-md p-2">
