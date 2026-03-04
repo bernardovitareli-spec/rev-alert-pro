@@ -183,7 +183,7 @@ export function useFleetInsights() {
           title: 'Entregas Atrasadas',
           description: `${atrasadas.length} revisões passaram da previsão de entrega`,
           value: atrasadas.length,
-          action: { label: 'Ver atrasadas', route: '/veiculos?statusExecucao=em_servico' }
+          action: { label: 'Ver atrasadas', route: '/veiculos?insight=entregas_atrasadas' }
         });
       }
 
@@ -206,7 +206,7 @@ export function useFleetInsights() {
           title: 'KM/Hora Desatualizado',
           description: `${veiculosDesatualizados.length} veículos sem atualização há mais de ${diasLimite} dias`,
           value: `${percentual.toFixed(0)}% da frota`,
-          action: { label: 'Atualizar veículos', route: '/veiculos' }
+          action: { label: 'Atualizar veículos', route: '/veiculos?insight=km_desatualizado' }
         });
       }
 
@@ -224,7 +224,7 @@ export function useFleetInsights() {
           title: 'Retorno ao Pátio Atrasado',
           description: `${veiculosRetornoAtrasado.length} veículos deveriam ter retornado e não voltaram`,
           value: `${veiculosRetornoAtrasado.length} veículos`,
-          action: { label: 'Ver veículos', route: '/veiculos' }
+          action: { label: 'Ver veículos', route: '/veiculos?insight=retorno_atrasado' }
         });
       }
 

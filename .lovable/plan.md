@@ -1,47 +1,35 @@
 
 
-## Filtrar Veículos por Insight com Dias sem Atualização
+## Adicionar Documento ART ao Controle de Veículos
 
-### Problema
-Ao clicar num insight (ex: "KM/Hora Desatualizado"), o link leva para `/veiculos` mas não filtra os veículos relevantes. O usuário precisa ver apenas os veículos que atendem à condição do insight, com a informação de quantos dias cada um está sem atualização.
+### O que será feito
 
-### Solução
+Adicionar um novo tipo de documento chamado **ART** (Anotação de Responsabilidade Técnica) na seção "Documentos do Veículo", com:
+- Upload/anexo do documento ART
+- Controle de validade com indicador de status (vencido, atenção, ok)
+- Mesma experiência visual dos documentos CRLV e Tacógrafo
 
-#### 1. Adicionar filtro `insightFilter` via query param
-O insight "KM/Hora Desatualizado" já aponta para `/veiculos` — vamos usar um query param `insight=km_desatualizado` para ativar o filtro especial.
+### Alterações necessárias
 
-Atualizar a rota do insight em `useFleetInsights.tsx`:
+#### 1. Banco de dados -- Migração SQL
+Adicionar duas novas colunas na tabela `veiculos`:
+- `art_url` (text, nullable) -- para armazenar o link do documento anexado
+- `art_validade` (date, nullable) -- para controlar a validade do ART
+
+#### 2. `src/types/fleet.ts` -- Tipo do documento
+Incluir `'art'` no tipo `TipoDocumentoVeiculo`:
 ```
-route: '/veiculos?insight=km_desatualizado'
-```
-
-Fazer o mesmo para `retorno_atrasado`:
-```
-route: '/veiculos?insight=retorno_atrasado'
-```
-
-#### 2. `src/types/fleet.ts` — Estender `FilterOptions`
-Adicionar campo opcional `insightFilter` ao tipo `FilterOptions`:
-```ts
-insightFilter?: 'km_desatualizado' | 'retorno_atrasado' | 'entregas_atrasadas' | null;
+'crlv' | 'tacografo' | 'documento' | 'art'
 ```
 
-#### 3. `src/components/vehicles/VehiclesList.tsx` — Aplicar filtro de insight
-- Ler `searchParams.get('insight')` e inicializar o filtro
-- Na lógica de `filteredVehicles`, quando `insightFilter === 'km_desatualizado'`, filtrar veículos cuja `ultima_atualizacao` seja nula ou anterior a 30 dias
-- Ordenar os resultados por dias sem atualização (mais antigos primeiro)
+Incluir `art_url`, `art_validade` na interface `Veiculo`.
 
-#### 4. `src/components/vehicles/VehicleCard.tsx` — Mostrar dias sem atualização
-- Quando o filtro de insight `km_desatualizado` estiver ativo, exibir um badge/info no card mostrando "X dias sem atualização"
-- Calcular usando `differenceInDays(hoje, ultima_atualizacao)`
+#### 3. `src/pages/VeiculoDetalhe.tsx` -- Lógica e UI
 
-#### 5. Aplicar mesmo padrão para outros insights
-- `retorno_atrasado`: filtrar veículos com `retorno_patio` no passado, mostrar dias de atraso
-- `entregas_atrasadas`: filtrar revisões em serviço com previsão de entrega vencida
+- **handleDocumentoChange**: Adicionar mapeamento `art` -> `art_url`
+- **handleValidadeChange**: Adicionar mapeamento `art` -> `art_validade`
+- **UI**: Novo card ART na grid de documentos com ícone, upload e controle de validade (mesmo padrão do CRLV e Tacógrafo)
 
-### Arquivos alterados
-- `src/hooks/useFleetInsights.tsx` — ajustar rotas dos insights
-- `src/types/fleet.ts` — adicionar `insightFilter` ao `FilterOptions`
-- `src/components/vehicles/VehiclesList.tsx` — lógica de filtragem por insight
-- `src/components/vehicles/VehicleCard.tsx` — exibir dias sem atualização contextualmente
+### Sem impacto em outras funcionalidades
 
+Apenas adiciona um novo documento opcional. Nenhuma funcionalidade existente será alterada.

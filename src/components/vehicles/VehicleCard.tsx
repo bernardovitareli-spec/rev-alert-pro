@@ -1,19 +1,22 @@
-import { VeiculoComRevisoes, ExecutionStatus } from '@/types/fleet';
+import { VeiculoComRevisoes, ExecutionStatus, InsightFilter } from '@/types/fleet';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { formatarKmOuHora, getStatusLabel } from '@/lib/revisionCalculations';
 import { getPrevisaoLabel, getPrevisaoColor } from '@/hooks/useDeliveryStats';
 import { cn } from '@/lib/utils';
-import { Truck, ChevronRight, AlertTriangle, Clock, CheckCircle2, Wrench } from 'lucide-react';
+import { Truck, ChevronRight, AlertTriangle, Clock, CheckCircle2, Wrench, CalendarClock } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { differenceInDays, parseISO } from 'date-fns';
 
 interface VehicleCardProps {
   veiculo: VeiculoComRevisoes;
   showDeliveryInfo?: boolean;
+  insightFilter?: InsightFilter;
 }
 
-export function VehicleCard({ veiculo, showDeliveryInfo = false }: VehicleCardProps) {
+export function VehicleCard({ veiculo, showDeliveryInfo = false, insightFilter }: VehicleCardProps) {
   const navigate = useNavigate();
+  const hoje = new Date();
 
   // Get the earliest delivery date from em_servico revisions
   const emServicoRevisoes = veiculo.revisoes.filter(r => r.status_execucao === 'em_servico');
@@ -94,6 +97,43 @@ export function VehicleCard({ veiculo, showDeliveryInfo = false }: VehicleCardPr
               <span className="ml-2 font-medium">{veiculo.empresa.nome}</span>
             </div>
           )}
+
+          {/* Insight contextual info */}
+          {insightFilter === 'km_desatualizado' && (
+            <div className="flex items-center gap-2 text-sm bg-status-warning/10 rounded-md p-2">
+              <CalendarClock className="h-4 w-4 text-status-warning shrink-0" />
+              <span className="font-medium text-status-warning">
+                {veiculo.ultima_atualizacao 
+                  ? `${differenceInDays(hoje, parseISO(veiculo.ultima_atualizacao))} dias sem atualização`
+                  : 'Nunca atualizado'}
+              </span>
+            </div>
+          )}
+
+          {insightFilter === 'retorno_atrasado' && veiculo.retorno_patio && (
+            <div className="flex items-center gap-2 text-sm bg-status-critical/10 rounded-md p-2">
+              <AlertTriangle className="h-4 w-4 text-status-critical shrink-0" />
+              <span className="font-medium text-status-critical">
+                {differenceInDays(hoje, parseISO(veiculo.retorno_patio))} dias de atraso no retorno
+              </span>
+            </div>
+          )}
+
+          {insightFilter === 'entregas_atrasadas' && (() => {
+            const atrasadas = veiculo.revisoes.filter(r => 
+              r.status_execucao === 'em_servico' && r.previsao_entrega && parseISO(r.previsao_entrega) < hoje
+            );
+            if (atrasadas.length === 0) return null;
+            const maisDias = Math.max(...atrasadas.map(r => differenceInDays(hoje, parseISO(r.previsao_entrega!))));
+            return (
+              <div className="flex items-center gap-2 text-sm bg-status-critical/10 rounded-md p-2">
+                <Clock className="h-4 w-4 text-status-critical shrink-0" />
+                <span className="font-medium text-status-critical">
+                  {atrasadas.length} entrega{atrasadas.length > 1 ? 's' : ''} atrasada{atrasadas.length > 1 ? 's' : ''} ({maisDias} dias)
+                </span>
+              </div>
+            );
+          })()}
 
           {/* Delivery info when in service filter is active */}
           {showDeliveryInfo && emServicoRevisoes.length > 0 && (
