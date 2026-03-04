@@ -117,6 +117,8 @@ export interface DashboardStats {
   revisoesOk: number;
 }
 
+export type InsightFilter = 'km_desatualizado' | 'retorno_atrasado' | 'entregas_atrasadas' | null;
+
 export interface FilterOptions {
   search: string;
   status: RevisionStatus | 'all';
@@ -124,6 +126,7 @@ export interface FilterOptions {
   empresaId: string | 'all';
   tipoRevisaoId: string | 'all';
   periodo: 'hoje' | 'amanha' | 'semana' | 'proxima_semana' | 'mes' | 'proximo_mes' | 'all';
+  insightFilter?: InsightFilter;
 }
 
 export type PeriodType = 'vencidas' | 'hoje' | 'amanha' | 'essaSemana' | 'proximaSemana' | 'esseMes' | 'emServico';
