@@ -2,15 +2,26 @@ import { useState, useMemo } from 'react';
 import { useVeiculosComRevisoes } from '@/hooks/useFleetData';
 import { VehicleCard } from './VehicleCard';
 import { VehicleFilters } from './VehicleFilters';
-import { FilterOptions, VeiculoComRevisoes } from '@/types/fleet';
+import { FilterOptions, InsightFilter, VeiculoComRevisoes } from '@/types/fleet';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { useSearchParams } from 'react-router-dom';
+import { differenceInDays, parseISO } from 'date-fns';
+import { X } from 'lucide-react';
+
+const INSIGHT_LABELS: Record<string, string> = {
+  km_desatualizado: 'KM/Hora Desatualizado (sem atualização há +30 dias)',
+  retorno_atrasado: 'Retorno ao Pátio Atrasado',
+  entregas_atrasadas: 'Entregas Atrasadas',
+};
 
 export function VehiclesList() {
   const { data: veiculos, isLoading } = useVeiculosComRevisoes();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   
+  const insightParam = searchParams.get('insight') as InsightFilter;
+
   const [filters, setFilters] = useState<FilterOptions>(() => ({
     search: '',
     status: (searchParams.get('status') as any) || 'all',
@@ -18,12 +29,16 @@ export function VehiclesList() {
     empresaId: 'all',
     tipoRevisaoId: 'all',
     periodo: 'all',
+    insightFilter: insightParam || null,
   }));
+
+  const hoje = new Date();
+  const diasLimite = 30;
 
   const filteredVehicles = useMemo(() => {
     if (!veiculos) return [];
 
-    return veiculos.filter((veiculo: VeiculoComRevisoes) => {
+    let result = veiculos.filter((veiculo: VeiculoComRevisoes) => {
       // Search filter
       if (filters.search) {
         const searchLower = filters.search.toLowerCase();
@@ -58,9 +73,52 @@ export function VehiclesList() {
         if (!hasStatusExecucao) return false;
       }
 
+      // Insight filters
+      if (filters.insightFilter === 'km_desatualizado') {
+        if (!veiculo.ultima_atualizacao) return true;
+        const dataLimite = new Date();
+        dataLimite.setDate(dataLimite.getDate() - diasLimite);
+        return parseISO(veiculo.ultima_atualizacao) < dataLimite;
+      }
+
+      if (filters.insightFilter === 'retorno_atrasado') {
+        if (!veiculo.retorno_patio) return false;
+        return parseISO(veiculo.retorno_patio) < hoje;
+      }
+
+      if (filters.insightFilter === 'entregas_atrasadas') {
+        return veiculo.revisoes.some(r => {
+          if (r.status_execucao !== 'em_servico' || !r.previsao_entrega) return false;
+          return parseISO(r.previsao_entrega) < hoje;
+        });
+      }
+
       return true;
     });
-  }, [veiculos, filters]);
+
+    // Sort by days (most outdated first) for insight filters
+    if (filters.insightFilter === 'km_desatualizado') {
+      result.sort((a, b) => {
+        const daysA = a.ultima_atualizacao ? differenceInDays(hoje, parseISO(a.ultima_atualizacao)) : 9999;
+        const daysB = b.ultima_atualizacao ? differenceInDays(hoje, parseISO(b.ultima_atualizacao)) : 9999;
+        return daysB - daysA;
+      });
+    } else if (filters.insightFilter === 'retorno_atrasado') {
+      result.sort((a, b) => {
+        const daysA = a.retorno_patio ? differenceInDays(hoje, parseISO(a.retorno_patio)) : 0;
+        const daysB = b.retorno_patio ? differenceInDays(hoje, parseISO(b.retorno_patio)) : 0;
+        return daysB - daysA;
+      });
+    }
+
+    return result;
+  }, [veiculos, filters, hoje]);
+
+  const clearInsightFilter = () => {
+    setFilters(prev => ({ ...prev, insightFilter: null }));
+    searchParams.delete('insight');
+    setSearchParams(searchParams);
+  };
 
   if (isLoading) {
     return (
@@ -81,6 +139,21 @@ export function VehiclesList() {
 
   return (
     <div className="space-y-6">
+      {filters.insightFilter && (
+        <div className="flex items-center gap-2 rounded-lg border border-primary/20 bg-primary/5 px-4 py-3">
+          <span className="text-sm font-medium text-primary">
+            Filtro ativo: {INSIGHT_LABELS[filters.insightFilter] || filters.insightFilter}
+          </span>
+          <button
+            onClick={clearInsightFilter}
+            className="ml-auto flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <X className="h-3.5 w-3.5" />
+            Limpar filtro
+          </button>
+        </div>
+      )}
+
       <VehicleFilters filters={filters} onFiltersChange={setFilters} />
 
       {filteredVehicles.length === 0 ? (
@@ -101,6 +174,7 @@ export function VehiclesList() {
                 key={veiculo.id} 
                 veiculo={veiculo} 
                 showDeliveryInfo={filters.statusExecucao === 'em_servico'}
+                insightFilter={filters.insightFilter}
               />
             ))}
           </div>

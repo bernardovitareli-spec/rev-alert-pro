@@ -1,19 +1,22 @@
-import { VeiculoComRevisoes, ExecutionStatus } from '@/types/fleet';
+import { VeiculoComRevisoes, ExecutionStatus, InsightFilter } from '@/types/fleet';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { formatarKmOuHora, getStatusLabel } from '@/lib/revisionCalculations';
 import { getPrevisaoLabel, getPrevisaoColor } from '@/hooks/useDeliveryStats';
 import { cn } from '@/lib/utils';
-import { Truck, ChevronRight, AlertTriangle, Clock, CheckCircle2, Wrench } from 'lucide-react';
+import { Truck, ChevronRight, AlertTriangle, Clock, CheckCircle2, Wrench, CalendarClock } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { differenceInDays, parseISO } from 'date-fns';
 
 interface VehicleCardProps {
   veiculo: VeiculoComRevisoes;
   showDeliveryInfo?: boolean;
+  insightFilter?: InsightFilter;
 }
 
-export function VehicleCard({ veiculo, showDeliveryInfo = false }: VehicleCardProps) {
+export function VehicleCard({ veiculo, showDeliveryInfo = false, insightFilter }: VehicleCardProps) {
   const navigate = useNavigate();
+  const hoje = new Date();
 
   // Get the earliest delivery date from em_servico revisions
   const emServicoRevisoes = veiculo.revisoes.filter(r => r.status_execucao === 'em_servico');
