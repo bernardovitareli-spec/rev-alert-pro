@@ -11,6 +11,7 @@ import VeiculoDetalhe from "./pages/VeiculoDetalhe";
 import Importar from "./pages/Importar";
 import Calendario from "./pages/Calendario";
 import Relatorios from "./pages/Relatorios";
+import ControleEntradaSaida from "./pages/ControleEntradaSaida";
 import TiposRevisao from "./pages/TiposRevisao";
 import Empresas from "./pages/Empresas";
 import Oficinas from "./pages/Oficinas";
@@ -54,6 +55,7 @@ function AppRoutes() {
       <Route path="/veiculos" element={<ProtectedRoute><Veiculos /></ProtectedRoute>} />
       <Route path="/veiculos/:id" element={<ProtectedRoute><VeiculoDetalhe /></ProtectedRoute>} />
       <Route path="/calendario" element={<ProtectedRoute><Calendario /></ProtectedRoute>} />
+      <Route path="/controle-entrada-saida" element={<ProtectedRoute><ControleEntradaSaida /></ProtectedRoute>} />
       <Route path="/relatorios" element={<ProtectedRoute><Relatorios /></ProtectedRoute>} />
       <Route path="/importar" element={<ProtectedRoute><Importar /></ProtectedRoute>} />
       <Route path="/tipos-revisao" element={<ProtectedRoute><TiposRevisao /></ProtectedRoute>} />

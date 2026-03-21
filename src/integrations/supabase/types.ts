@@ -14,6 +14,38 @@ export type Database = {
   }
   public: {
     Tables: {
+      avarias_fotos: {
+        Row: {
+          created_at: string
+          descricao: string | null
+          foto_url: string
+          id: string
+          ordem_servico_id: string
+        }
+        Insert: {
+          created_at?: string
+          descricao?: string | null
+          foto_url: string
+          id?: string
+          ordem_servico_id: string
+        }
+        Update: {
+          created_at?: string
+          descricao?: string | null
+          foto_url?: string
+          id?: string
+          ordem_servico_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "avarias_fotos_ordem_servico_id_fkey"
+            columns: ["ordem_servico_id"]
+            isOneToOne: false
+            referencedRelation: "ordens_servico"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       contratos: {
         Row: {
           created_at: string
@@ -197,6 +229,96 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      ordens_servico: {
+        Row: {
+          avarias_resolvidas: boolean | null
+          created_at: string
+          data_entrada: string
+          data_saida: string | null
+          descricao_avarias: string | null
+          detalhamento: string | null
+          horimetro_entrada: number | null
+          horimetro_saida: number | null
+          id: string
+          km_entrada: number | null
+          km_saida: number | null
+          observacoes_saida: string | null
+          previsao_saida: string | null
+          status: Database["public"]["Enums"]["status_ordem_servico"]
+          subcategoria_corretiva:
+            | Database["public"]["Enums"]["subcategoria_corretiva"]
+            | null
+          tem_avarias: boolean
+          tipo_manutencao: Database["public"]["Enums"]["tipo_manutencao"]
+          tipo_revisao_id: string | null
+          updated_at: string
+          veiculo_id: string
+        }
+        Insert: {
+          avarias_resolvidas?: boolean | null
+          created_at?: string
+          data_entrada?: string
+          data_saida?: string | null
+          descricao_avarias?: string | null
+          detalhamento?: string | null
+          horimetro_entrada?: number | null
+          horimetro_saida?: number | null
+          id?: string
+          km_entrada?: number | null
+          km_saida?: number | null
+          observacoes_saida?: string | null
+          previsao_saida?: string | null
+          status?: Database["public"]["Enums"]["status_ordem_servico"]
+          subcategoria_corretiva?:
+            | Database["public"]["Enums"]["subcategoria_corretiva"]
+            | null
+          tem_avarias?: boolean
+          tipo_manutencao: Database["public"]["Enums"]["tipo_manutencao"]
+          tipo_revisao_id?: string | null
+          updated_at?: string
+          veiculo_id: string
+        }
+        Update: {
+          avarias_resolvidas?: boolean | null
+          created_at?: string
+          data_entrada?: string
+          data_saida?: string | null
+          descricao_avarias?: string | null
+          detalhamento?: string | null
+          horimetro_entrada?: number | null
+          horimetro_saida?: number | null
+          id?: string
+          km_entrada?: number | null
+          km_saida?: number | null
+          observacoes_saida?: string | null
+          previsao_saida?: string | null
+          status?: Database["public"]["Enums"]["status_ordem_servico"]
+          subcategoria_corretiva?:
+            | Database["public"]["Enums"]["subcategoria_corretiva"]
+            | null
+          tem_avarias?: boolean
+          tipo_manutencao?: Database["public"]["Enums"]["tipo_manutencao"]
+          tipo_revisao_id?: string | null
+          updated_at?: string
+          veiculo_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ordens_servico_tipo_revisao_id_fkey"
+            columns: ["tipo_revisao_id"]
+            isOneToOne: false
+            referencedRelation: "tipos_revisao"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ordens_servico_veiculo_id_fkey"
+            columns: ["veiculo_id"]
+            isOneToOne: false
+            referencedRelation: "veiculos"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
@@ -450,6 +572,14 @@ export type Database = {
       app_role: "admin" | "user"
       execution_status: "nao_realizada" | "em_servico" | "realizada"
       revision_unit: "Km" | "Hr"
+      status_ordem_servico: "aberta" | "em_andamento" | "concluida"
+      subcategoria_corretiva:
+        | "borracharia"
+        | "mecanica"
+        | "eletrica"
+        | "ar_condicionado"
+        | "outros"
+      tipo_manutencao: "preventiva" | "corretiva"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -580,6 +710,15 @@ export const Constants = {
       app_role: ["admin", "user"],
       execution_status: ["nao_realizada", "em_servico", "realizada"],
       revision_unit: ["Km", "Hr"],
+      status_ordem_servico: ["aberta", "em_andamento", "concluida"],
+      subcategoria_corretiva: [
+        "borracharia",
+        "mecanica",
+        "eletrica",
+        "ar_condicionado",
+        "outros",
+      ],
+      tipo_manutencao: ["preventiva", "corretiva"],
     },
   },
 } as const
