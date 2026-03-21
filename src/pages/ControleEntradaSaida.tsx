@@ -420,6 +420,14 @@ export default function ControleEntradaSaida() {
   const [filtroStatus, setFiltroStatus] = useState<StatusOrdemServico | 'all'>('all');
   const [filtroTipo, setFiltroTipo] = useState<'preventiva' | 'corretiva' | 'all'>('all');
 
+  const formatDateSafe = (dateValue?: string | null) => {
+    if (!dateValue) return '-';
+    const normalized = dateValue.includes('T') ? dateValue : `${dateValue}T12:00:00`;
+    const parsed = new Date(normalized);
+    if (Number.isNaN(parsed.getTime())) return '-';
+    return format(parsed, 'dd/MM/yyyy');
+  };
+
   const ordensFiltradas = ordens?.filter((o) => {
     if (filtroStatus !== 'all' && o.status !== filtroStatus) return false;
     if (filtroTipo !== 'all' && o.tipo_manutencao !== filtroTipo) return false;
@@ -484,8 +492,9 @@ export default function ControleEntradaSaida() {
                     <TableRow><TableCell colSpan={8} className="text-center py-8 text-muted-foreground">Nenhuma ordem de serviço encontrada</TableCell></TableRow>
                   )}
                   {ordensFiltradas?.map((o) => {
-                    const sc = STATUS_CONFIG[o.status as StatusOrdemServico];
+                    const sc = STATUS_CONFIG[o.status as StatusOrdemServico] ?? STATUS_CONFIG.aberta;
                     const Icon = sc.icon;
+
                     return (
                       <TableRow key={o.id}>
                         <TableCell className="font-medium">
@@ -498,18 +507,18 @@ export default function ControleEntradaSaida() {
                           </Badge>
                         </TableCell>
                         <TableCell className="text-sm">
-                          {o.tipo_manutencao === 'corretiva' 
-                            ? SUBCATEGORIAS.find(s => s.value === o.subcategoria_corretiva)?.label || '-'
+                          {o.tipo_manutencao === 'corretiva'
+                            ? SUBCATEGORIAS.find((s) => s.value === o.subcategoria_corretiva)?.label || '-'
                             : (o as any).tipo_revisao?.nome || '-'}
                         </TableCell>
                         <TableCell className="text-sm">
-                          {o.data_entrada ? format(new Date(o.data_entrada + 'T12:00:00'), 'dd/MM/yyyy') : '-'}
+                          {formatDateSafe(o.data_entrada)}
                         </TableCell>
                         <TableCell className="text-sm">
-                          {o.previsao_saida ? format(new Date(o.previsao_saida + 'T12:00:00'), 'dd/MM/yyyy') : '-'}
+                          {formatDateSafe(o.previsao_saida)}
                         </TableCell>
                         <TableCell>
-                        {o.tem_avarias ? (
+                          {o.tem_avarias ? (
                             <AvariasDetailDialog ordem={o} />
                           ) : (
                             <span className="text-xs text-muted-foreground">Não</span>
@@ -526,7 +535,7 @@ export default function ControleEntradaSaida() {
                           )}
                           {o.status === 'concluida' && o.data_saida && (
                             <span className="text-xs text-muted-foreground">
-                              Saiu em {format(new Date(o.data_saida + 'T12:00:00'), 'dd/MM/yyyy')}
+                              Saiu em {formatDateSafe(o.data_saida)}
                             </span>
                           )}
                         </TableCell>
