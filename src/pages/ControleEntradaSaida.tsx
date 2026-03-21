@@ -509,8 +509,8 @@ export default function ControleEntradaSaida() {
                           {o.previsao_saida ? format(new Date(o.previsao_saida + 'T12:00:00'), 'dd/MM/yyyy') : '-'}
                         </TableCell>
                         <TableCell>
-                          {o.tem_avarias ? (
-                            <Badge variant="destructive" className="text-xs">Sim</Badge>
+                        {o.tem_avarias ? (
+                            <AvariasDetailDialog ordem={o} />
                           ) : (
                             <span className="text-xs text-muted-foreground">Não</span>
                           )}
