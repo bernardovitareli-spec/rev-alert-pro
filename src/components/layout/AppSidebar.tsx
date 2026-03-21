@@ -63,6 +63,13 @@ export function AppSidebar() {
       badge: stats.revisoesHoje > 0 ? { count: stats.revisoesHoje, variant: 'warning' as const } : null,
     },
     { 
+      title: 'Controle Entrada/Saída', 
+      icon: ClipboardList, 
+      path: '/controle-entrada-saida',
+      tooltip: 'Registrar entrada e saída de equipamentos',
+      badge: null,
+    },
+    { 
       title: 'Relatórios', 
       icon: FileBarChart, 
       path: '/relatorios',

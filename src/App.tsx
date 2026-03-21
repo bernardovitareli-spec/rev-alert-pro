@@ -55,6 +55,7 @@ function AppRoutes() {
       <Route path="/veiculos" element={<ProtectedRoute><Veiculos /></ProtectedRoute>} />
       <Route path="/veiculos/:id" element={<ProtectedRoute><VeiculoDetalhe /></ProtectedRoute>} />
       <Route path="/calendario" element={<ProtectedRoute><Calendario /></ProtectedRoute>} />
+      <Route path="/controle-entrada-saida" element={<ProtectedRoute><ControleEntradaSaida /></ProtectedRoute>} />
       <Route path="/relatorios" element={<ProtectedRoute><Relatorios /></ProtectedRoute>} />
       <Route path="/importar" element={<ProtectedRoute><Importar /></ProtectedRoute>} />
       <Route path="/tipos-revisao" element={<ProtectedRoute><TiposRevisao /></ProtectedRoute>} />

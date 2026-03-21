@@ -265,3 +265,41 @@ export interface FiltrosRelatorio {
   oficinaId: string | 'all';
   tipoRevisaoId: string | 'all';
 }
+
+// ===== CONTROLE DE ENTRADA / SAÍDA =====
+export type TipoManutencao = 'preventiva' | 'corretiva';
+export type SubcategoriaCorretiva = 'borracharia' | 'mecanica' | 'eletrica' | 'ar_condicionado' | 'outros';
+export type StatusOrdemServico = 'aberta' | 'em_andamento' | 'concluida';
+
+export interface OrdemServico {
+  id: string;
+  veiculo_id: string;
+  tipo_manutencao: TipoManutencao;
+  subcategoria_corretiva: SubcategoriaCorretiva | null;
+  detalhamento: string | null;
+  tipo_revisao_id: string | null;
+  data_entrada: string;
+  km_entrada: number | null;
+  horimetro_entrada: number | null;
+  tem_avarias: boolean;
+  descricao_avarias: string | null;
+  previsao_saida: string | null;
+  data_saida: string | null;
+  km_saida: number | null;
+  horimetro_saida: number | null;
+  avarias_resolvidas: boolean | null;
+  observacoes_saida: string | null;
+  status: StatusOrdemServico;
+  created_at: string;
+  updated_at: string;
+  veiculo?: Veiculo;
+  tipo_revisao?: TipoRevisao;
+}
+
+export interface AvariaFoto {
+  id: string;
+  ordem_servico_id: string;
+  foto_url: string;
+  descricao: string | null;
+  created_at: string;
+}
