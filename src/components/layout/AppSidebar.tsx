@@ -4,6 +4,7 @@ import {
   Settings, 
   LogOut,
   Wrench,
+  ClipboardList,
   Building2,
   Calendar,
   FileBarChart,
