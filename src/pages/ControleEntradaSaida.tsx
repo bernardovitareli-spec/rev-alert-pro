@@ -21,8 +21,66 @@ import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
-import { Plus, CalendarIcon, ClipboardList, Camera, CheckCircle2, Clock, AlertTriangle } from 'lucide-react';
+import { Plus, CalendarIcon, ClipboardList, Camera, CheckCircle2, Clock, AlertTriangle, ImageIcon } from 'lucide-react';
 import { SubcategoriaCorretiva, StatusOrdemServico } from '@/types/fleet';
+
+function AvariasDetailDialog({ ordem }: { ordem: any }) {
+  const [open, setOpen] = useState(false);
+  const { data: fotos, isLoading } = useAvariasFotos(open ? ordem.id : null);
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Badge variant="destructive" className="text-xs cursor-pointer hover:opacity-80 transition-opacity">
+          Sim
+        </Badge>
+      </DialogTrigger>
+      <DialogContent className="max-w-lg">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <AlertTriangle className="h-5 w-5 text-destructive" />
+            Avarias — {ordem.veiculo?.placa_serie}
+          </DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4 py-2">
+          {ordem.descricao_avarias ? (
+            <div className="space-y-1">
+              <Label className="text-sm font-medium">Descrição das Avarias</Label>
+              <p className="text-sm text-muted-foreground bg-muted rounded-md p-3">{ordem.descricao_avarias}</p>
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground italic">Nenhuma descrição registrada.</p>
+          )}
+
+          <div className="space-y-2">
+            <Label className="text-sm font-medium flex items-center gap-1">
+              <ImageIcon className="h-4 w-4" /> Fotos
+            </Label>
+            {isLoading ? (
+              <div className="grid grid-cols-2 gap-2">
+                {[1, 2].map(i => <Skeleton key={i} className="h-32 w-full rounded-md" />)}
+              </div>
+            ) : fotos && fotos.length > 0 ? (
+              <div className="grid grid-cols-2 gap-2">
+                {fotos.map((f) => (
+                  <a key={f.id} href={f.foto_url} target="_blank" rel="noopener noreferrer" className="block">
+                    <img
+                      src={f.foto_url}
+                      alt={f.descricao || 'Foto da avaria'}
+                      className="w-full h-32 object-cover rounded-md border border-border hover:opacity-90 transition-opacity"
+                    />
+                  </a>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground italic">Nenhuma foto anexada.</p>
+            )}
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
 
 const SUBCATEGORIAS: { value: SubcategoriaCorretiva; label: string }[] = [
   { value: 'borracharia', label: 'Borracharia' },
@@ -451,8 +509,8 @@ export default function ControleEntradaSaida() {
                           {o.previsao_saida ? format(new Date(o.previsao_saida + 'T12:00:00'), 'dd/MM/yyyy') : '-'}
                         </TableCell>
                         <TableCell>
-                          {o.tem_avarias ? (
-                            <Badge variant="destructive" className="text-xs">Sim</Badge>
+                        {o.tem_avarias ? (
+                            <AvariasDetailDialog ordem={o} />
                           ) : (
                             <span className="text-xs text-muted-foreground">Não</span>
                           )}
