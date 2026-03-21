@@ -11,6 +11,7 @@ import VeiculoDetalhe from "./pages/VeiculoDetalhe";
 import Importar from "./pages/Importar";
 import Calendario from "./pages/Calendario";
 import Relatorios from "./pages/Relatorios";
+import ControleEntradaSaida from "./pages/ControleEntradaSaida";
 import TiposRevisao from "./pages/TiposRevisao";
 import Empresas from "./pages/Empresas";
 import Oficinas from "./pages/Oficinas";
