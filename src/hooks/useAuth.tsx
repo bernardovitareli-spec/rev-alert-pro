@@ -19,9 +19,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let isMounted = true;
+    const fallbackTimeout = window.setTimeout(() => {
+      if (isMounted) {
+        console.warn('[auth] Timeout de sessão, liberando loading');
+        setLoading(false);
+      }
+    }, 8000);
+
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
+      (_event, session) => {
+        if (!isMounted) return;
+        window.clearTimeout(fallbackTimeout);
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);
@@ -29,13 +39,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     );
 
     // THEN check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      setLoading(false);
-    });
+    const loadSession = async () => {
+      try {
+        const { data, error } = await supabase.auth.getSession();
+        if (error) throw error;
+        if (!isMounted) return;
+        setSession(data.session);
+        setUser(data.session?.user ?? null);
+      } catch (error) {
+        console.error('[auth] Falha ao recuperar sessão', error);
+      } finally {
+        if (isMounted) {
+          window.clearTimeout(fallbackTimeout);
+          setLoading(false);
+        }
+      }
+    };
 
-    return () => subscription.unsubscribe();
+    void loadSession();
+
+    return () => {
+      isMounted = false;
+      window.clearTimeout(fallbackTimeout);
+      subscription.unsubscribe();
+    };
   }, []);
 
   const signIn = async (email: string, password: string) => {
