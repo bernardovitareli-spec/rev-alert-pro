@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import AppErrorBoundary from "@/components/system/AppErrorBoundary";
 import Login from "./pages/Login";
+import ResetPassword from "./pages/ResetPassword";
 import Dashboard from "./pages/Dashboard";
 import Veiculos from "./pages/Veiculos";
 import VeiculoDetalhe from "./pages/VeiculoDetalhe";
