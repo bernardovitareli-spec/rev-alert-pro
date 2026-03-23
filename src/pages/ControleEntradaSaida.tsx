@@ -201,17 +201,14 @@ function NovaEntradaDialog({ onSuccess }: { onSuccess: () => void }) {
           <div className="grid grid-cols-3 gap-3">
             <div className="grid gap-2">
               <Label>Data de Chegada *</Label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button variant="outline" className={cn("justify-start text-left font-normal", !form.data_entrada && "text-muted-foreground")}>
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {format(form.data_entrada, 'dd/MM/yyyy')}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar mode="single" selected={form.data_entrada} onSelect={(d) => d && setForm({ ...form, data_entrada: d })} className="p-3 pointer-events-auto" />
-                </PopoverContent>
-              </Popover>
+              <Input
+                type="date"
+                value={format(form.data_entrada, 'yyyy-MM-dd')}
+                onChange={(e) => {
+                  const d = e.target.value ? new Date(e.target.value + 'T12:00:00') : new Date();
+                  setForm({ ...form, data_entrada: d });
+                }}
+              />
             </div>
             <div className="grid gap-2">
               <Label>KM de Chegada</Label>
@@ -309,17 +306,14 @@ function NovaEntradaDialog({ onSuccess }: { onSuccess: () => void }) {
           {/* Previsão de Saída */}
           <div className="grid gap-2">
             <Label>Previsão de Saída</Label>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button variant="outline" className={cn("justify-start text-left font-normal", !form.previsao_saida && "text-muted-foreground")}>
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {form.previsao_saida ? format(form.previsao_saida, 'dd/MM/yyyy') : 'Selecione uma data'}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar mode="single" selected={form.previsao_saida} onSelect={(d) => setForm({ ...form, previsao_saida: d })} className="p-3 pointer-events-auto" />
-              </PopoverContent>
-            </Popover>
+            <Input
+              type="date"
+              value={form.previsao_saida ? format(form.previsao_saida, 'yyyy-MM-dd') : ''}
+              onChange={(e) => {
+                const d = e.target.value ? new Date(e.target.value + 'T12:00:00') : undefined;
+                setForm({ ...form, previsao_saida: d });
+              }}
+            />
           </div>
 
           <Button onClick={handleSubmit} disabled={createOS.isPending} className="w-full mt-2">
@@ -374,17 +368,14 @@ function RegistrarSaidaDialog({ ordem, onSuccess }: { ordem: any; onSuccess: () 
           <div className="grid grid-cols-3 gap-3">
             <div className="grid gap-2">
               <Label>Data de Saída</Label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button variant="outline" className="justify-start text-left font-normal">
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {format(form.data_saida, 'dd/MM/yyyy')}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar mode="single" selected={form.data_saida} onSelect={(d) => d && setForm({ ...form, data_saida: d })} className="p-3 pointer-events-auto" />
-                </PopoverContent>
-              </Popover>
+              <Input
+                type="date"
+                value={format(form.data_saida, 'yyyy-MM-dd')}
+                onChange={(e) => {
+                  const d = e.target.value ? new Date(e.target.value + 'T12:00:00') : new Date();
+                  setForm({ ...form, data_saida: d });
+                }}
+              />
             </div>
             <div className="grid gap-2">
               <Label>KM de Saída</Label>
