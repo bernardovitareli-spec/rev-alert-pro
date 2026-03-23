@@ -7,7 +7,11 @@ interface AuthContextType {
   session: Session | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
-  signUp: (email: string, password: string, nome: string) => Promise<{ error: Error | null }>;
+  signUp: (email: string, password: string, nome: string) => Promise<{
+    error: Error | null;
+    session: Session | null;
+    requiresEmailConfirmation: boolean;
+  }>;
   signOut: () => Promise<void>;
 }
 
@@ -83,15 +87,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       },
     });
 
-    // Update profile with name after signup
+    // Save profile data after signup without bloquear fluxo de autenticação
     if (!error && data.user) {
-      await supabase
+      const { error: profileError } = await supabase
         .from('profiles')
-        .update({ nome })
-        .eq('user_id', data.user.id);
+        .upsert(
+          {
+            user_id: data.user.id,
+            nome,
+            email,
+          },
+          { onConflict: 'user_id' }
+        );
+
+      if (profileError) {
+        console.error('[auth] Falha ao salvar perfil no cadastro', profileError);
+      }
     }
 
-    return { error };
+    const session = data.session ?? null;
+    return {
+      error,
+      session,
+      requiresEmailConfirmation: !session,
+    };
   };
 
   const signOut = async () => {
