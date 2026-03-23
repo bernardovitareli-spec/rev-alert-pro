@@ -368,17 +368,14 @@ function RegistrarSaidaDialog({ ordem, onSuccess }: { ordem: any; onSuccess: () 
           <div className="grid grid-cols-3 gap-3">
             <div className="grid gap-2">
               <Label>Data de Saída</Label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button variant="outline" className="justify-start text-left font-normal">
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {format(form.data_saida, 'dd/MM/yyyy')}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar mode="single" selected={form.data_saida} onSelect={(d) => d && setForm({ ...form, data_saida: d })} className="p-3 pointer-events-auto" />
-                </PopoverContent>
-              </Popover>
+              <Input
+                type="date"
+                value={format(form.data_saida, 'yyyy-MM-dd')}
+                onChange={(e) => {
+                  const d = e.target.value ? new Date(e.target.value + 'T12:00:00') : new Date();
+                  setForm({ ...form, data_saida: d });
+                }}
+              />
             </div>
             <div className="grid gap-2">
               <Label>KM de Saída</Label>
