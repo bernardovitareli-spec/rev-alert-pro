@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Loader2, Truck, ShieldCheck, BarChart3 } from 'lucide-react';
 import { toast } from 'sonner';
 import logoMC from '@/assets/logo-mc-20anos.jpg';
+import ForgotPasswordDialog from '@/components/auth/ForgotPasswordDialog';
 
 export default function Login() {
   const [activeTab, setActiveTab] = useState<'login' | 'register'>('login');
@@ -193,6 +194,9 @@ export default function Login() {
                     'Entrar no sistema'
                   )}
                 </Button>
+                <div className="text-center pt-1">
+                  <ForgotPasswordDialog />
+                </div>
               </form>
             </TabsContent>
 
