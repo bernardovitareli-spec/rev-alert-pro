@@ -21,8 +21,9 @@ import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
-import { Plus, CalendarIcon, ClipboardList, Camera, CheckCircle2, Clock, AlertTriangle, ImageIcon } from 'lucide-react';
+import { Plus, CalendarIcon, ClipboardList, Camera, CheckCircle2, Clock, AlertTriangle, ImageIcon, Pencil } from 'lucide-react';
 import { SubcategoriaCorretiva, StatusOrdemServico } from '@/types/fleet';
+import { useIsAdmin } from '@/hooks/useIsAdmin';
 
 function AvariasDetailDialog({ ordem }: { ordem: any }) {
   const [open, setOpen] = useState(false);
