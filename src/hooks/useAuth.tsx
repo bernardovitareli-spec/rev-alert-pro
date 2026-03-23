@@ -33,9 +33,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
+      (event, session) => {
         if (!isMounted) return;
         window.clearTimeout(fallbackTimeout);
+
+        // If the token refresh failed, don't immediately kick the user out
+        // Just log the error — they'll be redirected on the next protected action
+        if (event === 'TOKEN_REFRESHED' && !session) {
+          console.warn('[auth] Token refresh retornou sessão nula, ignorando');
+          return;
+        }
+
+        // Only clear user state on explicit sign-out
+        if (event === 'SIGNED_OUT') {
+          setSession(null);
+          setUser(null);
+          setLoading(false);
+          return;
+        }
+
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);
@@ -46,7 +62,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const loadSession = async () => {
       try {
         const { data, error } = await supabase.auth.getSession();
-        if (error) throw error;
+        if (error) {
+          // If refresh token is invalid, clear state gracefully
+          if (error.message?.includes('Refresh Token') || (error as any)?.code === 'refresh_token_not_found') {
+            console.warn('[auth] Refresh token inválido, limpando sessão');
+            await supabase.auth.signOut({ scope: 'local' }).catch(() => {});
+            if (isMounted) {
+              setSession(null);
+              setUser(null);
+              setLoading(false);
+            }
+            return;
+          }
+          throw error;
+        }
         if (!isMounted) return;
         setSession(data.session);
         setUser(data.session?.user ?? null);
