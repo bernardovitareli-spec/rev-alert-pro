@@ -672,6 +672,7 @@ function EditOrdemDialog({ ordem, onSuccess }: { ordem: any; onSuccess: () => vo
 export default function ControleEntradaSaida() {
   const { data: ordens, isLoading, refetch } = useOrdensServico();
   const { data: isAdmin } = useIsAdmin();
+  const deleteOS = useDeleteOrdemServico();
   const [filtroStatus, setFiltroStatus] = useState<StatusOrdemServico | 'all'>('all');
   const [filtroTipo, setFiltroTipo] = useState<'preventiva' | 'corretiva' | 'all'>('all');
 
