@@ -416,6 +416,258 @@ function RegistrarSaidaDialog({ ordem, onSuccess }: { ordem: any; onSuccess: () 
   );
 }
 
+function EditOrdemDialog({ ordem, onSuccess }: { ordem: any; onSuccess: () => void }) {
+  const [open, setOpen] = useState(false);
+  const update = useUpdateOrdemServico();
+  const { data: veiculos } = useVeiculos();
+  const { data: tiposRevisao } = useQuery({
+    queryKey: ['tipos_revisao'],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('tipos_revisao').select('*').order('nome');
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const [form, setForm] = useState({
+    veiculo_id: ordem.veiculo_id || '',
+    tipo_manutencao: ordem.tipo_manutencao || '',
+    subcategoria_corretiva: ordem.subcategoria_corretiva || '',
+    detalhamento: ordem.detalhamento || '',
+    tipo_revisao_id: ordem.tipo_revisao_id || '',
+    data_entrada: ordem.data_entrada ? new Date(ordem.data_entrada.includes('T') ? ordem.data_entrada : `${ordem.data_entrada}T12:00:00`) : new Date(),
+    km_entrada: ordem.km_entrada?.toString() || '',
+    horimetro_entrada: ordem.horimetro_entrada?.toString() || '',
+    tem_avarias: ordem.tem_avarias || false,
+    descricao_avarias: ordem.descricao_avarias || '',
+    previsao_saida: ordem.previsao_saida ? new Date(ordem.previsao_saida.includes('T') ? ordem.previsao_saida : `${ordem.previsao_saida}T12:00:00`) : undefined as Date | undefined,
+    status: ordem.status || 'aberta',
+    data_saida: ordem.data_saida ? new Date(ordem.data_saida.includes('T') ? ordem.data_saida : `${ordem.data_saida}T12:00:00`) : undefined as Date | undefined,
+    km_saida: ordem.km_saida?.toString() || '',
+    horimetro_saida: ordem.horimetro_saida?.toString() || '',
+    avarias_resolvidas: ordem.avarias_resolvidas ?? true,
+    observacoes_saida: ordem.observacoes_saida || '',
+  });
+
+  const handleSubmit = async () => {
+    try {
+      await update.mutateAsync({
+        id: ordem.id,
+        veiculo_id: form.veiculo_id,
+        tipo_manutencao: form.tipo_manutencao,
+        subcategoria_corretiva: form.tipo_manutencao === 'corretiva' && form.subcategoria_corretiva ? form.subcategoria_corretiva : null,
+        detalhamento: form.detalhamento || null,
+        tipo_revisao_id: form.tipo_manutencao === 'preventiva' && form.tipo_revisao_id ? form.tipo_revisao_id : null,
+        data_entrada: format(form.data_entrada, 'yyyy-MM-dd'),
+        km_entrada: form.km_entrada ? Number(form.km_entrada) : null,
+        horimetro_entrada: form.horimetro_entrada ? Number(form.horimetro_entrada) : null,
+        tem_avarias: form.tem_avarias,
+        descricao_avarias: form.tem_avarias ? form.descricao_avarias || null : null,
+        previsao_saida: form.previsao_saida ? format(form.previsao_saida, 'yyyy-MM-dd') : null,
+        status: form.status,
+        data_saida: form.data_saida ? format(form.data_saida, 'yyyy-MM-dd') : null,
+        km_saida: form.km_saida ? Number(form.km_saida) : null,
+        horimetro_saida: form.horimetro_saida ? Number(form.horimetro_saida) : null,
+        avarias_resolvidas: form.tem_avarias ? form.avarias_resolvidas : null,
+        observacoes_saida: form.observacoes_saida || null,
+      });
+      toast.success('Ordem atualizada com sucesso!');
+      setOpen(false);
+      onSuccess();
+    } catch (e: any) {
+      toast.error('Erro ao atualizar: ' + e.message);
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button variant="ghost" size="sm" className="gap-1"><Pencil className="h-3 w-3" /> Editar</Button>
+      </DialogTrigger>
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Editar Ordem — {ordem.veiculo?.placa_serie}</DialogTitle>
+        </DialogHeader>
+        <div className="grid gap-4 py-4">
+          {/* Veículo */}
+          <div className="grid gap-2">
+            <Label>Veículo / Equipamento</Label>
+            <Select value={form.veiculo_id} onValueChange={(v) => setForm({ ...form, veiculo_id: v })}>
+              <SelectTrigger><SelectValue placeholder="Selecione o veículo" /></SelectTrigger>
+              <SelectContent>
+                {veiculos?.map((v: any) => (
+                  <SelectItem key={v.id} value={v.id}>{v.placa_serie} {v.tag_obra ? `- ${v.tag_obra}` : ''}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Data de Entrada, KM, Horímetro */}
+          <div className="grid grid-cols-3 gap-3">
+            <div className="grid gap-2">
+              <Label>Data de Entrada</Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" className="justify-start text-left font-normal">
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {format(form.data_entrada, 'dd/MM/yyyy')}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar mode="single" selected={form.data_entrada} onSelect={(d) => d && setForm({ ...form, data_entrada: d })} className="p-3 pointer-events-auto" />
+                </PopoverContent>
+              </Popover>
+            </div>
+            <div className="grid gap-2">
+              <Label>KM de Entrada</Label>
+              <Input type="number" value={form.km_entrada} onChange={(e) => setForm({ ...form, km_entrada: e.target.value })} />
+            </div>
+            <div className="grid gap-2">
+              <Label>Horímetro de Entrada</Label>
+              <Input type="number" value={form.horimetro_entrada} onChange={(e) => setForm({ ...form, horimetro_entrada: e.target.value })} />
+            </div>
+          </div>
+
+          {/* Tipo + Status */}
+          <div className="grid grid-cols-2 gap-3">
+            <div className="grid gap-2">
+              <Label>Tipo de Manutenção</Label>
+              <Select value={form.tipo_manutencao} onValueChange={(v) => setForm({ ...form, tipo_manutencao: v as any, subcategoria_corretiva: '', tipo_revisao_id: '' })}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="corretiva">Corretiva</SelectItem>
+                  <SelectItem value="preventiva">Preventiva</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid gap-2">
+              <Label>Status</Label>
+              <Select value={form.status} onValueChange={(v) => setForm({ ...form, status: v })}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="aberta">Aberta</SelectItem>
+                  <SelectItem value="em_andamento">Em Andamento</SelectItem>
+                  <SelectItem value="concluida">Concluída</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          {/* Corretiva */}
+          {form.tipo_manutencao === 'corretiva' && (
+            <>
+              <div className="grid gap-2">
+                <Label>Subcategoria</Label>
+                <Select value={form.subcategoria_corretiva} onValueChange={(v) => setForm({ ...form, subcategoria_corretiva: v })}>
+                  <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
+                  <SelectContent>
+                    {SUBCATEGORIAS.map((s) => <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="grid gap-2">
+                <Label>Detalhamento</Label>
+                <Textarea value={form.detalhamento} onChange={(e) => setForm({ ...form, detalhamento: e.target.value })} />
+              </div>
+            </>
+          )}
+
+          {/* Preventiva */}
+          {form.tipo_manutencao === 'preventiva' && (
+            <div className="grid gap-2">
+              <Label>Tipo de Revisão</Label>
+              <Select value={form.tipo_revisao_id} onValueChange={(v) => setForm({ ...form, tipo_revisao_id: v })}>
+                <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
+                <SelectContent>
+                  {tiposRevisao?.map((t: any) => (
+                    <SelectItem key={t.id} value={t.id}>{t.nome}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+
+          {/* Avarias */}
+          <div className="flex items-center gap-3">
+            <Label>Tem Avarias?</Label>
+            <Switch checked={form.tem_avarias} onCheckedChange={(v) => setForm({ ...form, tem_avarias: v })} />
+            <span className="text-sm text-muted-foreground">{form.tem_avarias ? 'Sim' : 'Não'}</span>
+          </div>
+          {form.tem_avarias && (
+            <div className="grid gap-2">
+              <Label>Descrição das Avarias</Label>
+              <Textarea value={form.descricao_avarias} onChange={(e) => setForm({ ...form, descricao_avarias: e.target.value })} />
+            </div>
+          )}
+
+          {/* Previsão de Saída */}
+          <div className="grid gap-2">
+            <Label>Previsão de Saída</Label>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" className={cn("justify-start text-left font-normal", !form.previsao_saida && "text-muted-foreground")}>
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {form.previsao_saida ? format(form.previsao_saida, 'dd/MM/yyyy') : 'Sem previsão'}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar mode="single" selected={form.previsao_saida} onSelect={(d) => setForm({ ...form, previsao_saida: d })} className="p-3 pointer-events-auto" />
+              </PopoverContent>
+            </Popover>
+          </div>
+
+          {/* Dados de Saída (se concluída) */}
+          {form.status === 'concluida' && (
+            <>
+              <div className="border-t pt-4 mt-2">
+                <Label className="text-base font-semibold">Dados de Saída</Label>
+              </div>
+              <div className="grid grid-cols-3 gap-3">
+                <div className="grid gap-2">
+                  <Label>Data de Saída</Label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button variant="outline" className={cn("justify-start text-left font-normal", !form.data_saida && "text-muted-foreground")}>
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {form.data_saida ? format(form.data_saida, 'dd/MM/yyyy') : 'Selecione'}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar mode="single" selected={form.data_saida} onSelect={(d) => setForm({ ...form, data_saida: d })} className="p-3 pointer-events-auto" />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+                <div className="grid gap-2">
+                  <Label>KM de Saída</Label>
+                  <Input type="number" value={form.km_saida} onChange={(e) => setForm({ ...form, km_saida: e.target.value })} />
+                </div>
+                <div className="grid gap-2">
+                  <Label>Horímetro de Saída</Label>
+                  <Input type="number" value={form.horimetro_saida} onChange={(e) => setForm({ ...form, horimetro_saida: e.target.value })} />
+                </div>
+              </div>
+              {form.tem_avarias && (
+                <div className="flex items-center gap-3">
+                  <Label>Avarias Resolvidas?</Label>
+                  <Switch checked={form.avarias_resolvidas} onCheckedChange={(v) => setForm({ ...form, avarias_resolvidas: v })} />
+                </div>
+              )}
+              <div className="grid gap-2">
+                <Label>Observações Finais</Label>
+                <Textarea value={form.observacoes_saida} onChange={(e) => setForm({ ...form, observacoes_saida: e.target.value })} />
+              </div>
+            </>
+          )}
+
+          <Button onClick={handleSubmit} disabled={update.isPending} className="w-full mt-2">
+            {update.isPending ? 'Salvando...' : 'Salvar Alterações'}
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 export default function ControleEntradaSaida() {
   const { data: ordens, isLoading, refetch } = useOrdensServico();
   const [filtroStatus, setFiltroStatus] = useState<StatusOrdemServico | 'all'>('all');
