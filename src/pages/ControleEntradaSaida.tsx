@@ -796,7 +796,41 @@ export default function ControleEntradaSaida() {
                               </span>
                             )}
                             {isAdmin && (
-                              <EditOrdemDialog ordem={o} onSuccess={() => refetch()} />
+                              <>
+                                <EditOrdemDialog ordem={o} onSuccess={() => refetch()} />
+                                <AlertDialog>
+                                  <AlertDialogTrigger asChild>
+                                    <Button variant="ghost" size="sm" className="gap-1 text-destructive hover:text-destructive">
+                                      <Trash2 className="h-3 w-3" />
+                                    </Button>
+                                  </AlertDialogTrigger>
+                                  <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                      <AlertDialogTitle>Excluir Ordem de Serviço</AlertDialogTitle>
+                                      <AlertDialogDescription>
+                                        Tem certeza que deseja excluir esta ordem de serviço do veículo <strong>{o.veiculo?.placa_serie}</strong>? Esta ação não pode ser desfeita.
+                                      </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                      <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                      <AlertDialogAction
+                                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                        onClick={async () => {
+                                          try {
+                                            await deleteOS.mutateAsync(o.id);
+                                            toast.success('Ordem excluída com sucesso!');
+                                            refetch();
+                                          } catch (e: any) {
+                                            toast.error('Erro ao excluir: ' + e.message);
+                                          }
+                                        }}
+                                      >
+                                        Excluir
+                                      </AlertDialogAction>
+                                    </AlertDialogFooter>
+                                  </AlertDialogContent>
+                                </AlertDialog>
+                              </>
                             )}
                           </div>
                         </TableCell>

@@ -74,6 +74,19 @@ export function useAvariasFotos(ordemServicoId: string | null) {
   });
 }
 
+export function useDeleteOrdemServico() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      // Delete related avarias_fotos first
+      await supabase.from('avarias_fotos').delete().eq('ordem_servico_id', id);
+      const { error } = await supabase.from('ordens_servico').delete().eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['ordens_servico'] }),
+  });
+}
+
 export function useUploadAvariaFoto() {
   const qc = useQueryClient();
   return useMutation({
