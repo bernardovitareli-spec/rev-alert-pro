@@ -24,7 +24,16 @@ export default function Login() {
     setIsLoading(true);
     const { error } = await signIn(email, password);
     setIsLoading(false);
+
     if (error) {
+      const message = error.message?.toLowerCase() ?? '';
+      if (message.includes('invalid login credentials')) {
+        toast.error('E-mail ou senha inválidos', {
+          description: 'Confira os dados digitados ou clique em "Esqueci minha senha" para redefinir.',
+        });
+        return;
+      }
+
       toast.error('Erro ao entrar', { description: error.message });
     } else {
       navigate('/');
