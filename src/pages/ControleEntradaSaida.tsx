@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { AppLayout } from '@/components/layout/AppLayout';
-import { useOrdensServico, useCreateOrdemServico, useUpdateOrdemServico, useUploadAvariaFoto, useAvariasFotos } from '@/hooks/useOrdensServico';
+import { useOrdensServico, useCreateOrdemServico, useUpdateOrdemServico, useDeleteOrdemServico, useUploadAvariaFoto, useAvariasFotos } from '@/hooks/useOrdensServico';
 import { useVeiculos } from '@/hooks/useFleetData';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
