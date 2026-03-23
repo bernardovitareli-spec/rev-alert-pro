@@ -194,6 +194,9 @@ export default function Login() {
                     'Entrar no sistema'
                   )}
                 </Button>
+                <div className="text-center pt-1">
+                  <ForgotPasswordDialog />
+                </div>
               </form>
             </TabsContent>
 
