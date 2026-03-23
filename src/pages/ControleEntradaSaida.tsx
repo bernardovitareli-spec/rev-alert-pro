@@ -187,14 +187,19 @@ function NovaEntradaDialog({ onSuccess }: { onSuccess: () => void }) {
           {/* Veículo */}
           <div className="grid gap-2">
             <Label>Veículo / Equipamento *</Label>
-            <Select value={form.veiculo_id} onValueChange={(v) => setForm({ ...form, veiculo_id: v })}>
-              <SelectTrigger><SelectValue placeholder="Selecione o veículo" /></SelectTrigger>
-              <SelectContent>
-                {veiculos?.map((v: any) => (
-                  <SelectItem key={v.id} value={v.id}>{v.placa_serie} {v.tag_obra ? `- ${v.tag_obra}` : ''}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <select
+              value={form.veiculo_id}
+              onChange={(e) => setForm((prev) => ({ ...prev, veiculo_id: e.target.value }))}
+              className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              translate="no"
+            >
+              <option value="">Selecione o veículo</option>
+              {veiculos?.filter((v: any) => Boolean(v?.id)).map((v: any) => (
+                <option key={v.id} value={v.id}>
+                  {v.placa_serie} {v.tag_obra ? `- ${v.tag_obra}` : ''}
+                </option>
+              ))}
+            </select>
           </div>
 
           {/* Data de Chegada, KM, Horímetro */}
@@ -223,13 +228,23 @@ function NovaEntradaDialog({ onSuccess }: { onSuccess: () => void }) {
           {/* Tipo de Manutenção */}
           <div className="grid gap-2">
             <Label>Tipo de Manutenção *</Label>
-            <Select value={form.tipo_manutencao} onValueChange={(v) => setForm({ ...form, tipo_manutencao: v as any, subcategoria_corretiva: '', tipo_revisao_id: '' })}>
-              <SelectTrigger><SelectValue placeholder="Selecione o tipo" /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="corretiva">Corretiva</SelectItem>
-                <SelectItem value="preventiva">Preventiva</SelectItem>
-              </SelectContent>
-            </Select>
+            <select
+              value={form.tipo_manutencao}
+              onChange={(e) =>
+                setForm((prev) => ({
+                  ...prev,
+                  tipo_manutencao: e.target.value as 'preventiva' | 'corretiva' | '',
+                  subcategoria_corretiva: '',
+                  tipo_revisao_id: '',
+                }))
+              }
+              className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              translate="no"
+            >
+              <option value="">Selecione o tipo</option>
+              <option value="corretiva">Corretiva</option>
+              <option value="preventiva">Preventiva</option>
+            </select>
           </div>
 
           {/* Corretiva: subcategoria + detalhamento */}
@@ -237,14 +252,24 @@ function NovaEntradaDialog({ onSuccess }: { onSuccess: () => void }) {
             <>
               <div className="grid gap-2">
                 <Label>Subcategoria</Label>
-                <Select value={form.subcategoria_corretiva} onValueChange={(v) => setForm({ ...form, subcategoria_corretiva: v as SubcategoriaCorretiva })}>
-                  <SelectTrigger><SelectValue placeholder="Selecione a subcategoria" /></SelectTrigger>
-                  <SelectContent>
-                    {SUBCATEGORIAS.map((s) => (
-                      <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <select
+                  value={form.subcategoria_corretiva}
+                  onChange={(e) =>
+                    setForm((prev) => ({
+                      ...prev,
+                      subcategoria_corretiva: e.target.value as SubcategoriaCorretiva | '',
+                    }))
+                  }
+                  className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  translate="no"
+                >
+                  <option value="">Selecione a subcategoria</option>
+                  {SUBCATEGORIAS.map((s) => (
+                    <option key={s.value} value={s.value}>
+                      {s.label}
+                    </option>
+                  ))}
+                </select>
               </div>
               <div className="grid gap-2">
                 <Label>Detalhamento</Label>
@@ -257,16 +282,19 @@ function NovaEntradaDialog({ onSuccess }: { onSuccess: () => void }) {
           {form.tipo_manutencao === 'preventiva' && (
             <div className="grid gap-2">
               <Label>Tipo de Revisão</Label>
-              <Select value={form.tipo_revisao_id} onValueChange={(v) => setForm({ ...form, tipo_revisao_id: v })}>
-                <SelectTrigger><SelectValue placeholder="Selecione o tipo de revisão" /></SelectTrigger>
-                <SelectContent>
-                  {tiposRevisao?.map((t: any) => (
-                    <SelectItem key={t.id} value={t.id}>
-                      {t.nome} {t.intervalo_padrao ? `(a cada ${t.intervalo_padrao} ${t.unidade_padrao})` : ''}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <select
+                value={form.tipo_revisao_id}
+                onChange={(e) => setForm((prev) => ({ ...prev, tipo_revisao_id: e.target.value }))}
+                className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                translate="no"
+              >
+                <option value="">Selecione o tipo de revisão</option>
+                {tiposRevisao?.map((t: any) => (
+                  <option key={t.id} value={t.id}>
+                    {t.nome} {t.intervalo_padrao ? `(a cada ${t.intervalo_padrao} ${t.unidade_padrao})` : ''}
+                  </option>
+                ))}
+              </select>
             </div>
           )}
 
