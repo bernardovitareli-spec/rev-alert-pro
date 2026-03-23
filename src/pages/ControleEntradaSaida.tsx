@@ -201,17 +201,14 @@ function NovaEntradaDialog({ onSuccess }: { onSuccess: () => void }) {
           <div className="grid grid-cols-3 gap-3">
             <div className="grid gap-2">
               <Label>Data de Chegada *</Label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button variant="outline" className={cn("justify-start text-left font-normal", !form.data_entrada && "text-muted-foreground")}>
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {format(form.data_entrada, 'dd/MM/yyyy')}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar mode="single" selected={form.data_entrada} onSelect={(d) => d && setForm({ ...form, data_entrada: d })} className="p-3 pointer-events-auto" />
-                </PopoverContent>
-              </Popover>
+              <Input
+                type="date"
+                value={format(form.data_entrada, 'yyyy-MM-dd')}
+                onChange={(e) => {
+                  const d = e.target.value ? new Date(e.target.value + 'T12:00:00') : new Date();
+                  setForm({ ...form, data_entrada: d });
+                }}
+              />
             </div>
             <div className="grid gap-2">
               <Label>KM de Chegada</Label>
