@@ -2,6 +2,15 @@ import { useState, useEffect, createContext, useContext, ReactNode } from 'react
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 
+const sanitizeEmail = (value: string) => value.trim().toLowerCase().replace(/\s+/g, '');
+
+const isInvalidCredentialsError = (error: unknown) => {
+  if (!error || typeof error !== 'object') return false;
+  const parsedError = error as { code?: string; message?: string };
+  const message = parsedError.message?.toLowerCase() ?? '';
+  return parsedError.code === 'invalid_credentials' || message.includes('invalid login credentials');
+};
+
 interface AuthContextType {
   user: User | null;
   session: Session | null;
@@ -99,16 +108,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    const normalizedEmail = sanitizeEmail(email);
+
+    const attemptSignIn = (candidatePassword: string) =>
+      supabase.auth.signInWithPassword({
+        email: normalizedEmail,
+        password: candidatePassword,
+      });
+
+    let { error } = await attemptSignIn(password);
+
+    // Fallback para casos em que a senha foi colada com espaços no início/fim
+    if (error && isInvalidCredentialsError(error) && password !== password.trim()) {
+      const retryResult = await attemptSignIn(password.trim());
+      error = retryResult.error;
+    }
+
     return { error };
   };
 
   const signUp = async (email: string, password: string, nome: string) => {
+    const normalizedEmail = sanitizeEmail(email);
+
     const { error, data } = await supabase.auth.signUp({
-      email,
+      email: normalizedEmail,
       password,
       options: {
         emailRedirectTo: window.location.origin,
@@ -124,7 +147,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           {
             user_id: data.user.id,
             nome,
-            email,
+            email: normalizedEmail,
           },
           { onConflict: 'user_id' }
         );
