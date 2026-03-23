@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { AppLayout } from '@/components/layout/AppLayout';
-import { useOrdensServico, useCreateOrdemServico, useUpdateOrdemServico, useUploadAvariaFoto, useAvariasFotos } from '@/hooks/useOrdensServico';
+import { useOrdensServico, useCreateOrdemServico, useUpdateOrdemServico, useDeleteOrdemServico, useUploadAvariaFoto, useAvariasFotos } from '@/hooks/useOrdensServico';
 import { useVeiculos } from '@/hooks/useFleetData';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -21,7 +21,8 @@ import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
-import { Plus, CalendarIcon, ClipboardList, Camera, CheckCircle2, Clock, AlertTriangle, ImageIcon, Pencil } from 'lucide-react';
+import { Plus, CalendarIcon, ClipboardList, Camera, CheckCircle2, Clock, AlertTriangle, ImageIcon, Pencil, Trash2 } from 'lucide-react';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { SubcategoriaCorretiva, StatusOrdemServico } from '@/types/fleet';
 import { useIsAdmin } from '@/hooks/useIsAdmin';
 
@@ -671,6 +672,7 @@ function EditOrdemDialog({ ordem, onSuccess }: { ordem: any; onSuccess: () => vo
 export default function ControleEntradaSaida() {
   const { data: ordens, isLoading, refetch } = useOrdensServico();
   const { data: isAdmin } = useIsAdmin();
+  const deleteOS = useDeleteOrdemServico();
   const [filtroStatus, setFiltroStatus] = useState<StatusOrdemServico | 'all'>('all');
   const [filtroTipo, setFiltroTipo] = useState<'preventiva' | 'corretiva' | 'all'>('all');
 
@@ -794,7 +796,41 @@ export default function ControleEntradaSaida() {
                               </span>
                             )}
                             {isAdmin && (
-                              <EditOrdemDialog ordem={o} onSuccess={() => refetch()} />
+                              <>
+                                <EditOrdemDialog ordem={o} onSuccess={() => refetch()} />
+                                <AlertDialog>
+                                  <AlertDialogTrigger asChild>
+                                    <Button variant="ghost" size="sm" className="gap-1 text-destructive hover:text-destructive">
+                                      <Trash2 className="h-3 w-3" />
+                                    </Button>
+                                  </AlertDialogTrigger>
+                                  <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                      <AlertDialogTitle>Excluir Ordem de Serviço</AlertDialogTitle>
+                                      <AlertDialogDescription>
+                                        Tem certeza que deseja excluir esta ordem de serviço do veículo <strong>{o.veiculo?.placa_serie}</strong>? Esta ação não pode ser desfeita.
+                                      </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                      <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                      <AlertDialogAction
+                                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                        onClick={async () => {
+                                          try {
+                                            await deleteOS.mutateAsync(o.id);
+                                            toast.success('Ordem excluída com sucesso!');
+                                            refetch();
+                                          } catch (e: any) {
+                                            toast.error('Erro ao excluir: ' + e.message);
+                                          }
+                                        }}
+                                      >
+                                        Excluir
+                                      </AlertDialogAction>
+                                    </AlertDialogFooter>
+                                  </AlertDialogContent>
+                                </AlertDialog>
+                              </>
                             )}
                           </div>
                         </TableCell>
