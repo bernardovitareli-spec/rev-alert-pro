@@ -166,8 +166,9 @@ function NovaEntradaDialog({ onSuccess }: { onSuccess: () => void }) {
 
       toast.success('Entrada registrada com sucesso!');
       resetForm();
-      setOpen(false);
       onSuccess();
+      // Delay closing to let portaled elements (Select, Popover) unmount cleanly
+      setTimeout(() => setOpen(false), 0);
     } catch (e: any) {
       toast.error('Erro ao registrar entrada: ' + e.message);
     }
