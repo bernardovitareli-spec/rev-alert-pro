@@ -784,14 +784,19 @@ export default function ControleEntradaSaida() {
                           </Badge>
                         </TableCell>
                         <TableCell>
-                          {o.status !== 'concluida' && (
-                            <RegistrarSaidaDialog ordem={o} onSuccess={() => refetch()} />
-                          )}
-                          {o.status === 'concluida' && o.data_saida && (
-                            <span className="text-xs text-muted-foreground">
-                              Saiu em {formatDateSafe(o.data_saida)}
-                            </span>
-                          )}
+                          <div className="flex items-center gap-1">
+                            {o.status !== 'concluida' && (
+                              <RegistrarSaidaDialog ordem={o} onSuccess={() => refetch()} />
+                            )}
+                            {o.status === 'concluida' && o.data_saida && (
+                              <span className="text-xs text-muted-foreground">
+                                Saiu em {formatDateSafe(o.data_saida)}
+                              </span>
+                            )}
+                            {isAdmin && (
+                              <EditOrdemDialog ordem={o} onSuccess={() => refetch()} />
+                            )}
+                          </div>
                         </TableCell>
                       </TableRow>
                     );
