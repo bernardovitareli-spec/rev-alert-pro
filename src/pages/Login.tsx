@@ -10,6 +10,7 @@ import { toast } from 'sonner';
 import logoMC from '@/assets/logo-mc-20anos.jpg';
 
 export default function Login() {
+  const [activeTab, setActiveTab] = useState<'login' | 'register'>('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [nome, setNome] = useState('');
@@ -32,11 +33,21 @@ export default function Login() {
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    const { error } = await signUp(email, password, nome);
+    const { error, requiresEmailConfirmation } = await signUp(email, password, nome);
     setIsLoading(false);
+
     if (error) {
       toast.error('Erro ao cadastrar', { description: error.message });
     } else {
+      if (requiresEmailConfirmation) {
+        toast.success('Cadastro realizado!', {
+          description: 'Enviamos um e-mail de confirmação. Após confirmar, faça login para acessar o sistema.',
+        });
+        setActiveTab('login');
+        setPassword('');
+        return;
+      }
+
       toast.success('Conta criada!', { description: 'Você já pode acessar o sistema.' });
       navigate('/');
     }
@@ -128,7 +139,7 @@ export default function Login() {
           </div>
 
           {/* Tabs de login/cadastro */}
-          <Tabs defaultValue="login" className="space-y-6">
+          <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'login' | 'register')} className="space-y-6">
             <TabsList className="grid w-full grid-cols-2 h-10 bg-secondary p-1 rounded-lg">
               <TabsTrigger
                 value="login"
