@@ -127,8 +127,7 @@ export default function VeiculoDetalhe() {
 
   const handleStartEditContrato = () => {
     if (veiculo) {
-      // @ts-ignore - contrato_id pode existir após migração
-      setContratoIdEdit((veiculo as any).contrato_id || 'none');
+      setContratoIdEdit(veiculo.contrato_id || 'none');
       setIsEditingContrato(true);
     }
   };
@@ -476,7 +475,7 @@ export default function VeiculoDetalhe() {
                 ) : (
                   <p className="text-lg font-medium">
                     {(() => {
-                      const contratoId = (veiculo as any).contrato_id;
+                      const contratoId = veiculo.contrato_id;
                       const contratoNome = contratosDisponiveis?.find(c => c.id === contratoId)?.nome;
                       return contratoNome || veiculo.contrato || 'Não definido';
                     })()}
@@ -709,14 +708,14 @@ export default function VeiculoDetalhe() {
                     veiculoId={veiculo.id}
                     tipoDocumento="art"
                     label="ART"
-                    value={(veiculo as any).art_url || null}
+                    value={veiculo.art_url || null}
                     onChange={(url) => handleDocumentoChange('art', url)}
                     disabled={updateVeiculo.isPending}
                   />
                   <div className="mt-3">
                     <label className="text-xs text-muted-foreground mb-1 block">Validade</label>
                     <ValidadeDocumentoInput
-                      value={(veiculo as any).art_validade || null}
+                      value={veiculo.art_validade || null}
                       onChange={(v) => handleValidadeChange('art', v)}
                       disabled={updateVeiculo.isPending}
                     />
