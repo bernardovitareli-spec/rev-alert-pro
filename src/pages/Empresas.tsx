@@ -1,4 +1,7 @@
 import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import { Plus, Pencil, Trash2, Building2, ChevronDown, ChevronRight, FileText } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Button } from '@/components/ui/button';
@@ -15,7 +18,17 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
 import { Empresa } from '@/types/fleet';
 
-// Sub-componente para listar contratos de uma empresa
+const empresaSchema = z.object({
+  nome: z.string().trim().min(1, 'Nome é obrigatório').max(120, 'Máximo 120 caracteres'),
+});
+type EmpresaForm = z.infer<typeof empresaSchema>;
+
+const contratoSchema = z.object({
+  nome: z.string().trim().min(1, 'Nome é obrigatório').max(120, 'Máximo 120 caracteres'),
+  descricao: z.string().trim().max(500, 'Máximo 500 caracteres').optional(),
+});
+type ContratoForm = z.infer<typeof contratoSchema>;
+
 function EmpresaContratosRow({
   empresa,
   onEditEmpresa,
@@ -28,8 +41,6 @@ function EmpresaContratosRow({
   const [expanded, setExpanded] = useState(false);
   const [isContratoDialogOpen, setIsContratoDialogOpen] = useState(false);
   const [editingContrato, setEditingContrato] = useState<Contrato | null>(null);
-  const [contratoNome, setContratoNome] = useState('');
-  const [contratoDescricao, setContratoDescricao] = useState('');
 
   const { data: contratos, isLoading: contratosLoading } = useContratos(empresa.id);
   const createContrato = useCreateContrato();
@@ -37,15 +48,23 @@ function EmpresaContratosRow({
   const deleteContrato = useDeleteContrato();
   const { toast } = useToast();
 
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<ContratoForm>({
+    resolver: zodResolver(contratoSchema),
+    defaultValues: { nome: '', descricao: '' },
+  });
+
   const handleOpenContratoDialog = (contrato?: Contrato) => {
     if (contrato) {
       setEditingContrato(contrato);
-      setContratoNome(contrato.nome);
-      setContratoDescricao(contrato.descricao || '');
+      reset({ nome: contrato.nome, descricao: contrato.descricao || '' });
     } else {
       setEditingContrato(null);
-      setContratoNome('');
-      setContratoDescricao('');
+      reset({ nome: '', descricao: '' });
     }
     setIsContratoDialogOpen(true);
   };
@@ -53,32 +72,31 @@ function EmpresaContratosRow({
   const handleCloseContratoDialog = () => {
     setIsContratoDialogOpen(false);
     setEditingContrato(null);
-    setContratoNome('');
-    setContratoDescricao('');
+    reset({ nome: '', descricao: '' });
   };
 
-  const handleSubmitContrato = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const onSubmitContrato = async (values: ContratoForm) => {
     try {
       if (editingContrato) {
         await updateContrato.mutateAsync({
           id: editingContrato.id,
-          nome: contratoNome,
-          descricao: contratoDescricao || null,
+          nome: values.nome,
+          descricao: values.descricao || null,
         });
         toast({ title: 'Contrato atualizado com sucesso!' });
       } else {
         await createContrato.mutateAsync({
           empresa_id: empresa.id,
-          nome: contratoNome,
-          descricao: contratoDescricao || null,
+          nome: values.nome,
+          descricao: values.descricao || null,
         });
         toast({ title: 'Contrato criado com sucesso!' });
         setExpanded(true);
       }
       handleCloseContratoDialog();
-    } catch (error: any) {
-      toast({ title: 'Erro ao salvar contrato', description: error.message, variant: 'destructive' });
+    } catch (error) {
+      const msg = error instanceof Error ? error.message : String(error);
+      toast({ title: 'Erro ao salvar contrato', description: msg, variant: 'destructive' });
     }
   };
 
@@ -87,8 +105,9 @@ function EmpresaContratosRow({
     try {
       await deleteContrato.mutateAsync(id);
       toast({ title: 'Contrato excluído com sucesso!' });
-    } catch (error: any) {
-      toast({ title: 'Erro ao excluir contrato', description: error.message, variant: 'destructive' });
+    } catch (error) {
+      const msg = error instanceof Error ? error.message : String(error);
+      toast({ title: 'Erro ao excluir contrato', description: msg, variant: 'destructive' });
     }
   };
 
@@ -96,7 +115,6 @@ function EmpresaContratosRow({
 
   return (
     <>
-      {/* Linha da empresa */}
       <TableRow className="hover:bg-muted/30">
         <TableCell>
           <button
@@ -105,8 +123,7 @@ function EmpresaContratosRow({
           >
             {expanded
               ? <ChevronDown className="h-4 w-4 text-muted-foreground" />
-              : <ChevronRight className="h-4 w-4 text-muted-foreground" />
-            }
+              : <ChevronRight className="h-4 w-4 text-muted-foreground" />}
             {empresa.nome}
             {contratos && contratos.length > 0 && (
               <span className="text-xs text-muted-foreground bg-muted px-1.5 py-0.5 rounded-full">
@@ -120,36 +137,19 @@ function EmpresaContratosRow({
         </TableCell>
         <TableCell className="text-right">
           <div className="flex items-center justify-end gap-1">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8"
-              onClick={() => onEditEmpresa(empresa)}
-            >
-              <Pencil className="h-3.5 w-3.5" />
+            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => onEditEmpresa(empresa)} aria-label="Editar empresa">
+              <Pencil className="h-3.5 w-3.5" aria-hidden="true" />
             </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8"
-              onClick={() => onDeleteEmpresa(empresa.id)}
-            >
-              <Trash2 className="h-3.5 w-3.5 text-destructive" />
+            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => onDeleteEmpresa(empresa.id)} aria-label="Excluir empresa">
+              <Trash2 className="h-3.5 w-3.5 text-destructive" aria-hidden="true" />
             </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              className="text-xs h-8 ml-1"
-              onClick={() => handleOpenContratoDialog()}
-            >
-              <Plus className="h-3 w-3 mr-1" />
-              Novo Contrato
+            <Button variant="outline" size="sm" className="text-xs h-8 ml-1" onClick={() => handleOpenContratoDialog()}>
+              <Plus className="h-3 w-3 mr-1" /> Novo Contrato
             </Button>
           </div>
         </TableCell>
       </TableRow>
 
-      {/* Linhas dos contratos (expandível) */}
       {expanded && (
         <>
           {contratosLoading ? (
@@ -179,21 +179,11 @@ function EmpresaContratosRow({
                   {new Date(contrato.created_at).toLocaleDateString('pt-BR')}
                 </TableCell>
                 <TableCell className="text-right">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8"
-                    onClick={() => handleOpenContratoDialog(contrato)}
-                  >
-                    <Pencil className="h-3.5 w-3.5" />
+                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleOpenContratoDialog(contrato)} aria-label="Editar contrato">
+                    <Pencil className="h-3.5 w-3.5" aria-hidden="true" />
                   </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8"
-                    onClick={() => handleDeleteContrato(contrato.id)}
-                  >
-                    <Trash2 className="h-3.5 w-3.5 text-destructive" />
+                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleDeleteContrato(contrato.id)} aria-label="Excluir contrato">
+                    <Trash2 className="h-3.5 w-3.5 text-destructive" aria-hidden="true" />
                   </Button>
                 </TableCell>
               </TableRow>
@@ -208,10 +198,9 @@ function EmpresaContratosRow({
         </>
       )}
 
-      {/* Dialog de criação/edição de contrato */}
       <Dialog open={isContratoDialogOpen} onOpenChange={setIsContratoDialogOpen}>
         <DialogContent>
-          <form onSubmit={handleSubmitContrato}>
+          <form onSubmit={handleSubmit(onSubmitContrato)} noValidate>
             <DialogHeader>
               <DialogTitle>
                 {editingContrato ? 'Editar Contrato' : `Novo Contrato — ${empresa.nome}`}
@@ -227,27 +216,26 @@ function EmpresaContratosRow({
                 <Label htmlFor={`nome-${empresa.id}`}>Nome do Contrato *</Label>
                 <Input
                   id={`nome-${empresa.id}`}
-                  value={contratoNome}
-                  onChange={(e) => setContratoNome(e.target.value)}
                   placeholder="Ex: Contrato 001 - Terraplanagem S11D"
-                  required
+                  aria-invalid={!!errors.nome}
+                  {...register('nome')}
                 />
+                {errors.nome && <p className="text-xs text-destructive">{errors.nome.message}</p>}
               </div>
               <div className="space-y-2">
                 <Label htmlFor={`descricao-${empresa.id}`}>Descrição (opcional)</Label>
                 <Textarea
                   id={`descricao-${empresa.id}`}
-                  value={contratoDescricao}
-                  onChange={(e) => setContratoDescricao(e.target.value)}
                   placeholder="Descrição adicional do contrato..."
                   rows={3}
+                  aria-invalid={!!errors.descricao}
+                  {...register('descricao')}
                 />
+                {errors.descricao && <p className="text-xs text-destructive">{errors.descricao.message}</p>}
               </div>
             </div>
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={handleCloseContratoDialog}>
-                Cancelar
-              </Button>
+              <Button type="button" variant="outline" onClick={handleCloseContratoDialog}>Cancelar</Button>
               <Button type="submit" disabled={isPending}>
                 {isPending ? 'Salvando...' : editingContrato ? 'Salvar' : 'Criar'}
               </Button>
@@ -266,71 +254,63 @@ export default function Empresas() {
 
   const [isEmpresaDialogOpen, setIsEmpresaDialogOpen] = useState(false);
   const [editingEmpresa, setEditingEmpresa] = useState<Empresa | null>(null);
-  const [nome, setNome] = useState('');
 
-  const resetForm = () => {
-    setNome('');
-    setEditingEmpresa(null);
-  };
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors, isSubmitting },
+  } = useForm<EmpresaForm>({
+    resolver: zodResolver(empresaSchema),
+    defaultValues: { nome: '' },
+  });
 
   const handleOpenDialog = (empresa?: Empresa) => {
     if (empresa) {
       setEditingEmpresa(empresa);
-      setNome(empresa.nome);
+      reset({ nome: empresa.nome });
     } else {
-      resetForm();
+      setEditingEmpresa(null);
+      reset({ nome: '' });
     }
     setIsEmpresaDialogOpen(true);
   };
 
   const handleCloseDialog = () => {
     setIsEmpresaDialogOpen(false);
-    resetForm();
+    setEditingEmpresa(null);
+    reset({ nome: '' });
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
+  const onSubmit = async (values: EmpresaForm) => {
     try {
       if (editingEmpresa) {
-        const { error } = await supabase
-          .from('empresas')
-          .update({ nome })
-          .eq('id', editingEmpresa.id);
-
+        const { error } = await supabase.from('empresas').update({ nome: values.nome }).eq('id', editingEmpresa.id);
         if (error) throw error;
         toast({ title: 'Empresa atualizada com sucesso!' });
       } else {
-        const { error } = await supabase
-          .from('empresas')
-          .insert({ nome });
-
+        const { error } = await supabase.from('empresas').insert({ nome: values.nome });
         if (error) throw error;
         toast({ title: 'Empresa criada com sucesso!' });
       }
-
       queryClient.invalidateQueries({ queryKey: ['empresas'] });
       handleCloseDialog();
-    } catch (error: any) {
-      toast({ title: 'Erro ao salvar', description: error.message, variant: 'destructive' });
+    } catch (error) {
+      const msg = error instanceof Error ? error.message : String(error);
+      toast({ title: 'Erro ao salvar', description: msg, variant: 'destructive' });
     }
   };
 
   const handleDelete = async (id: string) => {
     if (!confirm('Tem certeza que deseja excluir esta empresa? Todos os contratos vinculados também serão excluídos.')) return;
-
     try {
-      const { error } = await supabase
-        .from('empresas')
-        .delete()
-        .eq('id', id);
-
+      const { error } = await supabase.from('empresas').delete().eq('id', id);
       if (error) throw error;
-
       toast({ title: 'Empresa excluída com sucesso!' });
       queryClient.invalidateQueries({ queryKey: ['empresas'] });
-    } catch (error: any) {
-      toast({ title: 'Erro ao excluir', description: error.message, variant: 'destructive' });
+    } catch (error) {
+      const msg = error instanceof Error ? error.message : String(error);
+      toast({ title: 'Erro ao excluir', description: msg, variant: 'destructive' });
     }
   };
 
@@ -353,8 +333,7 @@ export default function Empresas() {
             <p className="text-muted-foreground">Gerencie as empresas e seus contratos</p>
           </div>
           <Button onClick={() => handleOpenDialog()}>
-            <Plus className="h-4 w-4 mr-2" />
-            Nova Empresa
+            <Plus className="h-4 w-4 mr-2" /> Nova Empresa
           </Button>
         </div>
 
@@ -397,14 +376,11 @@ export default function Empresas() {
           </CardContent>
         </Card>
 
-        {/* Dialog de criação/edição de empresa */}
         <Dialog open={isEmpresaDialogOpen} onOpenChange={setIsEmpresaDialogOpen}>
           <DialogContent>
-            <form onSubmit={handleSubmit}>
+            <form onSubmit={handleSubmit(onSubmit)} noValidate>
               <DialogHeader>
-                <DialogTitle>
-                  {editingEmpresa ? 'Editar Empresa' : 'Nova Empresa'}
-                </DialogTitle>
+                <DialogTitle>{editingEmpresa ? 'Editar Empresa' : 'Nova Empresa'}</DialogTitle>
                 <DialogDescription>
                   {editingEmpresa ? 'Atualize o nome da empresa.' : 'Preencha o nome da nova empresa.'}
                 </DialogDescription>
@@ -414,19 +390,17 @@ export default function Empresas() {
                   <Label htmlFor="nome">Nome da Empresa</Label>
                   <Input
                     id="nome"
-                    value={nome}
-                    onChange={(e) => setNome(e.target.value)}
                     placeholder="Ex: CIVIL S11D"
-                    required
+                    aria-invalid={!!errors.nome}
+                    {...register('nome')}
                   />
+                  {errors.nome && <p className="text-xs text-destructive">{errors.nome.message}</p>}
                 </div>
               </div>
               <DialogFooter>
-                <Button type="button" variant="outline" onClick={handleCloseDialog}>
-                  Cancelar
-                </Button>
-                <Button type="submit">
-                  {editingEmpresa ? 'Salvar' : 'Criar'}
+                <Button type="button" variant="outline" onClick={handleCloseDialog}>Cancelar</Button>
+                <Button type="submit" disabled={isSubmitting}>
+                  {isSubmitting ? 'Salvando...' : editingEmpresa ? 'Salvar' : 'Criar'}
                 </Button>
               </DialogFooter>
             </form>
