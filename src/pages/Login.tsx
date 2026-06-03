@@ -1,5 +1,8 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,17 +12,30 @@ import { toast } from 'sonner';
 import logoMC from '@/assets/logo-mc-20anos.jpg';
 import ForgotPasswordDialog from '@/components/auth/ForgotPasswordDialog';
 
+const loginSchema = z.object({
+  email: z.string().trim().email('Email inválido').max(255, 'Email muito longo'),
+  password: z.string().min(8, 'Mínimo 8 caracteres').max(128, 'Senha muito longa'),
+});
+
+type LoginForm = z.infer<typeof loginSchema>;
+
 export default function Login() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const { signIn } = useAuth();
   const navigate = useNavigate();
 
-  const handleSignIn = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<LoginForm>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: { email: '', password: '' },
+  });
+
+  const onSubmit = async (values: LoginForm) => {
     setIsLoading(true);
-    const { error } = await signIn(email, password);
+    const { error } = await signIn(values.email, values.password);
     setIsLoading(false);
 
     if (error) {
@@ -103,7 +119,7 @@ export default function Login() {
             <p className="text-sm text-muted-foreground">Acesse o sistema de gestão de frota</p>
           </div>
 
-          <form onSubmit={handleSignIn} className="space-y-4">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
             <div className="space-y-1.5">
               <Label htmlFor="email" className="text-sm font-medium">Email</Label>
               <Input
@@ -111,11 +127,13 @@ export default function Login() {
                 type="email"
                 autoComplete="email"
                 placeholder="seu@email.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
+                aria-invalid={!!errors.email}
+                {...register('email')}
                 className="h-11 bg-secondary border-border/60 focus-visible:ring-primary/50 focus-visible:border-primary/50"
               />
+              {errors.email && (
+                <p className="text-xs text-destructive">{errors.email.message}</p>
+              )}
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="password" className="text-sm font-medium">Senha</Label>
@@ -124,11 +142,13 @@ export default function Login() {
                 type="password"
                 autoComplete="current-password"
                 placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
+                aria-invalid={!!errors.password}
+                {...register('password')}
                 className="h-11 bg-secondary border-border/60 focus-visible:ring-primary/50 focus-visible:border-primary/50"
               />
+              {errors.password && (
+                <p className="text-xs text-destructive">{errors.password.message}</p>
+              )}
             </div>
             <Button type="submit" className="w-full h-11 font-semibold text-sm rounded-lg" disabled={isLoading}>
               {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Entrar no sistema'}

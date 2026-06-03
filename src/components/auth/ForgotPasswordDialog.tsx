@@ -1,4 +1,7 @@
 import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -14,25 +17,39 @@ import {
 import { Loader2, Mail } from 'lucide-react';
 import { toast } from 'sonner';
 
+const forgotSchema = z.object({
+  email: z.string().trim().email('Email inválido').max(255, 'Email muito longo'),
+});
+
+type ForgotForm = z.infer<typeof forgotSchema>;
+
 export default function ForgotPasswordDialog() {
   const [open, setOpen] = useState(false);
-  const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [sent, setSent] = useState(false);
+  const [submittedEmail, setSubmittedEmail] = useState('');
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<ForgotForm>({
+    resolver: zodResolver(forgotSchema),
+    defaultValues: { email: '' },
+  });
+
+  const onSubmit = async ({ email }: ForgotForm) => {
     setIsLoading(true);
-
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: `${window.location.origin}/reset-password`,
     });
-
     setIsLoading(false);
 
     if (error) {
       toast.error('Erro ao enviar e-mail', { description: error.message });
     } else {
+      setSubmittedEmail(email);
       setSent(true);
     }
   };
@@ -41,7 +58,8 @@ export default function ForgotPasswordDialog() {
     setOpen(value);
     if (!value) {
       setSent(false);
-      setEmail('');
+      setSubmittedEmail('');
+      reset();
     }
   };
 
@@ -71,36 +89,35 @@ export default function ForgotPasswordDialog() {
               <Mail className="h-7 w-7 text-primary" />
             </div>
             <p className="text-sm text-muted-foreground text-center">
-              Enviamos um link de redefinição para <strong>{email}</strong>. Verifique também a pasta de spam.
+              Enviamos um link de redefinição para <strong>{submittedEmail}</strong>. Verifique também a pasta de spam.
             </p>
             <Button variant="outline" onClick={() => handleOpenChange(false)} className="w-full">
               Fechar
             </Button>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
             <div className="space-y-1.5">
               <Label htmlFor="recovery-email" className="text-sm font-medium">Email</Label>
               <Input
                 id="recovery-email"
                 type="email"
+                autoComplete="email"
                 placeholder="seu@email.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
+                aria-invalid={!!errors.email}
+                {...register('email')}
                 className="h-11 bg-secondary border-border/60 focus-visible:ring-primary/50 focus-visible:border-primary/50"
               />
+              {errors.email && (
+                <p className="text-xs text-destructive">{errors.email.message}</p>
+              )}
             </div>
             <Button
               type="submit"
               className="w-full h-11 font-semibold text-sm rounded-lg"
               disabled={isLoading}
             >
-              {isLoading ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                'Enviar link de redefinição'
-              )}
+              {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Enviar link de redefinição'}
             </Button>
           </form>
         )}
