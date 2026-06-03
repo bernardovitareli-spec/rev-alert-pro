@@ -230,8 +230,18 @@ export function useImportExcel() {
         vehicleGroups.set(placa, list);
       });
 
-      const veiculoPayload: Array<Record<string, unknown>> = [];
-      const placasSemEmpresa: string[] = [];
+      type VeiculoUpsert = {
+        placa_serie: string;
+        tag_obra: string | null;
+        km_atual: number;
+        hora_atual: number;
+        ultima_atualizacao: string | null;
+        retorno_patio: string | null;
+        empresa_id: string;
+        contrato: string | null;
+      };
+      const veiculoPayload: VeiculoUpsert[] = [];
+
 
       for (const [placa, vehicleRows] of vehicleGroups) {
         const firstRow = vehicleRows[0];
