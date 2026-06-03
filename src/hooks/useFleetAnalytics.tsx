@@ -128,108 +128,32 @@ export function useFleetAnalytics(filtros?: FiltrosRelatorio) {
   });
 }
 
-export function useFleetKPIs() {
+export function useFleetKPIs(empresaId?: string | null) {
   return useQuery({
-    queryKey: ['fleet_kpis'],
-    queryFn: async () => {
-      const hoje = new Date();
-      const inicioMesAtual = startOfMonth(hoje);
-      const fimMesAtual = endOfMonth(hoje);
-      const inicioMesAnterior = startOfMonth(subMonths(hoje, 1));
-      const fimMesAnterior = endOfMonth(subMonths(hoje, 1));
-
-      // Fetch histórico
-      const { data: historicoTotal, error: histError } = await supabase
-        .from('historico_revisoes')
-        .select('valor, tempo_servico_dias, data_realizacao');
-      
-      if (histError) throw histError;
-
-      // Fetch veículos para documentos e status
-      const { data: veiculos, error: veicError } = await supabase
-        .from('veiculos')
-        .select('id, crlv_validade, tacografo_validade');
-      
-      if (veicError) throw veicError;
-
-      // Fetch revisões para status crítico
-      const { error: revError } = await supabase
-        .from('revisoes')
-        .select('*');
-      
-      if (revError) throw revError;
-
-      // Calculate gastos por mês
-      const gastoMesAtual = historicoTotal
-        ?.filter(h => {
-          const data = new Date(h.data_realizacao);
-          return data >= inicioMesAtual && data <= fimMesAtual;
-        })
-        .reduce((sum, h) => sum + (h.valor || 0), 0) || 0;
-
-      const gastoMesAnterior = historicoTotal
-        ?.filter(h => {
-          const data = new Date(h.data_realizacao);
-          return data >= inicioMesAnterior && data <= fimMesAnterior;
-        })
-        .reduce((sum, h) => sum + (h.valor || 0), 0) || 0;
-
-      // Tendência
-      let tendenciaGasto: 'up' | 'down' | 'stable' = 'stable';
-      if (gastoMesAnterior > 0) {
-        const diff = ((gastoMesAtual - gastoMesAnterior) / gastoMesAnterior) * 100;
-        if (diff > 5) tendenciaGasto = 'up';
-        else if (diff < -5) tendenciaGasto = 'down';
-      }
-
-      // Tempo médio de entrega
-      const tempos = historicoTotal
-        ?.map(h => h.tempo_servico_dias)
-        .filter(t => t !== null && t !== undefined) || [];
-      const tempoMedioEntrega = tempos.length > 0 
-        ? tempos.reduce((a, b) => (a || 0) + (b || 0), 0) / tempos.length 
-        : 0;
-
-      // Documentos vencidos/atenção
-      let docsVencidos = 0;
-      let docsAtencao = 0;
-      let totalDocs = 0;
-
-      veiculos?.forEach(v => {
-        if (v.crlv_validade) {
-          totalDocs++;
-          const status = calcularStatusDocumento(v.crlv_validade);
-          if (status.status === 'vencido') docsVencidos++;
-          if (status.status === 'atencao') docsAtencao++;
-        }
-        if (v.tacografo_validade) {
-          totalDocs++;
-          const status = calcularStatusDocumento(v.tacografo_validade);
-          if (status.status === 'vencido') docsVencidos++;
-          if (status.status === 'atencao') docsAtencao++;
-        }
+    queryKey: ['fleet_kpis', empresaId ?? 'all'],
+    queryFn: async (): Promise<FleetKPIs> => {
+      const { data, error } = await supabase.rpc('get_fleet_kpis', {
+        p_empresa_id: empresaId ?? null,
       });
-
-      const totalGasto = historicoTotal?.reduce((sum, h) => sum + (h.valor || 0), 0) || 0;
-      const totalRevisoesRealizadas = historicoTotal?.length || 0;
-
-      const kpis: FleetKPIs = {
-        totalGasto,
-        gastoMesAtual,
-        gastoMesAnterior,
-        tendenciaGasto,
-        tempoMedioEntrega: Number(tempoMedioEntrega.toFixed(1)),
-        percentualVeiculosCriticos: 0, // Will be calculated with revision data
-        percentualDocumentosVencidos: totalDocs > 0 ? (docsVencidos / totalDocs) * 100 : 0,
-        percentualDocumentosAtencao: totalDocs > 0 ? (docsAtencao / totalDocs) * 100 : 0,
-        totalRevisoesRealizadas,
-        mediaGastoPorRevisao: totalRevisoesRealizadas > 0 ? totalGasto / totalRevisoesRealizadas : 0,
+      if (error) throw error;
+      const k = (data ?? {}) as Record<string, unknown>;
+      const num = (v: unknown) => (typeof v === 'number' ? v : Number(v ?? 0)) || 0;
+      return {
+        totalGasto: num(k.totalGasto),
+        gastoMesAtual: num(k.gastoMesAtual),
+        gastoMesAnterior: num(k.gastoMesAnterior),
+        tendenciaGasto: (k.tendenciaGasto as 'up' | 'down' | 'stable') ?? 'stable',
+        tempoMedioEntrega: num(k.tempoMedioEntrega),
+        percentualVeiculosCriticos: num(k.percentualVeiculosCriticos),
+        percentualDocumentosVencidos: num(k.percentualDocumentosVencidos),
+        percentualDocumentosAtencao: num(k.percentualDocumentosAtencao),
+        totalRevisoesRealizadas: num(k.totalRevisoesRealizadas),
+        mediaGastoPorRevisao: num(k.mediaGastoPorRevisao),
       };
-
-      return kpis;
     },
   });
 }
+
 
 export function useDocumentosVencidos() {
   return useQuery({
