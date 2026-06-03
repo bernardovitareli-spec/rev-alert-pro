@@ -22,7 +22,16 @@ const Oficinas = lazy(() => import("./pages/Oficinas"));
 const AdminUsuarios = lazy(() => import("./pages/AdminUsuarios"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000,   // 5 minutos
+      gcTime: 10 * 60 * 1000,     // 10 minutos
+      refetchOnWindowFocus: false,
+      retry: 1,
+    },
+  },
+});
 
 function FullScreenLoader({ message }: { message: string }) {
   return (
