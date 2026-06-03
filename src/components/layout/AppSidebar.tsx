@@ -107,6 +107,12 @@ export function AppSidebar() {
       path: '/oficinas',
       tooltip: 'Cadastrar mecânicos parceiros',
     },
+    { 
+      title: 'Configurações', 
+      icon: Settings, 
+      path: '/configuracoes',
+      tooltip: 'Preferências do usuário e conta',
+    },
     ...(isAdmin
       ? [{
           title: 'Usuários',
