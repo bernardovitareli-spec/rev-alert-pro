@@ -15,15 +15,21 @@ export function useFleetAnalytics(filtros?: FiltrosRelatorio) {
   return useQuery({
     queryKey: ['fleet_analytics', filtros],
     queryFn: async () => {
-      // Fetch historico
-      let historicoQuery = supabase
-        .from('historico_revisoes')
-        .select(`
-          *,
-          veiculo:veiculos(placa_serie, empresa:empresas(nome)),
-          tipo_revisao:tipos_revisao(nome),
-          oficina:oficinas(nome)
-        `);
+      // Quando há filtro por empresa, usamos !inner em veiculos+empresas para
+      // que o .eq('veiculo.empresa_id', ...) realmente filtre (PostgREST exige
+      // inner join para filtrar em colunas de relacionamento aninhado).
+      const filtraEmpresa = !!(filtros?.empresaId && filtros.empresaId !== 'all');
+      const selectExpr = filtraEmpresa
+        ? `*,
+           veiculo:veiculos!inner(placa_serie, empresa_id, empresa:empresas!inner(nome)),
+           tipo_revisao:tipos_revisao(nome),
+           oficina:oficinas(nome)`
+        : `*,
+           veiculo:veiculos(placa_serie, empresa_id, empresa:empresas(nome)),
+           tipo_revisao:tipos_revisao(nome),
+           oficina:oficinas(nome)`;
+
+      let historicoQuery = supabase.from('historico_revisoes').select(selectExpr);
 
       if (filtros?.dataInicio) {
         historicoQuery = historicoQuery.gte('data_realizacao', filtros.dataInicio);
@@ -31,8 +37,8 @@ export function useFleetAnalytics(filtros?: FiltrosRelatorio) {
       if (filtros?.dataFim) {
         historicoQuery = historicoQuery.lte('data_realizacao', filtros.dataFim);
       }
-      if (filtros?.empresaId && filtros.empresaId !== 'all') {
-        historicoQuery = historicoQuery.eq('veiculo.empresa_id', filtros.empresaId);
+      if (filtraEmpresa) {
+        historicoQuery = historicoQuery.eq('veiculo.empresa_id', filtros!.empresaId);
       }
       if (filtros?.oficinaId && filtros.oficinaId !== 'all') {
         historicoQuery = historicoQuery.eq('oficina_id', filtros.oficinaId);
