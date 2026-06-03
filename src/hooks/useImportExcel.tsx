@@ -158,22 +158,35 @@ export function useImportExcel() {
       });
 
       let processed = 0;
-      
+
+      // Empresa padrão (MC Terraplenagem) — usada quando o Excel não traz empresa
+      const { data: mcEmpresa, error: mcError } = await supabase
+        .from('empresas')
+        .select('id')
+        .eq('nome', 'MC Terraplenagem')
+        .maybeSingle();
+      if (mcError) throw mcError;
+      const defaultEmpresaId = mcEmpresa?.id ?? null;
+
       for (const [placa, vehicleRows] of vehicleGroups) {
         try {
           const firstRow = vehicleRows[0];
-          
+
           // 1. Upsert empresa if exists and not "-"
-          let empresaId: string | null = null;
+          let empresaId: string | null = defaultEmpresaId;
           if (firstRow.empresa && firstRow.empresa !== '-') {
             const { data: empresaData, error: empresaError } = await supabase
               .from('empresas')
               .upsert({ nome: firstRow.empresa }, { onConflict: 'nome' })
               .select('id')
               .single();
-            
+
             if (empresaError) throw empresaError;
             empresaId = empresaData.id;
+          }
+
+          if (!empresaId) {
+            throw new Error('Empresa não definida e MC Terraplenagem ausente do banco');
           }
           
           // 2. Upsert veiculo

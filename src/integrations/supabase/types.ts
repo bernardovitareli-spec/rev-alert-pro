@@ -324,6 +324,7 @@ export type Database = {
         Row: {
           created_at: string
           email: string | null
+          empresa_id: string
           id: string
           nome: string | null
           updated_at: string
@@ -332,6 +333,7 @@ export type Database = {
         Insert: {
           created_at?: string
           email?: string | null
+          empresa_id: string
           id?: string
           nome?: string | null
           updated_at?: string
@@ -340,12 +342,21 @@ export type Database = {
         Update: {
           created_at?: string
           email?: string | null
+          empresa_id?: string
           id?: string
           nome?: string | null
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "profiles_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       revisoes: {
         Row: {
@@ -484,7 +495,7 @@ export type Database = {
           crlv_url: string | null
           crlv_validade: string | null
           documento_url: string | null
-          empresa_id: string | null
+          empresa_id: string
           hora_atual: number | null
           id: string
           km_atual: number | null
@@ -505,7 +516,7 @@ export type Database = {
           crlv_url?: string | null
           crlv_validade?: string | null
           documento_url?: string | null
-          empresa_id?: string | null
+          empresa_id: string
           hora_atual?: number | null
           id?: string
           km_atual?: number | null
@@ -526,7 +537,7 @@ export type Database = {
           crlv_url?: string | null
           crlv_validade?: string | null
           documento_url?: string | null
-          empresa_id?: string | null
+          empresa_id?: string
           hora_atual?: number | null
           id?: string
           km_atual?: number | null
@@ -567,6 +578,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_admin: { Args: never; Returns: boolean }
+      ordem_servico_empresa_id: { Args: { _os_id: string }; Returns: string }
+      user_empresa_id: { Args: never; Returns: string }
+      veiculo_empresa_id: { Args: { _veiculo_id: string }; Returns: string }
     }
     Enums: {
       app_role: "admin" | "user"
