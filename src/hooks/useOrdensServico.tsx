@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { OrdemServico, AvariaFoto } from '@/types/fleet';
+import { OrdemServico, AvariaFoto, StatusOrdemServico } from '@/types/fleet';
 
 export function useOrdensServico() {
   return useQuery({
@@ -15,6 +15,62 @@ export function useOrdensServico() {
     },
   });
 }
+
+export interface OrdensServicoFilters {
+  veiculoId?: string | null;
+  status?: StatusOrdemServico | 'all';
+  tipo?: 'preventiva' | 'corretiva' | 'all';
+  dataInicio?: string | null; // yyyy-mm-dd
+  dataFim?: string | null;    // yyyy-mm-dd
+}
+
+export function useOrdensServicoPaginated(
+  page: number,
+  pageSize: number,
+  filters: OrdensServicoFilters,
+) {
+  return useQuery({
+    queryKey: ['ordens_servico_paginated', page, pageSize, filters],
+    queryFn: async () => {
+      const from = (page - 1) * pageSize;
+      const to = from + pageSize - 1;
+
+      let q = supabase
+        .from('ordens_servico')
+        .select(
+          '*, veiculo:veiculos(id, placa_serie, tag_obra, empresa:empresas(nome)), tipo_revisao:tipos_revisao(id, nome)',
+          { count: 'exact' },
+        )
+        .order('data_entrada', { ascending: false })
+        .order('created_at', { ascending: false });
+
+      if (filters.veiculoId && filters.veiculoId !== 'all') {
+        q = q.eq('veiculo_id', filters.veiculoId);
+      }
+      if (filters.status && filters.status !== 'all') {
+        q = q.eq('status', filters.status);
+      }
+      if (filters.tipo && filters.tipo !== 'all') {
+        q = q.eq('tipo_manutencao', filters.tipo);
+      }
+      if (filters.dataInicio) {
+        q = q.gte('data_entrada', filters.dataInicio);
+      }
+      if (filters.dataFim) {
+        q = q.lte('data_entrada', filters.dataFim);
+      }
+
+      const { data, error, count } = await q.range(from, to);
+      if (error) throw error;
+      return {
+        rows: (data ?? []) as any[],
+        total: count ?? 0,
+      };
+    },
+    placeholderData: (prev) => prev,
+  });
+}
+
 
 export function useCreateOrdemServico() {
   const qc = useQueryClient();
@@ -40,7 +96,7 @@ export function useCreateOrdemServico() {
       if (error) throw error;
       return data;
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['ordens_servico'] }),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['ordens_servico'] }); qc.invalidateQueries({ queryKey: ['ordens_servico_paginated'] }); },
   });
 }
 
@@ -54,7 +110,7 @@ export function useUpdateOrdemServico() {
         .eq('id', id);
       if (error) throw error;
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['ordens_servico'] }),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['ordens_servico'] }); qc.invalidateQueries({ queryKey: ['ordens_servico_paginated'] }); },
   });
 }
 
@@ -83,7 +139,7 @@ export function useDeleteOrdemServico() {
       const { error } = await supabase.from('ordens_servico').delete().eq('id', id);
       if (error) throw error;
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['ordens_servico'] }),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['ordens_servico'] }); qc.invalidateQueries({ queryKey: ['ordens_servico_paginated'] }); },
   });
 }
 

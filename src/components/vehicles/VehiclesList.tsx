@@ -1,14 +1,17 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useVeiculosComRevisoes } from '@/hooks/useFleetData';
 import { VehicleCard } from './VehicleCard';
 import { VehicleFilters } from './VehicleFilters';
 import { FilterOptions, InsightFilter, VeiculoComRevisoes } from '@/types/fleet';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 
 import { useSearchParams } from 'react-router-dom';
 import { differenceInDays, parseISO } from 'date-fns';
-import { X } from 'lucide-react';
+import { X, ChevronLeft, ChevronRight } from 'lucide-react';
+
+const PAGE_SIZE = 20;
 
 const INSIGHT_LABELS: Record<string, string> = {
   km_desatualizado: 'KM/Hora Desatualizado (sem atualização há +30 dias)',
@@ -120,6 +123,23 @@ export function VehiclesList() {
     setSearchParams(searchParams);
   };
 
+  // Pagination
+  const [page, setPage] = useState(1);
+  const totalPages = Math.max(1, Math.ceil(filteredVehicles.length / PAGE_SIZE));
+
+  // Reset to first page whenever filter results change
+  useEffect(() => {
+    setPage(1);
+  }, [filters]);
+
+  useEffect(() => {
+    if (page > totalPages) setPage(totalPages);
+  }, [totalPages, page]);
+
+  const startIndex = (page - 1) * PAGE_SIZE;
+  const endIndex = Math.min(startIndex + PAGE_SIZE, filteredVehicles.length);
+  const pageVehicles = filteredVehicles.slice(startIndex, endIndex);
+
   if (isLoading) {
     return (
       <div className="space-y-4">
@@ -165,14 +185,41 @@ export function VehiclesList() {
         </Card>
       ) : (
         <>
-          <p className="text-sm text-muted-foreground">
-            {filteredVehicles.length} veículo{filteredVehicles.length !== 1 ? 's' : ''} encontrado{filteredVehicles.length !== 1 ? 's' : ''}
-          </p>
+          <div className="flex items-center justify-between flex-wrap gap-2">
+            <p className="text-sm text-muted-foreground">
+              Mostrando <span className="font-medium text-foreground">{startIndex + 1}-{endIndex}</span> de{' '}
+              <span className="font-medium text-foreground">{filteredVehicles.length}</span>{' '}
+              veículo{filteredVehicles.length !== 1 ? 's' : ''}
+            </p>
+            {totalPages > 1 && (
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  disabled={page === 1}
+                >
+                  <ChevronLeft className="h-4 w-4 mr-1" /> Anterior
+                </Button>
+                <span className="text-sm text-muted-foreground">
+                  Página {page} de {totalPages}
+                </span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={page === totalPages}
+                >
+                  Próxima <ChevronRight className="h-4 w-4 ml-1" />
+                </Button>
+              </div>
+            )}
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filteredVehicles.map((veiculo) => (
-              <VehicleCard 
-                key={veiculo.id} 
-                veiculo={veiculo} 
+            {pageVehicles.map((veiculo) => (
+              <VehicleCard
+                key={veiculo.id}
+                veiculo={veiculo}
                 showDeliveryInfo={filters.statusExecucao === 'em_servico'}
                 insightFilter={filters.insightFilter}
               />
@@ -183,3 +230,4 @@ export function VehiclesList() {
     </div>
   );
 }
+
