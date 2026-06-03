@@ -368,6 +368,7 @@ export default function Empresas() {
           <CardContent>
             {empresas && empresas.length > 0 ? (
               <Table>
+                <caption className="sr-only">Lista de empresas cadastradas com nome, data de criação e ações disponíveis.</caption>
                 <TableHeader>
                   <TableRow>
                     <TableHead>Nome</TableHead>

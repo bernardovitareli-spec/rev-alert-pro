@@ -86,8 +86,8 @@ export function VeiculoHeader({
       {/* Top bar */}
       <div className="flex items-start justify-between">
         <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" onClick={() => navigate('/veiculos')}>
-            <ArrowLeft className="h-5 w-5" />
+          <Button variant="ghost" size="icon" onClick={() => navigate('/veiculos')} aria-label="Voltar para a lista de veículos">
+            <ArrowLeft className="h-5 w-5" aria-hidden="true" />
           </Button>
           <div className={cn(
             'flex h-12 w-12 items-center justify-center rounded-lg',

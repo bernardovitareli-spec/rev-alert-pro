@@ -258,8 +258,8 @@ export default function Calendario() {
 
               {/* Clear filters */}
               {hasActiveFilters && (
-                <Button variant="ghost" size="icon" onClick={clearFilters} title="Limpar filtros">
-                  <X className="h-4 w-4" />
+                <Button variant="ghost" size="icon" onClick={clearFilters} title="Limpar filtros" aria-label="Limpar filtros">
+                  <X className="h-4 w-4" aria-hidden="true" />
                 </Button>
               )}
             </div>

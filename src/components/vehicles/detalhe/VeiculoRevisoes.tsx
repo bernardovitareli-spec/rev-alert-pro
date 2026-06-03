@@ -52,6 +52,7 @@ export function VeiculoRevisoes({
           ) : (
             <div className="overflow-x-auto">
               <Table>
+                <caption className="sr-only">Revisões programadas do veículo, com tipo, última realização, próximo vencimento e status.</caption>
                 <TableHeader>
                   <TableRow>
                     <TableHead>Tipo de Revisão</TableHead>

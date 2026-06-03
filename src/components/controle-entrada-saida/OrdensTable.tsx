@@ -30,6 +30,7 @@ export function OrdensTable({ ordens, isAdmin, onChanged }: Props) {
     <Card>
       <CardContent className="p-0">
         <Table>
+          <caption className="sr-only">Lista de ordens de serviço com veículo, status, datas de entrada e saída e ações disponíveis.</caption>
           <TableHeader>
             <TableRow>
               <TableHead>Veículo</TableHead>

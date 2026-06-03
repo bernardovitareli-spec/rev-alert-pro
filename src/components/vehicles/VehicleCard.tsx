@@ -178,22 +178,25 @@ export function VehicleCard({ veiculo, showDeliveryInfo = false, insightFilter }
           {/* Revision summary */}
           <div className="flex items-center gap-2 pt-2 border-t">
             {veiculo.revisoesCriticas > 0 && (
-              <Badge variant="secondary" className="bg-status-critical/10 text-status-critical border-0">
+              <Badge variant="secondary" className="bg-status-critical/10 text-status-critical border-0 gap-1">
+                <AlertTriangle className="h-3 w-3" aria-hidden="true" />
                 {veiculo.revisoesCriticas} vencida{veiculo.revisoesCriticas > 1 ? 's' : ''}
               </Badge>
             )}
             {veiculo.revisoesAtencao > 0 && (
-              <Badge variant="secondary" className="bg-status-warning/10 text-status-warning border-0">
+              <Badge variant="secondary" className="bg-status-warning/10 text-status-warning border-0 gap-1">
+                <Clock className="h-3 w-3" aria-hidden="true" />
                 {veiculo.revisoesAtencao} atenção
               </Badge>
             )}
             {veiculo.revisoesOk > 0 && (
-              <Badge variant="secondary" className="bg-status-ok/10 text-status-ok border-0">
+              <Badge variant="secondary" className="bg-status-ok/10 text-status-ok border-0 gap-1">
+                <CheckCircle2 className="h-3 w-3" aria-hidden="true" />
                 {veiculo.revisoesOk} ok
               </Badge>
             )}
             <div className="flex-1" />
-            <ChevronRight className="h-5 w-5 text-muted-foreground" />
+            <ChevronRight className="h-5 w-5 text-muted-foreground" aria-hidden="true" />
           </div>
         </div>
       </CardContent>
