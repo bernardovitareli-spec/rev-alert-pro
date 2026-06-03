@@ -1,6 +1,4 @@
 import { useNavigate } from 'react-router-dom';
-import { format } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
 import { ExternalLink, AlertCircle, AlertTriangle, CheckCircle, Car, Wrench } from 'lucide-react';
 import {
   Dialog,
@@ -84,7 +82,7 @@ export function RevisionEditModal({ open, onOpenChange, revision }: RevisionEdit
         });
         toast.success('Status atualizado!');
       }
-    } catch (error) {
+    } catch (_error) {
       toast.error('Erro ao atualizar status');
     }
   };
@@ -96,7 +94,7 @@ export function RevisionEditModal({ open, onOpenChange, revision }: RevisionEdit
         previsaoEntrega: date,
       });
       toast.success('Previsão de entrega atualizada!');
-    } catch (error) {
+    } catch (_error) {
       toast.error('Erro ao atualizar previsão');
     }
   };
@@ -108,7 +106,7 @@ export function RevisionEditModal({ open, onOpenChange, revision }: RevisionEdit
         oficinaId,
       });
       toast.success('Oficina atualizada!');
-    } catch (error) {
+    } catch (_error) {
       toast.error('Erro ao atualizar oficina');
     }
   };
@@ -120,7 +118,7 @@ export function RevisionEditModal({ open, onOpenChange, revision }: RevisionEdit
         ordemServico,
       });
       toast.success('Ordem de serviço atualizada!');
-    } catch (error) {
+    } catch (_error) {
       toast.error('Erro ao atualizar OS');
     }
   };
@@ -131,7 +129,7 @@ export function RevisionEditModal({ open, onOpenChange, revision }: RevisionEdit
         revisaoId: revision.id,
         notaFiscalUrl,
       });
-    } catch (error) {
+    } catch (_error) {
       toast.error('Erro ao atualizar anexo');
     }
   };
@@ -143,7 +141,7 @@ export function RevisionEditModal({ open, onOpenChange, revision }: RevisionEdit
         valor,
       });
       toast.success('Valor atualizado!');
-    } catch (error) {
+    } catch (_error) {
       toast.error('Erro ao atualizar valor');
     }
   };
@@ -155,7 +153,7 @@ export function RevisionEditModal({ open, onOpenChange, revision }: RevisionEdit
         observacoes,
       });
       // Toast is handled inside the ObservacoesInput component
-    } catch (error) {
+    } catch (_error) {
       toast.error('Erro ao atualizar observações');
     }
   };
@@ -169,7 +167,7 @@ export function RevisionEditModal({ open, onOpenChange, revision }: RevisionEdit
       });
       toast.success('Revisão marcada como realizada!');
       onOpenChange(false);
-    } catch (error) {
+    } catch (_error) {
       toast.error('Erro ao marcar revisão');
     }
   };

@@ -8,7 +8,7 @@ import {
   AlertCircle,
   CalendarX
 } from 'lucide-react';
-import { PeriodCard } from './PeriodCard';
+
 import { DrilldownModal } from './DrilldownModal';
 import { useDeliveryStats } from '@/hooks/useDeliveryStats';
 import { Skeleton } from '@/components/ui/skeleton';

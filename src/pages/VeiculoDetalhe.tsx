@@ -93,7 +93,7 @@ export default function VeiculoDetalhe() {
       });
       toast.success('Valores atualizados com sucesso!');
       setIsEditing(false);
-    } catch (err) {
+    } catch (_err) {
       toast.error('Erro ao atualizar valores');
     }
   };
@@ -120,7 +120,7 @@ export default function VeiculoDetalhe() {
       });
       toast.success('Tag da Obra atualizada com sucesso!');
       setIsEditingTagObra(false);
-    } catch (err) {
+    } catch (_err) {
       toast.error('Erro ao atualizar Tag da Obra');
     }
   };
@@ -147,7 +147,7 @@ export default function VeiculoDetalhe() {
       });
       toast.success('Contrato atualizado com sucesso!');
       setIsEditingContrato(false);
-    } catch (err) {
+    } catch (_err) {
       toast.error('Erro ao atualizar Contrato');
     }
   };
@@ -174,7 +174,7 @@ export default function VeiculoDetalhe() {
       });
       toast.success('Empresa atualizada com sucesso!');
       setIsEditingEmpresa(false);
-    } catch (err) {
+    } catch (_err) {
       toast.error('Erro ao atualizar Empresa');
     }
   };
@@ -189,7 +189,7 @@ export default function VeiculoDetalhe() {
         horaAtual: veiculo.hora_atual,
       });
       toast.success('Revisão marcada como realizada!');
-    } catch (err) {
+    } catch (_err) {
       toast.error('Erro ao marcar revisão');
     }
   };
@@ -209,7 +209,7 @@ export default function VeiculoDetalhe() {
         statusExecucao: newStatus,
       });
       toast.success('Status atualizado!');
-    } catch (err) {
+    } catch (_err) {
       toast.error('Erro ao atualizar status');
     }
   };
@@ -221,7 +221,7 @@ export default function VeiculoDetalhe() {
         previsaoEntrega: date,
       });
       toast.success('Previsão de entrega atualizada!');
-    } catch (err) {
+    } catch (_err) {
       toast.error('Erro ao atualizar previsão');
     }
   };
@@ -233,7 +233,7 @@ export default function VeiculoDetalhe() {
         oficinaId,
       });
       toast.success('Oficina atualizada!');
-    } catch (err) {
+    } catch (_err) {
       toast.error('Erro ao atualizar oficina');
     }
   };
@@ -245,7 +245,7 @@ export default function VeiculoDetalhe() {
         ordemServico,
       });
       toast.success('Ordem de serviço atualizada!');
-    } catch (err) {
+    } catch (_err) {
       toast.error('Erro ao atualizar OS');
     }
   };
@@ -256,7 +256,7 @@ export default function VeiculoDetalhe() {
         revisaoId,
         notaFiscalUrl,
       });
-    } catch (err) {
+    } catch (_err) {
       toast.error('Erro ao atualizar anexo');
     }
   };
@@ -268,7 +268,7 @@ export default function VeiculoDetalhe() {
         valor,
       });
       toast.success('Valor atualizado!');
-    } catch (err) {
+    } catch (_err) {
       toast.error('Erro ao atualizar valor');
     }
   };
@@ -287,7 +287,7 @@ export default function VeiculoDetalhe() {
         id: veiculo.id,
         ...updateData,
       });
-    } catch (err) {
+    } catch (_err) {
       toast.error('Erro ao atualizar documento');
     }
   };
@@ -306,7 +306,7 @@ export default function VeiculoDetalhe() {
         ...updateData,
       });
       toast.success('Validade atualizada!');
-    } catch (err) {
+    } catch (_err) {
       toast.error('Erro ao atualizar validade');
     }
   };

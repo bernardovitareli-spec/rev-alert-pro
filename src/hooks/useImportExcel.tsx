@@ -32,7 +32,7 @@ const COLUMN_MAP: Record<string, keyof ImportedRow> = {
 function parseNumber(value: any): number {
   if (!value) return 0;
   if (typeof value === 'number') return Math.round(value);
-  const str = String(value).replace(/[,\.]/g, '').replace(/[^\d-]/g, '');
+  const str = String(value).replace(/[,.]/g, '').replace(/[^\d-]/g, '');
   return parseInt(str, 10) || 0;
 }
 

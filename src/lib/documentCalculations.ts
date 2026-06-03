@@ -1,5 +1,5 @@
 import { differenceInDays, parseISO } from 'date-fns';
-import { DocumentStatus, DocumentoStatusInfo, VeiculoDocumentosStatus } from '@/types/fleet';
+import { DocumentStatus, DocumentoStatusInfo } from '@/types/fleet';
 
 const DIAS_ATENCAO = 30; // Alertar quando faltar 30 dias para vencer
 

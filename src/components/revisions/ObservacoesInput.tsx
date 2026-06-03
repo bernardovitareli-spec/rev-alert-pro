@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback, forwardRef } from 'react';
 import { Textarea } from '@/components/ui/textarea';
 import { MessageSquare, Check, Loader2 } from 'lucide-react';
-import { cn } from '@/lib/utils';
 
 interface ObservacoesInputProps {
   value: string | null;

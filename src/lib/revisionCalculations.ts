@@ -1,4 +1,4 @@
-import { Revisao, RevisaoComStatus, RevisionStatus, VeiculoComRevisoes, Veiculo, ExecutionStatus } from '@/types/fleet';
+import { Revisao, RevisaoComStatus, RevisionStatus, VeiculoComRevisoes, Veiculo } from '@/types/fleet';
 
 const DIAS_ALERTA = 7; // Alert 7 days before
 const MEDIA_KM_DIA = 150; // Average km per day for estimation

@@ -22,7 +22,7 @@ interface ValidadeDocumentoInputProps {
 }
 
 export const ValidadeDocumentoInput = forwardRef<HTMLButtonElement, ValidadeDocumentoInputProps>(
-  ({ value, onChange, disabled = false, label = "Validade" }, ref) => {
+  ({ value, onChange, disabled = false }, ref) => {
     const [open, setOpen] = useState(false);
     
     const statusInfo = calcularStatusDocumento(value);

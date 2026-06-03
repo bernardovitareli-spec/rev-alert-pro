@@ -18,7 +18,7 @@ import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { ExternalLink } from 'lucide-react';
 import { RevisionDrilldownItem, PeriodType, ExecutionStatus } from '@/types/fleet';
-import { getStatusLabel, getStatusColor, formatarKmOuHora } from '@/lib/revisionCalculations';
+import { formatarKmOuHora } from '@/lib/revisionCalculations';
 import { StatusExecucaoSelect } from '@/components/revisions/StatusExecucaoSelect';
 import { PrevisaoEntregaInput } from '@/components/revisions/PrevisaoEntregaInput';
 import { OficinaSelect } from '@/components/revisions/OficinaSelect';
@@ -64,7 +64,7 @@ export function DrilldownModal({ open, onOpenChange, items, periodType }: Drilld
           horaAtual: item.horaAtual,
         });
         toast.success('Revisão marcada como realizada!');
-      } catch (err) {
+      } catch (_err) {
         toast.error('Erro ao marcar revisão');
       }
       return;
@@ -76,7 +76,7 @@ export function DrilldownModal({ open, onOpenChange, items, periodType }: Drilld
         statusExecucao: newStatus,
       });
       toast.success('Status atualizado!');
-    } catch (err) {
+    } catch (_err) {
       toast.error('Erro ao atualizar status');
     }
   };
@@ -88,7 +88,7 @@ export function DrilldownModal({ open, onOpenChange, items, periodType }: Drilld
         previsaoEntrega: date,
       });
       toast.success('Previsão de entrega atualizada!');
-    } catch (err) {
+    } catch (_err) {
       toast.error('Erro ao atualizar previsão');
     }
   };
@@ -100,7 +100,7 @@ export function DrilldownModal({ open, onOpenChange, items, periodType }: Drilld
         oficinaId,
       });
       toast.success('Oficina atualizada!');
-    } catch (err) {
+    } catch (_err) {
       toast.error('Erro ao atualizar oficina');
     }
   };
@@ -112,7 +112,7 @@ export function DrilldownModal({ open, onOpenChange, items, periodType }: Drilld
         valor,
       });
       toast.success('Valor atualizado!');
-    } catch (err) {
+    } catch (_err) {
       toast.error('Erro ao atualizar valor');
     }
   };

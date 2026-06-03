@@ -104,7 +104,7 @@ export function ImportExcel() {
       const data = await processFile(selectedFile);
       setPreviewData(data.slice(0, 5)); // Show first 5 rows as preview
       toast.success('Arquivo carregado', { description: `${data.length} registros encontrados` });
-    } catch (error) {
+    } catch (_error) {
       toast.error('Erro ao processar arquivo', { description: 'Verifique se o formato está correto' });
       setFile(null);
       setPreviewData(null);
@@ -128,7 +128,7 @@ export function ImportExcel() {
           description: `${result.success} veículos importados, ${result.errors.length} erros` 
         });
       }
-    } catch (error) {
+    } catch (_error) {
       toast.error('Erro na importação', { description: 'Tente novamente' });
     }
   };

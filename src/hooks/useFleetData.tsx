@@ -243,7 +243,7 @@ export function useVeiculoDetalhe(id: string) {
         return {
           ...rev,
           tipo_revisao: tiposRevisao?.find(t => t.id === rev.tipo_revisao_id),
-          oficina: original?.oficina,
+          oficina: original?.oficina ?? undefined,
         };
       });
 

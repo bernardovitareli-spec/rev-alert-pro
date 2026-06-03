@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { addDays, startOfDay, endOfDay, differenceInDays } from 'date-fns';
+import { addDays, startOfDay, differenceInDays } from 'date-fns';
 import { calcularStatusRevisao } from '@/lib/revisionCalculations';
 import type { Revisao } from '@/types/fleet';
 
@@ -34,20 +34,14 @@ export function useForecast() {
     queryKey: ['forecast'],
     queryFn: async (): Promise<ForecastData> => {
       const hoje = startOfDay(new Date());
-      const em30dias = addDays(hoje, 30);
-      const em60dias = addDays(hoje, 60);
-      const em90dias = addDays(hoje, 90);
-      const em7dias = addDays(hoje, 7);
 
       const [
         { data: veiculos },
         { data: revisoes },
-        { data: tiposRevisao },
         { data: historico }
       ] = await Promise.all([
         supabase.from('veiculos').select('id, km_atual, hora_atual'),
         supabase.from('revisoes').select('*'),
-        supabase.from('tipos_revisao').select('id, nome'),
         supabase.from('historico_revisoes').select('tipo_revisao_id, valor')
       ]);
 
@@ -75,9 +69,9 @@ export function useForecast() {
       const veiculosMap = new Map(veiculosList.map(v => [v.id, v]));
 
       // Análise de revisões pendentes
-      let periodo30 = { quantidade: 0, custoEstimado: 0 };
-      let periodo60 = { quantidade: 0, custoEstimado: 0 };
-      let periodo90 = { quantidade: 0, custoEstimado: 0 };
+      const periodo30 = { quantidade: 0, custoEstimado: 0 };
+      const periodo60 = { quantidade: 0, custoEstimado: 0 };
+      const periodo90 = { quantidade: 0, custoEstimado: 0 };
       let proximaSemana = 0;
       const contagemPorDia: Record<string, number> = {};
 
@@ -141,9 +135,6 @@ export function useDocumentForecast() {
     queryKey: ['document_forecast'],
     queryFn: async (): Promise<DocumentForecast> => {
       const hoje = startOfDay(new Date());
-      const em30dias = addDays(hoje, 30);
-      const em60dias = addDays(hoje, 60);
-      const em90dias = addDays(hoje, 90);
 
       const { data: veiculos } = await supabase
         .from('veiculos')
