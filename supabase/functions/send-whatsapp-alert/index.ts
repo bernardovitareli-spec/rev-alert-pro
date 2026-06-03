@@ -1,4 +1,4 @@
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.91.1";
 
 // CORS: allowlist explícita lida de ALLOWED_ORIGIN (separar múltiplos por vírgula).
 function buildCorsHeaders(req: Request): Record<string, string> {
