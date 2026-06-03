@@ -133,8 +133,9 @@ export function useFleetKPIs(empresaId?: string | null) {
     queryKey: ['fleet_kpis', empresaId ?? 'all'],
     queryFn: async (): Promise<FleetKPIs> => {
       const { data, error } = await supabase.rpc('get_fleet_kpis', {
-        p_empresa_id: empresaId ?? null,
+        p_empresa_id: empresaId ?? undefined,
       });
+
       if (error) throw error;
       const k = (data ?? {}) as Record<string, unknown>;
       const num = (v: unknown) => (typeof v === 'number' ? v : Number(v ?? 0)) || 0;
