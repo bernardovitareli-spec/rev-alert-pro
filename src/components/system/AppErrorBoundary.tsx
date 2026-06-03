@@ -28,6 +28,20 @@ class AppErrorBoundary extends React.Component<AppErrorBoundaryProps, AppErrorBo
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     console.error('Erro de renderização capturado:', error, errorInfo);
+
+    // Auto-recovery para erros causados por extensões do navegador
+    // (Google Tradutor e similares modificam o DOM e quebram o React)
+    const msg = error?.message || '';
+    const isDomMutationError =
+      msg.includes("insertBefore") ||
+      msg.includes("removeChild") ||
+      msg.includes("Failed to execute") ||
+      msg.includes("NotFoundError");
+
+    if (isDomMutationError && !sessionStorage.getItem('__autoReloaded')) {
+      sessionStorage.setItem('__autoReloaded', '1');
+      window.location.reload();
+    }
   }
 
   handleReload = () => {
