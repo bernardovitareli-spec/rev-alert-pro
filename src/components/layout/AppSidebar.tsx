@@ -30,14 +30,6 @@ import {
   SidebarMenuItem,
 } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
-
-export function AppSidebar() {
-import { Button } from '@/components/ui/button';
 import { useIsAdmin } from '@/hooks/useIsAdmin';
 import {
   Tooltip,
