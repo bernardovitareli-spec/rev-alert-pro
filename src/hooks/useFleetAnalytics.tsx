@@ -9,7 +9,7 @@ import {
   VeiculoDocumentosStatus,
 } from '@/types/fleet';
 import { calcularStatusDocumento } from '@/lib/documentCalculations';
-import { startOfMonth, endOfMonth, subMonths } from 'date-fns';
+
 
 export function useFleetAnalytics(filtros?: FiltrosRelatorio) {
   return useQuery({
