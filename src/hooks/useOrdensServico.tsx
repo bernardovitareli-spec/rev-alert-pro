@@ -98,13 +98,10 @@ export function useUploadAvariaFoto() {
         .upload(path, file);
       if (uploadError) throw uploadError;
 
-      const { data: urlData } = supabase.storage
-        .from('avarias-fotos')
-        .getPublicUrl(path);
-
+      // Armazena apenas o path; signed URL é gerada sob demanda.
       const { error } = await supabase
         .from('avarias_fotos')
-        .insert({ ordem_servico_id: ordemServicoId, foto_url: urlData.publicUrl } as any);
+        .insert({ ordem_servico_id: ordemServicoId, foto_url: path } as any);
       if (error) throw error;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['avarias_fotos'] }),
