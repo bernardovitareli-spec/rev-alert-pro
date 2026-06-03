@@ -773,25 +773,123 @@ export default function ControleEntradaSaida() {
         </div>
 
         {/* Filtros */}
-        <div className="flex gap-3">
-          <Select value={filtroStatus} onValueChange={(v) => setFiltroStatus(v as any)}>
-            <SelectTrigger className="w-[180px]"><SelectValue placeholder="Status" /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todos os Status</SelectItem>
-              <SelectItem value="aberta">Aberta</SelectItem>
-              <SelectItem value="em_andamento">Em Andamento</SelectItem>
-              <SelectItem value="concluida">Concluída</SelectItem>
-            </SelectContent>
-          </Select>
-          <Select value={filtroTipo} onValueChange={(v) => setFiltroTipo(v as any)}>
-            <SelectTrigger className="w-[180px]"><SelectValue placeholder="Tipo" /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todos os Tipos</SelectItem>
-              <SelectItem value="corretiva">Corretiva</SelectItem>
-              <SelectItem value="preventiva">Preventiva</SelectItem>
-            </SelectContent>
-          </Select>
+        <div className="flex flex-wrap gap-3 items-end">
+          <div className="grid gap-1.5 min-w-[220px] flex-1">
+            <Label className="text-xs">Veículo</Label>
+            <div className="flex flex-col gap-1">
+              <Input
+                type="search"
+                placeholder="Buscar placa ou tag..."
+                value={veiculoSearch}
+                onChange={(e) => setVeiculoSearch(e.target.value)}
+                className="h-9"
+              />
+              <select
+                value={filtroVeiculo}
+                onChange={(e) => setFiltroVeiculo(e.target.value)}
+                className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring"
+                translate="no"
+              >
+                <option value="all">Todos os veículos</option>
+                {veiculosFiltrados.map((v: any) => (
+                  <option key={v.id} value={v.id}>
+                    {v.placa_serie}{v.tag_obra ? ` - ${v.tag_obra}` : ''}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <div className="grid gap-1.5">
+            <Label className="text-xs">Status</Label>
+            <Select value={filtroStatus} onValueChange={(v) => setFiltroStatus(v as any)}>
+              <SelectTrigger className="w-[170px] h-9"><SelectValue placeholder="Status" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos os Status</SelectItem>
+                <SelectItem value="aberta">Aberta</SelectItem>
+                <SelectItem value="em_andamento">Em Andamento</SelectItem>
+                <SelectItem value="concluida">Concluída</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="grid gap-1.5">
+            <Label className="text-xs">Tipo</Label>
+            <Select value={filtroTipo} onValueChange={(v) => setFiltroTipo(v as any)}>
+              <SelectTrigger className="w-[170px] h-9"><SelectValue placeholder="Tipo" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos os Tipos</SelectItem>
+                <SelectItem value="corretiva">Corretiva</SelectItem>
+                <SelectItem value="preventiva">Preventiva</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="grid gap-1.5">
+            <Label className="text-xs">Entrada de</Label>
+            <Input
+              type="date"
+              value={dataInicio}
+              onChange={(e) => setDataInicio(e.target.value)}
+              className="h-9 w-[160px]"
+            />
+          </div>
+
+          <div className="grid gap-1.5">
+            <Label className="text-xs">até</Label>
+            <Input
+              type="date"
+              value={dataFim}
+              onChange={(e) => setDataFim(e.target.value)}
+              className="h-9 w-[160px]"
+            />
+          </div>
+
+          {hasActiveFilters && (
+            <Button variant="ghost" size="sm" onClick={clearAll} className="h-9 gap-1">
+              <X className="h-4 w-4" /> Limpar
+            </Button>
+          )}
         </div>
+
+        {/* Contador + paginação topo */}
+        <div className="flex items-center justify-between flex-wrap gap-2">
+          <p className="text-sm text-muted-foreground">
+            {total === 0 ? (
+              'Nenhuma ordem encontrada'
+            ) : (
+              <>
+                Mostrando <span className="font-medium text-foreground">{startIndex}-{endIndex}</span> de{' '}
+                <span className="font-medium text-foreground">{total}</span> ordens
+                {isFetching && <span className="ml-2 text-xs italic">(atualizando...)</span>}
+              </>
+            )}
+          </p>
+          {totalPages > 1 && (
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                disabled={page === 1 || isFetching}
+              >
+                <ChevronLeft className="h-4 w-4 mr-1" /> Anterior
+              </Button>
+              <span className="text-sm text-muted-foreground">
+                Página {page} de {totalPages}
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                disabled={page === totalPages || isFetching}
+              >
+                Próxima <ChevronRight className="h-4 w-4 ml-1" />
+              </Button>
+            </div>
+          )}
+        </div>
+
 
         {/* Tabela */}
         {isLoading ? (
