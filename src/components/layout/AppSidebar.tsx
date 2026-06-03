@@ -10,7 +10,8 @@ import {
   FileBarChart,
   Truck,
   ChevronRight,
-  Users
+  Users,
+  SlidersHorizontal
 } from 'lucide-react';
 import logoMC from '@/assets/logo-mc-20anos.jpg';
 import { Link, useLocation } from 'react-router-dom';
@@ -106,6 +107,12 @@ export function AppSidebar() {
       icon: Settings, 
       path: '/oficinas',
       tooltip: 'Cadastrar mecânicos parceiros',
+    },
+    { 
+      title: 'Configurações', 
+      icon: SlidersHorizontal, 
+      path: '/configuracoes',
+      tooltip: 'Preferências do usuário e conta',
     },
     ...(isAdmin
       ? [{

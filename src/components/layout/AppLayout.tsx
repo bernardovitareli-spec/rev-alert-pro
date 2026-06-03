@@ -1,6 +1,8 @@
 import { ReactNode } from 'react';
 import { SidebarProvider, SidebarInset, SidebarTrigger } from '@/components/ui/sidebar';
 import { AppSidebar } from './AppSidebar';
+import { NotificationsDropdown } from './NotificationsDropdown';
+import { ThemeToggle } from '@/components/theme/ThemeToggle';
 
 interface AppLayoutProps {
   children: ReactNode;
@@ -26,6 +28,10 @@ export function AppLayout({ children, title }: AppLayoutProps) {
               <h1 className="text-lg font-bold text-foreground tracking-tight">{title}</h1>
             </div>
           )}
+          <div className="ml-auto flex items-center gap-1">
+            <NotificationsDropdown />
+            <ThemeToggle />
+          </div>
         </header>
         <main id="main-content" tabIndex={-1} className="flex-1 overflow-auto p-6 focus:outline-none">
           {children}

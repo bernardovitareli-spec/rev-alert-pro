@@ -90,6 +90,73 @@
     --chart-4: 263 81% 57%;
     --chart-5: 0 72% 51%;
   }
+
+  /* ============================================
+     Light Mode — paleta clara mantendo identidade teal
+     ============================================ */
+  .light {
+    --background: 210 25% 98%;
+    --foreground: 220 40% 12%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 220 40% 12%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 40% 12%;
+
+    --primary: 160 84% 35%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 210 20% 94%;
+    --secondary-foreground: 220 40% 18%;
+
+    --muted: 210 20% 94%;
+    --muted-foreground: 220 12% 40%;
+
+    --accent: 160 84% 35%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 72% 45%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 220 15% 88%;
+    --input: 220 15% 88%;
+    --ring: 160 84% 35%;
+
+    --status-critical: 0 72% 48%;
+    --status-critical-foreground: 0 0% 100%;
+    --status-critical-light: 0 80% 96%;
+    --status-critical-border: 0 72% 75%;
+
+    --status-warning: 32 95% 44%;
+    --status-warning-foreground: 0 0% 100%;
+    --status-warning-light: 38 95% 94%;
+    --status-warning-border: 38 92% 70%;
+
+    --status-ok: 160 84% 32%;
+    --status-ok-foreground: 0 0% 100%;
+    --status-ok-light: 160 70% 94%;
+    --status-ok-border: 160 60% 70%;
+
+    --status-service: 263 70% 50%;
+    --status-service-foreground: 0 0% 100%;
+    --status-service-light: 263 70% 95%;
+
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 220 40% 18%;
+    --sidebar-primary: 160 84% 32%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 210 20% 94%;
+    --sidebar-accent-foreground: 220 40% 18%;
+    --sidebar-border: 220 15% 88%;
+    --sidebar-ring: 160 84% 32%;
+
+    --chart-1: 160 84% 35%;
+    --chart-2: 190 80% 40%;
+    --chart-3: 32 95% 44%;
+    --chart-4: 263 70% 50%;
+    --chart-5: 0 72% 48%;
+  }
 }
 
 @layer base {
