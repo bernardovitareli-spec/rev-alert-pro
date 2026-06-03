@@ -1,14 +1,17 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useVeiculosComRevisoes } from '@/hooks/useFleetData';
 import { VehicleCard } from './VehicleCard';
 import { VehicleFilters } from './VehicleFilters';
 import { FilterOptions, InsightFilter, VeiculoComRevisoes } from '@/types/fleet';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 
 import { useSearchParams } from 'react-router-dom';
 import { differenceInDays, parseISO } from 'date-fns';
-import { X } from 'lucide-react';
+import { X, ChevronLeft, ChevronRight } from 'lucide-react';
+
+const PAGE_SIZE = 20;
 
 const INSIGHT_LABELS: Record<string, string> = {
   km_desatualizado: 'KM/Hora Desatualizado (sem atualização há +30 dias)',
