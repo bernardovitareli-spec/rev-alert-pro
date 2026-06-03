@@ -1,61 +1,59 @@
+## Contexto importante sobre o ambiente Lovable
 
+Antes do plano, dois pontos do prompt **não se aplicam ao Lovable** e precisam ser ajustados:
 
-## Controle de Entrada / Saída de Equipamentos
+1. **`.env` no Lovable** — o arquivo `.env` deste projeto é **gerado automaticamente** pelo Lovable Cloud (contém `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`, `VITE_SUPABASE_PROJECT_ID`). Ele **nunca vai para o GitHub** quando você conectar o repositório — o Lovable já o trata como ambiente local. Além disso, as chaves contidas nele são **publishable/anon keys**, projetadas para ficar expostas no client (a segurança real está nas RLS policies, que já estão ativas). Mesmo assim, adicionar ao `.gitignore` e criar um `.env.example` é boa prática e **vou fazer**.
 
-### Resumo
-Nova seção no menu principal para registrar entrada e saída de equipamentos na oficina, com suporte a manutenções corretivas (com subcategorias) e preventivas (integradas com Tipos de Revisão), registro de avarias com fotos, e checklist de saída.
+2. **`git rm --cached .env`** — não posso executar comandos `git` no sandbox do Lovable (o estado do git é gerenciado internamente). Quando você conectar ao GitHub, o `.env` **não será commitado** porque estará no `.gitignore`. Se o repo já estiver conectado e o `.env` já tiver sido enviado antes, você precisará rodar `git rm --cached .env && git commit` **localmente no clone do GitHub** — eu posso te passar os comandos exatos, mas não consigo executá-los daqui.
 
-### 1. Banco de dados
+3. **`supabase/types.ts`** — este arquivo é **regenerado automaticamente pelo Lovable** a cada migração do banco. **Não devo editá-lo manualmente** (e a doc do Lovable proíbe explicitamente). Olhando o arquivo atual (já em contexto), os campos `art_url`, `art_validade` e `contrato_id` **já estão presentes** na tabela `veiculos`. Portanto a "defasagem" não existe mais — os `@ts-ignore` e `(x as any)` em `VeiculoDetalhe.tsx` são resquícios antigos e podem ser removidos com segurança.
 
-**Nova tabela `ordens_servico`** — registro principal de entrada/saída:
-- `id`, `veiculo_id` (FK veiculos), `tipo_manutencao` (enum: preventiva/corretiva)
-- `subcategoria_corretiva` (enum: borracharia/mecanica/eletrica/ar_condicionado/outros — nullable, só para corretiva)
-- `detalhamento` (text — descrição livre em cascata)
-- `tipo_revisao_id` (FK tipos_revisao — nullable, usado apenas para preventiva)
-- `data_entrada`, `km_entrada`, `horimetro_entrada`
-- `tem_avarias` (boolean), `descricao_avarias` (text)
-- `previsao_saida` (date)
-- `data_saida` (date nullable), `km_saida` (integer nullable), `horimetro_saida` (integer nullable)
-- `avarias_resolvidas` (boolean nullable), `observacoes_saida` (text nullable)
-- `status` (enum: aberta/em_andamento/concluida)
-- `created_at`, `updated_at`
-- RLS: CRUD para authenticated
+---
 
-**Nova tabela `avarias_fotos`** — fotos das avarias:
-- `id`, `ordem_servico_id` (FK ordens_servico), `foto_url` (text), `descricao` (text nullable), `created_at`
-- RLS: CRUD para authenticated
+## Plano
 
-**Novo bucket de storage** `avarias-fotos` (público).
+### 1. Atualizar `.gitignore`
+Adicionar as entradas de ambiente:
+```
+.env
+.env.local
+.env.*.local
+```
 
-### 2. Menu — `AppSidebar.tsx`
-- Adicionar item "Controle Entrada/Saída" com ícone `ClipboardList` entre Calendário e Relatórios
-- Rota: `/controle-entrada-saida`
+### 2. Criar `.env.example`
+Espelhar as chaves reais do `.env` com placeholders:
+```
+VITE_SUPABASE_PROJECT_ID="YOUR_SUPABASE_PROJECT_ID_HERE"
+VITE_SUPABASE_PUBLISHABLE_KEY="YOUR_SUPABASE_PUBLISHABLE_KEY_HERE"
+VITE_SUPABASE_URL="YOUR_SUPABASE_URL_HERE"
+```
 
-### 3. Página — `src/pages/ControleEntradaSaida.tsx`
-Página principal com:
-- **Lista de ordens** em cards/tabela com status (Aberta, Em Andamento, Concluída), filtros por tipo e status
-- **Botão "Nova Entrada"** abre dialog/formulário com:
-  - Seleção do veículo (select dos veículos cadastrados)
-  - Data de Chegada, KM de Chegada, Horímetro de Chegada
-  - Tipo: Corretiva ou Preventiva
-  - Se **Corretiva**: subcategoria (Borracharia, Mecânica, Elétrica, Ar Condicionado, Outros) + campo de detalhamento em cascata
-  - Se **Preventiva**: select dos Tipos de Revisão existentes (calculados com base no KM/Horímetro informados)
-  - Tem Avarias? (Sim/Não) → se Sim: descrição + upload de fotos múltiplas
-  - Previsão de Saída
-- **Registrar Saída** (em ordem existente): Data de saída, KM de saída, Horímetro de saída, Avarias resolvidas? (Sim/Não), Observações finais
+### 3. Limpar `src/pages/VeiculoDetalhe.tsx`
+Remover os workarounds de tipagem nas 4 ocorrências identificadas:
 
-### 4. Rota — `App.tsx`
-- Adicionar `/controle-entrada-saida` como rota protegida
+- **Linha 130-131**: remover comentário `@ts-ignore` e o cast `(veiculo as any).contrato_id` → usar `veiculo.contrato_id` diretamente.
+- **Linha 479**: `(veiculo as any).contrato_id` → `veiculo.contrato_id`.
+- **Linha 712**: `(veiculo as any).art_url` → `veiculo.art_url`.
+- **Linha 719**: `(veiculo as any).art_validade` → `veiculo.art_validade`.
 
-### 5. Tipos — `src/types/fleet.ts`
-- Adicionar tipos `TipoManutencao`, `SubcategoriaCorretiva`, `StatusOrdemServico`, `OrdemServico`, `AvariaFoto`
+### 4. Não alterar
+- `.env` (gerenciado pelo Lovable)
+- `src/integrations/supabase/types.ts` (já está atualizado e é auto-gerado)
+- `src/integrations/supabase/client.ts` (auto-gerado)
 
-### 6. Hook — `src/hooks/useOrdensServico.tsx`
-- CRUD de ordens de serviço com queries e mutations
-- Upload de fotos de avarias para o bucket
+### 5. Validação
+- Build automático do Lovable deve passar sem erros de TS após remoção dos casts.
 
-### Arquivos criados/alterados
-- **Criados**: `src/pages/ControleEntradaSaida.tsx`, `src/hooks/useOrdensServico.tsx`
-- **Alterados**: `src/components/layout/AppSidebar.tsx`, `src/App.tsx`, `src/types/fleet.ts`
-- **Migração**: criar tabelas `ordens_servico`, `avarias_fotos`, bucket `avarias-fotos`
+---
 
+## O que você precisa fazer manualmente (fora do Lovable)
+
+Se já conectou o projeto ao GitHub **antes** desta correção e o `.env` foi enviado, rode no clone local:
+```bash
+git rm --cached .env
+git commit -m "chore: untrack .env"
+git push
+```
+Como as chaves do `.env` deste projeto são **publishable keys** (não secretas), não há necessidade urgente de rotação — mas você pode rotacioná-las em Cloud Settings se quiser.
+
+Confirma para eu prosseguir com as 3 mudanças (gitignore + .env.example + limpeza do VeiculoDetalhe.tsx)?

@@ -34,6 +34,7 @@ export interface Veiculo {
   placa_serie: string;
   tag_obra: string | null;
   contrato: string | null;
+  contrato_id: string | null;
   km_atual: number;
   hora_atual: number;
   ultima_atualizacao: string | null;
