@@ -1,3 +1,4 @@
+import { lazy, Suspense } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -5,20 +6,21 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import AppErrorBoundary from "@/components/system/AppErrorBoundary";
-import Login from "./pages/Login";
-import ResetPassword from "./pages/ResetPassword";
-import Dashboard from "./pages/Dashboard";
-import Veiculos from "./pages/Veiculos";
-import VeiculoDetalhe from "./pages/VeiculoDetalhe";
-import Importar from "./pages/Importar";
-import Calendario from "./pages/Calendario";
-import Relatorios from "./pages/Relatorios";
-import ControleEntradaSaida from "./pages/ControleEntradaSaida";
-import TiposRevisao from "./pages/TiposRevisao";
-import Empresas from "./pages/Empresas";
-import Oficinas from "./pages/Oficinas";
-import AdminUsuarios from "./pages/AdminUsuarios";
-import NotFound from "./pages/NotFound";
+
+const Login = lazy(() => import("./pages/Login"));
+const ResetPassword = lazy(() => import("./pages/ResetPassword"));
+const Dashboard = lazy(() => import("./pages/Dashboard"));
+const Veiculos = lazy(() => import("./pages/Veiculos"));
+const VeiculoDetalhe = lazy(() => import("./pages/VeiculoDetalhe"));
+const Importar = lazy(() => import("./pages/Importar"));
+const Calendario = lazy(() => import("./pages/Calendario"));
+const Relatorios = lazy(() => import("./pages/Relatorios"));
+const ControleEntradaSaida = lazy(() => import("./pages/ControleEntradaSaida"));
+const TiposRevisao = lazy(() => import("./pages/TiposRevisao"));
+const Empresas = lazy(() => import("./pages/Empresas"));
+const Oficinas = lazy(() => import("./pages/Oficinas"));
+const AdminUsuarios = lazy(() => import("./pages/AdminUsuarios"));
+const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient();
 
@@ -53,22 +55,24 @@ function AppRoutes() {
   }
   
   return (
-    <Routes>
-      <Route path="/login" element={user ? <Navigate to="/" replace /> : <Login />} />
-      <Route path="/reset-password" element={<ResetPassword />} />
-      <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-      <Route path="/veiculos" element={<ProtectedRoute><Veiculos /></ProtectedRoute>} />
-      <Route path="/veiculos/:id" element={<ProtectedRoute><VeiculoDetalhe /></ProtectedRoute>} />
-      <Route path="/calendario" element={<ProtectedRoute><Calendario /></ProtectedRoute>} />
-      <Route path="/controle-entrada-saida" element={<ProtectedRoute><ControleEntradaSaida /></ProtectedRoute>} />
-      <Route path="/relatorios" element={<ProtectedRoute><Relatorios /></ProtectedRoute>} />
-      <Route path="/importar" element={<ProtectedRoute><Importar /></ProtectedRoute>} />
-      <Route path="/tipos-revisao" element={<ProtectedRoute><TiposRevisao /></ProtectedRoute>} />
-      <Route path="/empresas" element={<ProtectedRoute><Empresas /></ProtectedRoute>} />
-      <Route path="/oficinas" element={<ProtectedRoute><Oficinas /></ProtectedRoute>} />
-      <Route path="/admin/usuarios" element={<ProtectedRoute><AdminUsuarios /></ProtectedRoute>} />
-      <Route path="*" element={<NotFound />} />
-    </Routes>
+    <Suspense fallback={<FullScreenLoader message="Carregando..." />}>
+      <Routes>
+        <Route path="/login" element={user ? <Navigate to="/" replace /> : <Login />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+        <Route path="/veiculos" element={<ProtectedRoute><Veiculos /></ProtectedRoute>} />
+        <Route path="/veiculos/:id" element={<ProtectedRoute><VeiculoDetalhe /></ProtectedRoute>} />
+        <Route path="/calendario" element={<ProtectedRoute><Calendario /></ProtectedRoute>} />
+        <Route path="/controle-entrada-saida" element={<ProtectedRoute><ControleEntradaSaida /></ProtectedRoute>} />
+        <Route path="/relatorios" element={<ProtectedRoute><Relatorios /></ProtectedRoute>} />
+        <Route path="/importar" element={<ProtectedRoute><Importar /></ProtectedRoute>} />
+        <Route path="/tipos-revisao" element={<ProtectedRoute><TiposRevisao /></ProtectedRoute>} />
+        <Route path="/empresas" element={<ProtectedRoute><Empresas /></ProtectedRoute>} />
+        <Route path="/oficinas" element={<ProtectedRoute><Oficinas /></ProtectedRoute>} />
+        <Route path="/admin/usuarios" element={<ProtectedRoute><AdminUsuarios /></ProtectedRoute>} />
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </Suspense>
   );
 }
 

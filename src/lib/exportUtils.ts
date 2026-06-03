@@ -1,4 +1,4 @@
-import * as XLSX from 'xlsx';
+// xlsx is loaded dynamically inside exportToExcel to keep it out of the main bundle
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
@@ -9,11 +9,12 @@ export interface ExportColumn {
   format?: (value: any) => string;
 }
 
-export function exportToExcel<T extends Record<string, any>>(
+export async function exportToExcel<T extends Record<string, any>>(
   data: T[],
   columns: ExportColumn[],
   filename: string
 ) {
+  const XLSX = await import('xlsx');
   // Prepare header row
   const headers = columns.map(col => col.header);
   

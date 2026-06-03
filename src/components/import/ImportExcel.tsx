@@ -7,7 +7,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Upload, FileSpreadsheet, CheckCircle2, AlertTriangle, Loader2, Download, BookOpen, AlertCircle, CheckCheck } from 'lucide-react';
 import { toast } from 'sonner';
-import * as XLSX from 'xlsx';
+// xlsx is loaded dynamically inside downloadTemplate to keep it out of the main bundle
 
 // Template columns definition
 const TEMPLATE_COLUMNS = [
@@ -64,7 +64,8 @@ const EXAMPLE_DATA = [
 ];
 
 export function ImportExcel() {
-  const downloadTemplate = () => {
+  const downloadTemplate = async () => {
+    const XLSX = await import('xlsx');
     // Create workbook with template
     const wb = XLSX.utils.book_new();
     
