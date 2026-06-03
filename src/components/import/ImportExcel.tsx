@@ -117,7 +117,7 @@ export function ImportExcel() {
 
     try {
       const data = await processFile(file);
-      const result = await importData(data);
+      const result = await importData({ rows: data, filename: file.name });
       setImportResult(result);
       
       if (result.errors.length === 0) {
