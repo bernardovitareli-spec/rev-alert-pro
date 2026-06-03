@@ -48,11 +48,8 @@ export const DocumentoVeiculoUpload = forwardRef<HTMLDivElement, DocumentoVeicul
 
         if (uploadError) throw uploadError;
 
-        const { data: { publicUrl } } = supabase.storage
-          .from('documentos-veiculos')
-          .getPublicUrl(filePath);
-
-        await onChange(publicUrl);
+        // Armazena apenas o path. URLs são geradas sob demanda via signed URL.
+        await onChange(filePath);
         toast.success(`${label} anexado com sucesso!`);
       } catch (error) {
         console.error('Error uploading document:', error);
@@ -68,11 +65,8 @@ export const DocumentoVeiculoUpload = forwardRef<HTMLDivElement, DocumentoVeicul
 
       setIsRemoving(true);
       try {
-        // Extract file path from URL
-        const url = new URL(value);
-        const pathParts = url.pathname.split('/documentos-veiculos/');
-        if (pathParts.length > 1) {
-          const filePath = decodeURIComponent(pathParts[1]);
+        const filePath = extractObjectPath('documentos-veiculos', value);
+        if (filePath) {
           await supabase.storage
             .from('documentos-veiculos')
             .remove([filePath]);
@@ -88,9 +82,9 @@ export const DocumentoVeiculoUpload = forwardRef<HTMLDivElement, DocumentoVeicul
       }
     };
 
-    const handleView = () => {
+    const handleView = async () => {
       if (value) {
-        window.open(value, '_blank');
+        await openSigned('documentos-veiculos', value);
       }
     };
 
