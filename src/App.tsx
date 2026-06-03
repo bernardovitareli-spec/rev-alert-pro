@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import AppErrorBoundary from "@/components/system/AppErrorBoundary";
+import { ThemeProvider } from "@/components/theme/ThemeProvider";
 
 const Login = lazy(() => import("./pages/Login"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
@@ -20,6 +21,7 @@ const TiposRevisao = lazy(() => import("./pages/TiposRevisao"));
 const Empresas = lazy(() => import("./pages/Empresas"));
 const Oficinas = lazy(() => import("./pages/Oficinas"));
 const AdminUsuarios = lazy(() => import("./pages/AdminUsuarios"));
+const Configuracoes = lazy(() => import("./pages/Configuracoes"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient({
@@ -79,6 +81,7 @@ function AppRoutes() {
         <Route path="/empresas" element={<ProtectedRoute><Empresas /></ProtectedRoute>} />
         <Route path="/oficinas" element={<ProtectedRoute><Oficinas /></ProtectedRoute>} />
         <Route path="/admin/usuarios" element={<ProtectedRoute><AdminUsuarios /></ProtectedRoute>} />
+        <Route path="/configuracoes" element={<ProtectedRoute><Configuracoes /></ProtectedRoute>} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </Suspense>
@@ -87,17 +90,19 @@ function AppRoutes() {
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <AuthProvider>
-          <AppErrorBoundary>
-            <AppRoutes />
-          </AppErrorBoundary>
-        </AuthProvider>
-      </BrowserRouter>
-    </TooltipProvider>
+    <ThemeProvider>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <AuthProvider>
+            <AppErrorBoundary>
+              <AppRoutes />
+            </AppErrorBoundary>
+          </AuthProvider>
+        </BrowserRouter>
+      </TooltipProvider>
+    </ThemeProvider>
   </QueryClientProvider>
 );
 
