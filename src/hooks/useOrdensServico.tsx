@@ -96,7 +96,7 @@ export function useCreateOrdemServico() {
       if (error) throw error;
       return data;
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['ordens_servico'] }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['ordens_servico'] }); qc.invalidateQueries({ queryKey: ['ordens_servico_paginated'] }),
   });
 }
 
@@ -110,7 +110,7 @@ export function useUpdateOrdemServico() {
         .eq('id', id);
       if (error) throw error;
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['ordens_servico'] }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['ordens_servico'] }); qc.invalidateQueries({ queryKey: ['ordens_servico_paginated'] }),
   });
 }
 
@@ -139,7 +139,7 @@ export function useDeleteOrdemServico() {
       const { error } = await supabase.from('ordens_servico').delete().eq('id', id);
       if (error) throw error;
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['ordens_servico'] }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['ordens_servico'] }); qc.invalidateQueries({ queryKey: ['ordens_servico_paginated'] }),
   });
 }
 
