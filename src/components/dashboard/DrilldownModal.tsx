@@ -146,6 +146,7 @@ export function DrilldownModal({ open, onOpenChange, items, periodType }: Drilld
             </div>
           ) : (
             <Table>
+              <caption className="sr-only">Detalhamento dos itens filtrados a partir do dashboard.</caption>
               <TableHeader>
                 <TableRow>
                   <TableHead>Veículo</TableHead>

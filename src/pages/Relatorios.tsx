@@ -329,6 +329,7 @@ export default function Relatorios() {
                   <p className="text-center text-muted-foreground py-8">Nenhum dado no período</p>
                 ) : (
                   <Table>
+                    <caption className="sr-only">Gastos por veículo no período selecionado.</caption>
                     <TableHeader>
                       <TableRow>
                         <TableHead>Veículo</TableHead>
@@ -372,6 +373,7 @@ export default function Relatorios() {
                     <p className="text-center text-muted-foreground py-8">Nenhum dado</p>
                   ) : (
                     <Table>
+                      <caption className="sr-only">Gastos agregados por mecânico no período selecionado.</caption>
                       <TableHeader>
                         <TableRow>
                            <TableHead>Mecânico</TableHead>
@@ -440,6 +442,7 @@ export default function Relatorios() {
                     <p className="text-center text-muted-foreground py-8">Nenhum dado</p>
                   ) : (
                     <Table>
+                      <caption className="sr-only">Gastos agregados por tipo de revisão no período selecionado.</caption>
                       <TableHeader>
                         <TableRow>
                           <TableHead>Tipo de Revisão</TableHead>
@@ -511,6 +514,7 @@ export default function Relatorios() {
                 ) : (
                   <div className="overflow-x-auto">
                     <Table>
+                      <caption className="sr-only">Histórico de revisões realizadas com data, veículo, tipo, mecânico e valor.</caption>
                       <TableHeader>
                         <TableRow>
                           <TableHead>Data</TableHead>

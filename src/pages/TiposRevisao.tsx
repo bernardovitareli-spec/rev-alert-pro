@@ -208,6 +208,7 @@ export default function TiposRevisao() {
           <CardContent>
             {tiposRevisao && tiposRevisao.length > 0 ? (
               <Table>
+                <caption className="sr-only">Lista de tipos de revisão cadastrados com intervalo padrão, unidade e ações.</caption>
                 <TableHeader>
                   <TableRow>
                     <TableHead>Nome</TableHead>

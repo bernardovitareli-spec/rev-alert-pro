@@ -158,6 +158,7 @@ export default function Oficinas() {
               </div>
             ) : (
               <Table>
+                <caption className="sr-only">Lista de mecânicos cadastrados com nome, endereço, telefone e ações.</caption>
                 <TableHeader>
                   <TableRow>
                     <TableHead>Nome</TableHead>
