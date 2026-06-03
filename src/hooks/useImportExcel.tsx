@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { ImportedRow, RevisionUnit } from '@/types/fleet';
-import * as XLSX from 'xlsx';
+// xlsx is loaded dynamically inside processFile to keep it out of the main bundle
+type XLSXModule = typeof import('xlsx');
 
 interface ImportResult {
   success: number;
@@ -36,7 +37,7 @@ function parseNumber(value: any): number {
   return parseInt(str, 10) || 0;
 }
 
-function parseExcelDate(value: any): string | undefined {
+function parseExcelDate(value: any, XLSX: XLSXModule): string | undefined {
   if (!value) return undefined;
   
   // If it's already a string in date format
@@ -89,6 +90,7 @@ export function useImportExcel() {
   const queryClient = useQueryClient();
 
   const processFile = async (file: File): Promise<ImportedRow[]> => {
+    const XLSX = await import('xlsx');
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
       
@@ -107,7 +109,7 @@ export function useImportExcel() {
               const mappedKey = COLUMN_MAP[key];
               if (mappedKey) {
                 if (mappedKey === 'ultima_atualizacao' || mappedKey === 'retorno_patio' || mappedKey === 'data_revisao') {
-                  (mappedRow as any)[mappedKey] = parseExcelDate(value);
+                  (mappedRow as any)[mappedKey] = parseExcelDate(value, XLSX);
                 } else if (mappedKey === 'km_atual' || mappedKey === 'hora_atual' || mappedKey === 'km_revisao' || mappedKey === 'hora_revisao' || mappedKey === 'intervalo') {
                   (mappedRow as any)[mappedKey] = parseNumber(value);
                 } else if (mappedKey === 'unidade') {
