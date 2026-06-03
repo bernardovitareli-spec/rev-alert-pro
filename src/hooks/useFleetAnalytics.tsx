@@ -6,6 +6,7 @@ import {
   GastoPorOficina, 
   GastoPorTipo, 
   FiltrosRelatorio,
+  VeiculoDocumentosStatus,
 } from '@/types/fleet';
 import { calcularStatusDocumento } from '@/lib/documentCalculations';
 import { startOfMonth, endOfMonth, subMonths } from 'date-fns';
