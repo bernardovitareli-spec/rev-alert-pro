@@ -1,9 +1,30 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
+// CORS: allowlist explícita lida de ALLOWED_ORIGIN (separar múltiplos por vírgula).
+function buildCorsHeaders(req: Request): Record<string, string> {
+  const allowedRaw = Deno.env.get("ALLOWED_ORIGIN") || "";
+  const allowed = allowedRaw.split(",").map((o) => o.trim()).filter(Boolean);
+  const origin = req.headers.get("origin") || "";
+  const allowOrigin =
+    allowed.length === 0 ? "" : allowed.includes(origin) ? origin : allowed[0];
+  return {
+    "Access-Control-Allow-Origin": allowOrigin,
+    "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+    "Access-Control-Allow-Methods": "POST, OPTIONS",
+    "Vary": "Origin",
+  };
+}
+
+function jsonResponse(
+  body: unknown,
+  status: number,
+  cors: Record<string, string>,
+): Response {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { ...cors, "Content-Type": "application/json" },
+  });
+}
 
 interface VeiculoData {
   placa_serie: string;
@@ -30,12 +51,93 @@ interface Revision {
   tipo_revisao: TipoRevisaoData | null;
 }
 
+// Rate limit simples por IP via Deno KV: 5 chamadas / hora.
+const RATE_LIMIT_MAX = 5;
+const RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000;
+
+async function checkRateLimit(ip: string): Promise<boolean> {
+  try {
+    const kv = await Deno.openKv();
+    const key = ["wa_alert_rl", ip];
+    const now = Date.now();
+    const entry = await kv.get<{ count: number; resetAt: number }>(key);
+    const current = entry.value;
+
+    if (!current || current.resetAt < now) {
+      await kv.set(key, { count: 1, resetAt: now + RATE_LIMIT_WINDOW_MS }, {
+        expireIn: RATE_LIMIT_WINDOW_MS,
+      });
+      return true;
+    }
+    if (current.count >= RATE_LIMIT_MAX) return false;
+    await kv.set(key, { count: current.count + 1, resetAt: current.resetAt }, {
+      expireIn: Math.max(1, current.resetAt - now),
+    });
+    return true;
+  } catch (e) {
+    console.error("rate-limit kv error", e);
+    // Fail-open para não derrubar a função se KV indisponível.
+    return true;
+  }
+}
+
 Deno.serve(async (req) => {
+  const cors = buildCorsHeaders(req);
+
   if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
+    return new Response(null, { headers: cors });
+  }
+
+  if (req.method !== "POST") {
+    return jsonResponse({ error: "Método não permitido" }, 405, cors);
   }
 
   try {
+    // 1) Autenticação obrigatória
+    const authHeader = req.headers.get("Authorization") || "";
+    if (!authHeader.startsWith("Bearer ")) {
+      return jsonResponse({ error: "Não autorizado" }, 401, cors);
+    }
+    const jwt = authHeader.slice("Bearer ".length).trim();
+
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
+    const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+
+    const authClient = createClient(supabaseUrl, anonKey);
+    const { data: userData, error: userErr } = await authClient.auth.getUser(jwt);
+    if (userErr || !userData?.user) {
+      return jsonResponse({ error: "Não autorizado" }, 401, cors);
+    }
+    const userId = userData.user.id;
+
+    // 2) Checar role admin
+    const admin = createClient(supabaseUrl, serviceKey);
+    const { data: roleRow, error: roleErr } = await admin
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", userId)
+      .eq("role", "admin")
+      .maybeSingle();
+    if (roleErr || !roleRow) {
+      return jsonResponse({ error: "Não autorizado" }, 401, cors);
+    }
+
+    // 3) Rate limit por IP
+    const ip =
+      req.headers.get("x-forwarded-for")?.split(",")[0].trim() ||
+      req.headers.get("cf-connecting-ip") ||
+      "unknown";
+    const allowed = await checkRateLimit(ip);
+    if (!allowed) {
+      return jsonResponse(
+        { error: "Limite de chamadas atingido. Tente novamente mais tarde." },
+        429,
+        cors,
+      );
+    }
+
+    // 4) Lógica de envio
     const ZAPI_INSTANCE_ID = Deno.env.get("ZAPI_INSTANCE_ID");
     const ZAPI_TOKEN = Deno.env.get("ZAPI_TOKEN");
     const ZAPI_CLIENT_TOKEN = Deno.env.get("ZAPI_CLIENT_TOKEN");
@@ -45,17 +147,11 @@ Deno.serve(async (req) => {
       throw new Error("Missing Z-API credentials");
     }
 
-    // Support comma, semicolon, or space as separators
-    const phoneNumbers = ZAPI_PHONE_NUMBERS.split(/[,;\s]+/).map((n) => n.trim()).filter((n) => n.length > 0);
-    console.log("Phone numbers parsed:", phoneNumbers);
+    const phoneNumbers = ZAPI_PHONE_NUMBERS.split(/[,;\s]+/)
+      .map((n) => n.trim())
+      .filter((n) => n.length > 0);
 
-    const supabase = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
-    );
-
-    // Buscar revisões vencidas (não realizadas)
-    const { data: revisoes, error } = await supabase
+    const { data: revisoes, error } = await admin
       .from("revisoes")
       .select(`
         id,
@@ -120,10 +216,11 @@ Deno.serve(async (req) => {
         }
       }
 
-      // Verificar também por data
       if (rev.data_revisao) {
         const dataRevisao = new Date(rev.data_revisao);
-        const diffDays = Math.floor((today.getTime() - dataRevisao.getTime()) / (1000 * 60 * 60 * 24));
+        const diffDays = Math.floor(
+          (today.getTime() - dataRevisao.getTime()) / (1000 * 60 * 60 * 24),
+        );
         const diasRestantes = rev.intervalo - diffDays;
 
         if (diasRestantes <= 0 && !isVencida) {
@@ -143,17 +240,17 @@ Deno.serve(async (req) => {
     }
 
     if (vencidasList.length === 0 && proximasAVencer.length === 0) {
-      return new Response(
-        JSON.stringify({ 
-          success: true, 
+      return jsonResponse(
+        {
+          success: true,
           message: "Nenhuma revisão vencida ou próxima do vencimento",
-          sent: false 
-        }),
-        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          sent: false,
+        },
+        200,
+        cors,
       );
     }
 
-    // Montar mensagem
     const dataHora = today.toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" });
     let mensagem = `📋 *ALERTA DE REVISÕES - FROTA*\n`;
     mensagem += `📅 ${dataHora}\n\n`;
@@ -171,11 +268,10 @@ Deno.serve(async (req) => {
 
     mensagem += "\n\n_Mensagem automática do Sistema de Gestão de Frota_";
 
-    // Enviar para cada número
-    const results = [];
+    const results: Array<{ status: number; ok: boolean }> = [];
     for (const phone of phoneNumbers) {
       const zapiUrl = `https://api.z-api.io/instances/${ZAPI_INSTANCE_ID}/token/${ZAPI_TOKEN}/send-text`;
-      
+
       const response = await fetch(zapiUrl, {
         method: "POST",
         headers: {
@@ -188,28 +284,29 @@ Deno.serve(async (req) => {
         }),
       });
 
-      const result = await response.json();
-      results.push({ phone, status: response.status, result });
+      // Não logar números nem corpo (PII). Apenas status agregado.
+      results.push({ status: response.status, ok: response.ok });
     }
 
-    console.log("WhatsApp alerts sent:", results);
+    console.log(
+      `WhatsApp alerts dispatch summary: total=${results.length} ok=${
+        results.filter((r) => r.ok).length
+      }`,
+    );
 
-    return new Response(
-      JSON.stringify({
+    return jsonResponse(
+      {
         success: true,
-        message: `Alertas enviados para ${phoneNumbers.length} número(s)`,
+        message: `Alertas enviados para ${phoneNumbers.length} destinatário(s)`,
         vencidas: vencidasList.length,
         proximasAVencer: proximasAVencer.length,
-        results,
-      }),
-      { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      },
+      200,
+      cors,
     );
   } catch (error: unknown) {
-    console.error("Error sending WhatsApp alert:", error);
-    const errMessage = error instanceof Error ? error.message : "Unknown error";
-    return new Response(
-      JSON.stringify({ error: errMessage }),
-      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
+    // Loga internamente, devolve mensagem genérica.
+    console.error("send-whatsapp-alert error:", error);
+    return jsonResponse({ error: "Erro ao processar alerta" }, 500, cors);
   }
 });
