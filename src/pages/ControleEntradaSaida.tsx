@@ -24,6 +24,7 @@ import { Plus, CalendarIcon, ClipboardList, Camera, CheckCircle2, Clock, AlertTr
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { SubcategoriaCorretiva, StatusOrdemServico } from '@/types/fleet';
 import { useIsAdmin } from '@/hooks/useIsAdmin';
+import { AvariaFotoThumb } from '@/components/oficina/AvariaFotoThumb';
 
 function AvariasDetailDialog({ ordem }: { ordem: any }) {
   const [open, setOpen] = useState(false);
