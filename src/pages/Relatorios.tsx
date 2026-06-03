@@ -294,8 +294,8 @@ export default function Relatorios() {
                 </Select>
               </div>
               {hasActiveFilters && (
-                <Button variant="ghost" size="icon" onClick={clearFilters}>
-                  <X className="h-4 w-4" />
+                <Button variant="ghost" size="icon" onClick={clearFilters} aria-label="Limpar filtros">
+                  <X className="h-4 w-4" aria-hidden="true" />
                 </Button>
               )}
             </div>
