@@ -710,8 +710,7 @@ export default function ControleEntradaSaida() {
   );
 
   // Reset page when filters change
-  const filtersKey = JSON.stringify(filters);
-  useMemo(() => { setPage(1); return null; }, [filtersKey]);
+  useEffect(() => { setPage(1); }, [filters]);
 
   const { data: pageData, isLoading, isFetching, refetch } = useOrdensServicoPaginated(page, PAGE_SIZE, filters);
   const ordens = pageData?.rows ?? [];
