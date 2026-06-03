@@ -298,7 +298,17 @@ export function useImportExcel() {
 
       // ============ STAGE 4: Revisões ============
       setStage('revisoes');
-      const revisaoMap = new Map<string, Record<string, unknown>>();
+      type RevisaoUpsert = {
+        veiculo_id: string;
+        tipo_revisao_id: string;
+        data_revisao: string | null;
+        km_revisao: number | null;
+        hora_revisao: number | null;
+        intervalo: number;
+        unidade: RevisionUnit;
+      };
+      const revisaoMap = new Map<string, RevisaoUpsert>();
+
       let revisaoLinhasIgnoradas = 0;
 
       for (const row of rows) {
