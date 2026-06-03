@@ -116,9 +116,14 @@ export function useFleetInsights() {
         return acc;
       }, {} as Record<string, number[]>);
 
-      const tempoMedioGeral = historicoAtual
-        .filter(h => h.tempo_servico_dias)
-        .reduce((sum, h, _, arr) => sum + (h.tempo_servico_dias || 0) / arr.length, 0);
+      const tempoValidos = historicoAtual.filter(
+        (h) => h.tempo_servico_dias != null
+      );
+      const tempoMedioGeral =
+        tempoValidos.length > 0
+          ? tempoValidos.reduce((sum, h) => sum + (h.tempo_servico_dias as number), 0) /
+            tempoValidos.length
+          : 0;
 
       Object.entries(temposPorOficina).forEach(([oficinaId, tempos]) => {
         const mediaOficina = tempos.reduce((a, b) => a + b, 0) / tempos.length;
