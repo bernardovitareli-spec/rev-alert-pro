@@ -9,7 +9,8 @@ import {
   Calendar,
   FileBarChart,
   Truck,
-  ChevronRight
+  ChevronRight,
+  Users
 } from 'lucide-react';
 import logoMC from '@/assets/logo-mc-20anos.jpg';
 import { Link, useLocation } from 'react-router-dom';
@@ -36,9 +37,19 @@ import {
 } from '@/components/ui/tooltip';
 
 export function AppSidebar() {
+import { Button } from '@/components/ui/button';
+import { useIsAdmin } from '@/hooks/useIsAdmin';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
+
+export function AppSidebar() {
   const location = useLocation();
   const { user, signOut } = useAuth();
   const stats = useSidebarStats();
+  const { data: isAdmin } = useIsAdmin();
 
   const menuItems = [
     { 
@@ -104,6 +115,14 @@ export function AppSidebar() {
       path: '/oficinas',
       tooltip: 'Cadastrar mecânicos parceiros',
     },
+    ...(isAdmin
+      ? [{
+          title: 'Usuários',
+          icon: Users,
+          path: '/admin/usuarios',
+          tooltip: 'Gerenciar usuários e convites',
+        }]
+      : []),
   ];
 
   const isActive = (path: string) => location.pathname === path;
