@@ -4,6 +4,7 @@ import { Paperclip, X, ExternalLink, Loader2, FileIcon } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { extractObjectPath, openSigned } from '@/lib/signedUrl';
 
 interface NotaFiscalUploadProps {
   revisaoId: string;
