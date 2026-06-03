@@ -2,6 +2,8 @@ import { VeiculoComRevisoes, ExecutionStatus } from '@/types/fleet';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { formatarKmOuHora } from '@/lib/revisionCalculations';
@@ -11,7 +13,7 @@ import { OficinaSelect } from '@/components/revisions/OficinaSelect';
 import { OrdemServicoInput } from '@/components/revisions/OrdemServicoInput';
 import { NotaFiscalUpload } from '@/components/revisions/NotaFiscalUpload';
 import { ValorRevisaoInput } from '@/components/revisions/ValorRevisaoInput';
-import { CheckCircle2 } from 'lucide-react';
+import { CheckCircle2, ChevronRight } from 'lucide-react';
 
 interface VeiculoRevisoesProps {
   veiculo: VeiculoComRevisoes;
