@@ -17,6 +17,7 @@ import ControleEntradaSaida from "./pages/ControleEntradaSaida";
 import TiposRevisao from "./pages/TiposRevisao";
 import Empresas from "./pages/Empresas";
 import Oficinas from "./pages/Oficinas";
+import AdminUsuarios from "./pages/AdminUsuarios";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -65,6 +66,7 @@ function AppRoutes() {
       <Route path="/tipos-revisao" element={<ProtectedRoute><TiposRevisao /></ProtectedRoute>} />
       <Route path="/empresas" element={<ProtectedRoute><Empresas /></ProtectedRoute>} />
       <Route path="/oficinas" element={<ProtectedRoute><Oficinas /></ProtectedRoute>} />
+      <Route path="/admin/usuarios" element={<ProtectedRoute><AdminUsuarios /></ProtectedRoute>} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
