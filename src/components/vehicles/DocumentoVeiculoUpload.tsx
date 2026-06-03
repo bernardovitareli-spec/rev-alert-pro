@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Upload, Trash2, Loader2, Eye } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { extractObjectPath, openSigned } from '@/lib/signedUrl';
 
 interface DocumentoVeiculoUploadProps {
   veiculoId: string;
