@@ -10,7 +10,8 @@ import {
   FileBarChart,
   Truck,
   ChevronRight,
-  Users
+  Users,
+  SlidersHorizontal
 } from 'lucide-react';
 import logoMC from '@/assets/logo-mc-20anos.jpg';
 import { Link, useLocation } from 'react-router-dom';
@@ -109,7 +110,7 @@ export function AppSidebar() {
     },
     { 
       title: 'Configurações', 
-      icon: Settings, 
+      icon: SlidersHorizontal, 
       path: '/configuracoes',
       tooltip: 'Preferências do usuário e conta',
     },
