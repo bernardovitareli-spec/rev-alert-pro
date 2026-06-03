@@ -100,7 +100,7 @@ export default function Oficinas() {
         toast.success('Mecânico criado com sucesso!');
       }
       setFormOpen(false);
-    } catch (err) {
+    } catch (_err) {
       toast.error('Erro ao salvar mecânico');
     }
   };
@@ -112,7 +112,7 @@ export default function Oficinas() {
       await deleteOficina.mutateAsync(deletingOficina.id);
       toast.success('Mecânico excluído com sucesso!');
       setDeleteOpen(false);
-    } catch (err) {
+    } catch (_err) {
       toast.error('Erro ao excluir mecânico');
     }
   };
