@@ -24,6 +24,7 @@ import { Plus, CalendarIcon, ClipboardList, Camera, CheckCircle2, Clock, AlertTr
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { SubcategoriaCorretiva, StatusOrdemServico } from '@/types/fleet';
 import { useIsAdmin } from '@/hooks/useIsAdmin';
+import { AvariaFotoThumb } from '@/components/oficina/AvariaFotoThumb';
 
 function AvariasDetailDialog({ ordem }: { ordem: any }) {
   const [open, setOpen] = useState(false);
@@ -64,13 +65,7 @@ function AvariasDetailDialog({ ordem }: { ordem: any }) {
             ) : fotos && fotos.length > 0 ? (
               <div className="grid grid-cols-2 gap-2">
                 {fotos.map((f) => (
-                  <a key={f.id} href={f.foto_url} target="_blank" rel="noopener noreferrer" className="block">
-                    <img
-                      src={f.foto_url}
-                      alt={f.descricao || 'Foto da avaria'}
-                      className="w-full h-32 object-cover rounded-md border border-border hover:opacity-90 transition-opacity"
-                    />
-                  </a>
+                  <AvariaFotoThumb key={f.id} urlOrPath={f.foto_url} alt={f.descricao || undefined} />
                 ))}
               </div>
             ) : (

@@ -4,6 +4,7 @@ import { Paperclip, X, ExternalLink, Loader2, FileIcon } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { extractObjectPath, openSigned } from '@/lib/signedUrl';
 
 interface NotaFiscalUploadProps {
   revisaoId: string;
@@ -47,11 +48,8 @@ export const NotaFiscalUpload = forwardRef<HTMLDivElement, NotaFiscalUploadProps
 
         if (uploadError) throw uploadError;
 
-        const { data: urlData } = supabase.storage
-          .from('notas-fiscais')
-          .getPublicUrl(fileName);
-
-        await onChange(urlData.publicUrl);
+        // Armazena apenas o path; a URL é gerada sob demanda via signed URL.
+        await onChange(fileName);
         toast.success('Nota fiscal anexada com sucesso!');
       } catch (error) {
         console.error('Upload error:', error);
@@ -66,15 +64,13 @@ export const NotaFiscalUpload = forwardRef<HTMLDivElement, NotaFiscalUploadProps
 
     const handleRemove = async () => {
       if (!value) return;
-      
+
       try {
-        // Extract file path from URL
-        const urlParts = value.split('/notas-fiscais/');
-        if (urlParts.length > 1) {
-          const filePath = urlParts[1];
+        const filePath = extractObjectPath('notas-fiscais', value);
+        if (filePath) {
           await supabase.storage.from('notas-fiscais').remove([filePath]);
         }
-        
+
         await onChange(null);
         toast.success('Anexo removido');
       } catch (error) {
@@ -83,9 +79,9 @@ export const NotaFiscalUpload = forwardRef<HTMLDivElement, NotaFiscalUploadProps
       }
     };
 
-    const handleView = () => {
+    const handleView = async () => {
       if (value) {
-        window.open(value, '_blank');
+        await openSigned('notas-fiscais', value);
       }
     };
 
