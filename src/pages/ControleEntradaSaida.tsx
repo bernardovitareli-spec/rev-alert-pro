@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { AppLayout } from '@/components/layout/AppLayout';
-import { useOrdensServico, useCreateOrdemServico, useUpdateOrdemServico, useDeleteOrdemServico, useUploadAvariaFoto, useAvariasFotos } from '@/hooks/useOrdensServico';
+import { useOrdensServicoPaginated, useCreateOrdemServico, useUpdateOrdemServico, useDeleteOrdemServico, useUploadAvariaFoto, useAvariasFotos } from '@/hooks/useOrdensServico';
 import { useVeiculos } from '@/hooks/useFleetData';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -20,11 +20,13 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
-import { Plus, CalendarIcon, ClipboardList, Camera, CheckCircle2, Clock, AlertTriangle, ImageIcon, Pencil, Trash2 } from 'lucide-react';
+import { Plus, CalendarIcon, ClipboardList, Camera, CheckCircle2, Clock, AlertTriangle, ImageIcon, Pencil, Trash2, ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { SubcategoriaCorretiva, StatusOrdemServico } from '@/types/fleet';
 import { useIsAdmin } from '@/hooks/useIsAdmin';
 import { AvariaFotoThumb } from '@/components/oficina/AvariaFotoThumb';
+
+const PAGE_SIZE = 20;
 
 function AvariasDetailDialog({ ordem }: { ordem: any }) {
   const [open, setOpen] = useState(false);
