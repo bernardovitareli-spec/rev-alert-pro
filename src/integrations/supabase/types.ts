@@ -580,6 +580,7 @@ export type Database = {
       }
       is_admin: { Args: never; Returns: boolean }
       ordem_servico_empresa_id: { Args: { _os_id: string }; Returns: string }
+      revisao_empresa_id: { Args: { _revisao_id: string }; Returns: string }
       user_empresa_id: { Args: never; Returns: string }
       veiculo_empresa_id: { Args: { _veiculo_id: string }; Returns: string }
     }
