@@ -1,12 +1,13 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.91.1";
 
-// CORS: allowlist explícita lida de ALLOWED_ORIGIN (separar múltiplos por vírgula).
+// CORS: por padrão libera "*" (comportamento anterior). Se ALLOWED_ORIGIN estiver
+// definido (lista separada por vírgula), passa a aplicar allowlist explícita.
 function buildCorsHeaders(req: Request): Record<string, string> {
   const allowedRaw = Deno.env.get("ALLOWED_ORIGIN") || "";
   const allowed = allowedRaw.split(",").map((o) => o.trim()).filter(Boolean);
   const origin = req.headers.get("origin") || "";
   const allowOrigin =
-    allowed.length === 0 ? "" : allowed.includes(origin) ? origin : allowed[0];
+    allowed.length === 0 ? "*" : allowed.includes(origin) ? origin : allowed[0];
   return {
     "Access-Control-Allow-Origin": allowOrigin,
     "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
