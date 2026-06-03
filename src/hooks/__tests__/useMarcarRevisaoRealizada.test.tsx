@@ -1,12 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { renderHook, waitFor } from '@testing-library/react';
+import { renderHook, act } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
 
 // ----- Mock do client Supabase -----
 // Builder fluente que captura a sequência de chamadas por tabela e
 // permite injetar a resposta final via `then`.
-type ThenFn = () => Promise<{ data: unknown; error: unknown }>;
 const calls: Array<{ table: string; op: string; payload?: unknown }> = [];
 
 // Cada tabela tem uma fila de respostas para os seus accessors finais
