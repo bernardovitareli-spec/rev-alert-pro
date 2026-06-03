@@ -686,11 +686,51 @@ function EditOrdemDialog({ ordem, onSuccess }: { ordem: any; onSuccess: () => vo
 }
 
 export default function ControleEntradaSaida() {
-  const { data: ordens, isLoading, refetch } = useOrdensServico();
   const { data: isAdmin } = useIsAdmin();
   const deleteOS = useDeleteOrdemServico();
+  const { data: veiculos } = useVeiculos();
+
   const [filtroStatus, setFiltroStatus] = useState<StatusOrdemServico | 'all'>('all');
   const [filtroTipo, setFiltroTipo] = useState<'preventiva' | 'corretiva' | 'all'>('all');
+  const [filtroVeiculo, setFiltroVeiculo] = useState<string>('all');
+  const [veiculoSearch, setVeiculoSearch] = useState<string>('');
+  const [dataInicio, setDataInicio] = useState<string>('');
+  const [dataFim, setDataFim] = useState<string>('');
+  const [page, setPage] = useState(1);
+
+  const filters = useMemo(
+    () => ({
+      veiculoId: filtroVeiculo,
+      status: filtroStatus,
+      tipo: filtroTipo,
+      dataInicio: dataInicio || null,
+      dataFim: dataFim || null,
+    }),
+    [filtroVeiculo, filtroStatus, filtroTipo, dataInicio, dataFim],
+  );
+
+  // Reset page when filters change
+  const filtersKey = JSON.stringify(filters);
+  useMemo(() => { setPage(1); return null; }, [filtersKey]);
+
+  const { data: pageData, isLoading, isFetching, refetch } = useOrdensServicoPaginated(page, PAGE_SIZE, filters);
+  const ordens = pageData?.rows ?? [];
+  const total = pageData?.total ?? 0;
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  const startIndex = total === 0 ? 0 : (page - 1) * PAGE_SIZE + 1;
+  const endIndex = Math.min(page * PAGE_SIZE, total);
+
+  const veiculosFiltrados = useMemo(() => {
+    if (!veiculos) return [];
+    const term = veiculoSearch.trim().toLowerCase();
+    if (!term) return veiculos.slice(0, 100);
+    return veiculos
+      .filter((v: any) =>
+        v.placa_serie?.toLowerCase().includes(term) ||
+        v.tag_obra?.toLowerCase().includes(term),
+      )
+      .slice(0, 100);
+  }, [veiculos, veiculoSearch]);
 
   const formatDateSafe = (dateValue?: string | null) => {
     if (!dateValue) return '-';
@@ -700,11 +740,24 @@ export default function ControleEntradaSaida() {
     return format(parsed, 'dd/MM/yyyy');
   };
 
-  const ordensFiltradas = ordens?.filter((o) => {
-    if (filtroStatus !== 'all' && o.status !== filtroStatus) return false;
-    if (filtroTipo !== 'all' && o.tipo_manutencao !== filtroTipo) return false;
-    return true;
-  });
+  const hasActiveFilters =
+    filtroStatus !== 'all' ||
+    filtroTipo !== 'all' ||
+    filtroVeiculo !== 'all' ||
+    !!dataInicio ||
+    !!dataFim;
+
+  const clearAll = () => {
+    setFiltroStatus('all');
+    setFiltroTipo('all');
+    setFiltroVeiculo('all');
+    setVeiculoSearch('');
+    setDataInicio('');
+    setDataFim('');
+  };
+
+  const ordensFiltradas = ordens;
+
 
   return (
     <AppLayout>
