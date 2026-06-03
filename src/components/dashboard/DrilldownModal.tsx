@@ -18,7 +18,7 @@ import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { ExternalLink } from 'lucide-react';
 import { RevisionDrilldownItem, PeriodType, ExecutionStatus } from '@/types/fleet';
-import { getStatusLabel, getStatusColor, formatarKmOuHora } from '@/lib/revisionCalculations';
+import { formatarKmOuHora } from '@/lib/revisionCalculations';
 import { StatusExecucaoSelect } from '@/components/revisions/StatusExecucaoSelect';
 import { PrevisaoEntregaInput } from '@/components/revisions/PrevisaoEntregaInput';
 import { OficinaSelect } from '@/components/revisions/OficinaSelect';

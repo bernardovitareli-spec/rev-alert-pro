@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { useVeiculosComRevisoes } from './useFleetData';
 import { RevisionDrilldownItem } from '@/types/fleet';
-import { parseISO, isToday, isTomorrow, isThisWeek, isThisMonth, isBefore, startOfDay, endOfWeek, startOfWeek, addWeeks } from 'date-fns';
+import { parseISO, isToday, isTomorrow, isThisMonth, isBefore, startOfDay, endOfWeek, startOfWeek, addWeeks } from 'date-fns';
 
 export interface DeliveryStats {
   atrasadas: RevisionDrilldownItem[];

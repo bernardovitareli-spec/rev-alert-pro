@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { startOfMonth, endOfMonth, subMonths, differenceInDays, parseISO } from 'date-fns';
+import { startOfMonth, endOfMonth, subMonths, parseISO } from 'date-fns';
 import { calcularStatusDocumento } from '@/lib/documentCalculations';
 
 export interface FleetInsight {

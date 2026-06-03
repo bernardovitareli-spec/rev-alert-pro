@@ -1,6 +1,6 @@
 import { useState, useRef, forwardRef } from 'react';
 import { Button } from '@/components/ui/button';
-import { Paperclip, Upload, X, ExternalLink, Loader2, FileIcon } from 'lucide-react';
+import { Paperclip, X, ExternalLink, Loader2, FileIcon } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';

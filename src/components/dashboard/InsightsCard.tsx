@@ -15,7 +15,6 @@ import {
   FileWarning, 
   Wrench,
   DollarSign,
-  CheckCircle2,
   ArrowRight,
   Sparkles
 } from 'lucide-react';

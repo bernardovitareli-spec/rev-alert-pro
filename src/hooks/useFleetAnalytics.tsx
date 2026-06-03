@@ -6,10 +6,9 @@ import {
   GastoPorOficina, 
   GastoPorTipo, 
   FiltrosRelatorio,
-  VeiculoDocumentosStatus
 } from '@/types/fleet';
 import { calcularStatusDocumento } from '@/lib/documentCalculations';
-import { startOfMonth, endOfMonth, subMonths, format } from 'date-fns';
+import { startOfMonth, endOfMonth, subMonths } from 'date-fns';
 
 export function useFleetAnalytics(filtros?: FiltrosRelatorio) {
   return useQuery({
@@ -147,7 +146,7 @@ export function useFleetKPIs() {
       if (veicError) throw veicError;
 
       // Fetch revisões para status crítico
-      const { data: revisoes, error: revError } = await supabase
+      const { error: revError } = await supabase
         .from('revisoes')
         .select('*');
       

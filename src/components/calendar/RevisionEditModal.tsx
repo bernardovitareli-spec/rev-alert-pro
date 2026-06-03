@@ -1,6 +1,4 @@
 import { useNavigate } from 'react-router-dom';
-import { format } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
 import { ExternalLink, AlertCircle, AlertTriangle, CheckCircle, Car, Wrench } from 'lucide-react';
 import {
   Dialog,

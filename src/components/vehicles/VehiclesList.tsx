@@ -5,7 +5,7 @@ import { VehicleFilters } from './VehicleFilters';
 import { FilterOptions, InsightFilter, VeiculoComRevisoes } from '@/types/fleet';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+
 import { useSearchParams } from 'react-router-dom';
 import { differenceInDays, parseISO } from 'date-fns';
 import { X } from 'lucide-react';
@@ -32,13 +32,13 @@ export function VehiclesList() {
     insightFilter: insightParam || null,
   }));
 
-  const hoje = new Date();
   const diasLimite = 30;
 
   const filteredVehicles = useMemo(() => {
     if (!veiculos) return [];
 
-    let result = veiculos.filter((veiculo: VeiculoComRevisoes) => {
+    const hoje = new Date();
+    const result = veiculos.filter((veiculo: VeiculoComRevisoes) => {
       // Search filter
       if (filters.search) {
         const searchLower = filters.search.toLowerCase();
@@ -112,7 +112,7 @@ export function VehiclesList() {
     }
 
     return result;
-  }, [veiculos, filters, hoje]);
+  }, [veiculos, filters]);
 
   const clearInsightFilter = () => {
     setFilters(prev => ({ ...prev, insightFilter: null }));

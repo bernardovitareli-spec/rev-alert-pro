@@ -1,8 +1,6 @@
 import { useState, useMemo } from 'react';
-import { format, subMonths, startOfMonth, endOfMonth } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
+import { format, subMonths, startOfMonth } from 'date-fns';
 import { 
-  FileDown, 
   FileSpreadsheet, 
   DollarSign, 
   TrendingUp, 
@@ -11,7 +9,6 @@ import {
   Car,
   Wrench,
   Settings2,
-  Filter,
   X
 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -22,14 +19,12 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useFleetAnalytics, useFleetKPIs, useDocumentosVencidos } from '@/hooks/useFleetAnalytics';
 import { useEmpresas, useTiposRevisao } from '@/hooks/useFleetData';
 import { useOficinas } from '@/hooks/useOficinas';
 import { FiltrosRelatorio } from '@/types/fleet';
-import { exportToExcel, exportConfigs, formatCurrency, formatDate, formatPercent } from '@/lib/exportUtils';
-import { cn } from '@/lib/utils';
+import { exportToExcel, exportConfigs, formatCurrency, formatDate } from '@/lib/exportUtils';
 import {
   BarChart,
   Bar,
@@ -41,7 +36,6 @@ import {
   PieChart,
   Pie,
   Cell,
-  Legend,
 } from 'recharts';
 
 const COLORS = ['hsl(var(--primary))', 'hsl(var(--chart-2))', 'hsl(var(--chart-3))', 'hsl(var(--chart-4))', 'hsl(var(--chart-5))'];

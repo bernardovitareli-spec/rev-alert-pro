@@ -1,7 +1,7 @@
-import { VeiculoComRevisoes, ExecutionStatus, InsightFilter } from '@/types/fleet';
+import { VeiculoComRevisoes, InsightFilter } from '@/types/fleet';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { formatarKmOuHora, getStatusLabel } from '@/lib/revisionCalculations';
+import { getStatusLabel } from '@/lib/revisionCalculations';
 import { getPrevisaoLabel, getPrevisaoColor } from '@/hooks/useDeliveryStats';
 import { cn } from '@/lib/utils';
 import { Truck, ChevronRight, AlertTriangle, Clock, CheckCircle2, Wrench, CalendarClock } from 'lucide-react';

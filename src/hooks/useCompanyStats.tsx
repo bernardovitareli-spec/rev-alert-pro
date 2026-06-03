@@ -57,7 +57,7 @@ export function useCompanyStats() {
       // Calcular stats por empresa
       const stats: CompanyStats[] = empresasList.map(empresa => {
         const veiculosEmpresa = veiculosList.filter(v => v.empresa_id === empresa.id);
-        const veiculoIds = new Set(veiculosEmpresa.map(v => v.id));
+
 
         let criticos = 0;
         let atencao = 0;

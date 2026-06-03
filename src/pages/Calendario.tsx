@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useVeiculosComRevisoes, useEmpresas, useTiposRevisao } from '@/hooks/useFleetData';
-import { RevisaoComStatus, RevisionStatus, ExecutionStatus } from '@/types/fleet';
+import { RevisionStatus, ExecutionStatus } from '@/types/fleet';
 import { RevisionEditModal, RevisionWithDetails } from '@/components/calendar/RevisionEditModal';
 import { StatusExecucaoBadge } from '@/components/revisions/StatusExecucaoSelect';
 import { cn } from '@/lib/utils';

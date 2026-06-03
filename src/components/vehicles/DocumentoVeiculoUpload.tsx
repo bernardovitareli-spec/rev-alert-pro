@@ -1,6 +1,6 @@
 import { useState, forwardRef } from 'react';
 import { Button } from '@/components/ui/button';
-import { FileText, Upload, Trash2, Loader2, Eye } from 'lucide-react';
+import { Upload, Trash2, Loader2, Eye } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 

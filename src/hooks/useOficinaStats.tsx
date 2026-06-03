@@ -21,13 +21,6 @@ export function useOficinaStats() {
 
       if (historicoError) throw historicoError;
 
-      // Fetch revisões em serviço atualmente
-      const { data: revisoesEmServico, error: revisoesError } = await supabase
-        .from('revisoes')
-        .select('oficina_id, previsao_entrega')
-        .eq('status_execucao', 'em_servico');
-
-      if (revisoesError) throw revisoesError;
 
       // Calculate stats for each oficina
       const stats: OficinaStats[] = (oficinas || []).map(oficina => {

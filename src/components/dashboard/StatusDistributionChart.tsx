@@ -22,7 +22,7 @@ export function StatusDistributionChart() {
       { name: 'Atenção', value: stats.veiculosAtencao, color: COLORS.warning },
       { name: 'Em Dia', value: stats.veiculosOk, color: COLORS.ok },
     ].filter(item => item.value > 0);
-  }, [stats?.veiculosCriticos, stats?.veiculosAtencao, stats?.veiculosOk]);
+  }, [stats]);
 
   if (isLoading) {
     return (
@@ -73,7 +73,7 @@ export function StatusDistributionChart() {
               label={({ name, value }) => `${name}: ${value}`}
               labelLine={false}
             >
-              {data.map((entry, index) => (
+              {data.map((entry) => (
                 <Cell key={`cell-${entry.name}`} fill={entry.color} />
               ))}
             </Pie>
