@@ -241,6 +241,8 @@ export function useImportExcel() {
         contrato: string | null;
       };
       const veiculoPayload: VeiculoUpsert[] = [];
+      const placasSemEmpresa: string[] = [];
+
 
 
       for (const [placa, vehicleRows] of vehicleGroups) {
