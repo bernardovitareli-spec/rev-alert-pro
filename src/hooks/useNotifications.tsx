@@ -12,7 +12,8 @@ export interface NotificationItem {
   placa: string;
   tipoNome: string;
   status: "critical" | "warning";
-  proxima?: string | null;
+  faltam: number;
+  unidade: string;
   createdAt: string;
 }
 
@@ -64,24 +65,23 @@ export function useNotifications() {
     const list: NotificationItem[] = [];
     for (const v of veiculos) {
       for (const r of v.revisoes || []) {
-        const status = (r as { status?: string }).status;
-        if (status === "critical" || status === "warning") {
+        if (r.status === "critical" || r.status === "warning") {
           list.push({
             id: r.id,
             veiculoId: v.id,
             placa: v.placa_serie,
             tipoNome: r.tipo_revisao?.nome || "Revisão",
-            status,
-            proxima: (r as { data_proxima?: string | null }).data_proxima ?? null,
+            status: r.status,
+            faltam: r.faltam,
+            unidade: r.unidade,
             createdAt: r.created_at || new Date().toISOString(),
           });
         }
       }
     }
-    // Critical first
     list.sort((a, b) => {
       if (a.status !== b.status) return a.status === "critical" ? -1 : 1;
-      return (a.proxima || "").localeCompare(b.proxima || "");
+      return a.faltam - b.faltam;
     });
     return list;
   }, [veiculos]);
