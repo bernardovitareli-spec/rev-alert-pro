@@ -1,6 +1,20 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook } from '@testing-library/react';
-import { waitFor } from '@testing-library/dom';
+
+async function waitFor(cb: () => void, { timeout = 1000, interval = 10 } = {}) {
+  const start = Date.now();
+  let lastErr: unknown;
+  while (Date.now() - start < timeout) {
+    try {
+      cb();
+      return;
+    } catch (e) {
+      lastErr = e;
+      await new Promise((r) => setTimeout(r, interval));
+    }
+  }
+  throw lastErr;
+}
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
 
