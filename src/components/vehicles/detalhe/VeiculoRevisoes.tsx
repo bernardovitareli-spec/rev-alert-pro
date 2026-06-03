@@ -2,6 +2,8 @@ import { VeiculoComRevisoes, ExecutionStatus } from '@/types/fleet';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { formatarKmOuHora } from '@/lib/revisionCalculations';
@@ -11,7 +13,7 @@ import { OficinaSelect } from '@/components/revisions/OficinaSelect';
 import { OrdemServicoInput } from '@/components/revisions/OrdemServicoInput';
 import { NotaFiscalUpload } from '@/components/revisions/NotaFiscalUpload';
 import { ValorRevisaoInput } from '@/components/revisions/ValorRevisaoInput';
-import { CheckCircle2 } from 'lucide-react';
+import { CheckCircle2, ChevronRight } from 'lucide-react';
 
 interface VeiculoRevisoesProps {
   veiculo: VeiculoComRevisoes;
@@ -50,118 +52,251 @@ export function VeiculoRevisoes({
               <p>Nenhuma revisão cadastrada para este veículo.</p>
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <Table>
-                <caption className="sr-only">Revisões programadas do veículo, com tipo, última realização, próximo vencimento e status.</caption>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Tipo de Revisão</TableHead>
-                    <TableHead>Última Realizada</TableHead>
-                    <TableHead>Faltam</TableHead>
-                    <TableHead>Execução</TableHead>
-                    <TableHead>Mecânicos</TableHead>
-                    <TableHead>Prev. Entrega</TableHead>
-                    <TableHead>Ordem de Serviço</TableHead>
-                    <TableHead>Valor (R$)</TableHead>
-                    <TableHead>Anexo NF</TableHead>
-                    <TableHead className="text-right">Ações</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {[...veiculo.revisoes]
-                    .sort((a, b) => a.faltam - b.faltam)
-                    .map((revisao) => (
-                      <TableRow key={revisao.id}>
-                        <TableCell className="font-medium">
-                          {revisao.tipo_revisao?.nome || 'Revisão'}
-                        </TableCell>
-                        <TableCell>
-                          {revisao.unidade === 'Km'
-                            ? revisao.km_revisao
-                              ? `${revisao.km_revisao.toLocaleString('pt-BR')} km`
-                              : '-'
-                            : revisao.hora_revisao
-                              ? `${revisao.hora_revisao.toLocaleString('pt-BR')} h`
-                              : '-'}
-                          {revisao.data_revisao && (
-                            <span className="text-xs text-muted-foreground ml-1">
-                              ({format(new Date(revisao.data_revisao), 'dd/MM/yy')})
+            <>
+              {/* Desktop: Table */}
+              <div className="hidden md:block overflow-x-auto">
+                <Table>
+                  <caption className="sr-only">Revisões programadas do veículo, com tipo, última realização, próximo vencimento e status.</caption>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Tipo de Revisão</TableHead>
+                      <TableHead>Última Realizada</TableHead>
+                      <TableHead>Faltam</TableHead>
+                      <TableHead>Execução</TableHead>
+                      <TableHead>Mecânicos</TableHead>
+                      <TableHead>Prev. Entrega</TableHead>
+                      <TableHead>Ordem de Serviço</TableHead>
+                      <TableHead>Valor (R$)</TableHead>
+                      <TableHead>Anexo NF</TableHead>
+                      <TableHead className="text-right">Ações</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {[...veiculo.revisoes]
+                      .sort((a, b) => a.faltam - b.faltam)
+                      .map((revisao) => (
+                        <TableRow key={revisao.id}>
+                          <TableCell className="font-medium">
+                            {revisao.tipo_revisao?.nome || 'Revisão'}
+                          </TableCell>
+                          <TableCell>
+                            {revisao.unidade === 'Km'
+                              ? revisao.km_revisao
+                                ? `${revisao.km_revisao.toLocaleString('pt-BR')} km`
+                                : '-'
+                              : revisao.hora_revisao
+                                ? `${revisao.hora_revisao.toLocaleString('pt-BR')} h`
+                                : '-'}
+                            {revisao.data_revisao && (
+                              <span className="text-xs text-muted-foreground ml-1">
+                                ({format(new Date(revisao.data_revisao), 'dd/MM/yy')})
+                              </span>
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            <span className={cn(
+                              'font-medium text-sm',
+                              revisao.status === 'critical' && 'text-status-critical',
+                              revisao.status === 'warning' && 'text-status-warning',
+                              revisao.status === 'ok' && 'text-status-ok',
+                            )}>
+                              {revisao.faltam <= 0
+                                ? 'Vencida'
+                                : formatarKmOuHora(revisao.faltam, revisao.unidade)}
                             </span>
-                          )}
-                        </TableCell>
-                        <TableCell>
-                          <span className={cn(
-                            'font-medium text-sm',
-                            revisao.status === 'critical' && 'text-status-critical',
-                            revisao.status === 'warning' && 'text-status-warning',
-                            revisao.status === 'ok' && 'text-status-ok',
-                          )}>
-                            {revisao.faltam <= 0
-                              ? 'Vencida'
-                              : formatarKmOuHora(revisao.faltam, revisao.unidade)}
-                          </span>
-                        </TableCell>
-                        <TableCell>
-                          <StatusExecucaoSelect
-                            value={revisao.status_execucao}
-                            onChange={(s) => onStatusChange(revisao.id, s)}
-                            isVencida={revisao.status === 'critical'}
-                            disabled={isUpdating || isMarking}
-                          />
-                        </TableCell>
-                        <TableCell>
-                          <OficinaSelect
-                            value={revisao.oficina_id}
-                            onChange={(id) => onOficinaChange(revisao.id, id)}
-                            disabled={isUpdating}
-                            compact
-                          />
-                        </TableCell>
-                        <TableCell>
-                          <PrevisaoEntregaInput
-                            value={revisao.previsao_entrega}
-                            onChange={(d) => onPrevisaoChange(revisao.id, d)}
-                            disabled={isUpdating}
-                          />
-                        </TableCell>
-                        <TableCell>
-                          <OrdemServicoInput
-                            value={revisao.ordem_servico}
-                            onChange={(os) => onOrdemServicoChange(revisao.id, os)}
-                            disabled={isUpdating}
-                            compact
-                          />
-                        </TableCell>
-                        <TableCell>
-                          <ValorRevisaoInput
-                            value={revisao.valor}
-                            onChange={(v) => onValorChange(revisao.id, v)}
-                          />
-                        </TableCell>
-                        <TableCell>
-                          <NotaFiscalUpload
-                            revisaoId={revisao.id}
-                            value={revisao.nota_fiscal_url}
-                            onChange={(url) => onNotaFiscalChange(revisao.id, url)}
-                            disabled={isUpdating}
-                            compact
-                          />
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <Button
-                            size="sm"
-                            variant={revisao.status === 'critical' ? 'default' : 'outline'}
-                            onClick={() => onMarcarRealizada(revisao.id)}
-                            disabled={isMarking}
-                          >
-                            <CheckCircle2 className="h-4 w-4 mr-1" /> Realizada
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                </TableBody>
-              </Table>
-            </div>
+                          </TableCell>
+                          <TableCell>
+                            <StatusExecucaoSelect
+                              value={revisao.status_execucao}
+                              onChange={(s) => onStatusChange(revisao.id, s)}
+                              isVencida={revisao.status === 'critical'}
+                              disabled={isUpdating || isMarking}
+                            />
+                          </TableCell>
+                          <TableCell>
+                            <OficinaSelect
+                              value={revisao.oficina_id}
+                              onChange={(id) => onOficinaChange(revisao.id, id)}
+                              disabled={isUpdating}
+                              compact
+                            />
+                          </TableCell>
+                          <TableCell>
+                            <PrevisaoEntregaInput
+                              value={revisao.previsao_entrega}
+                              onChange={(d) => onPrevisaoChange(revisao.id, d)}
+                              disabled={isUpdating}
+                            />
+                          </TableCell>
+                          <TableCell>
+                            <OrdemServicoInput
+                              value={revisao.ordem_servico}
+                              onChange={(os) => onOrdemServicoChange(revisao.id, os)}
+                              disabled={isUpdating}
+                              compact
+                            />
+                          </TableCell>
+                          <TableCell>
+                            <ValorRevisaoInput
+                              value={revisao.valor}
+                              onChange={(v) => onValorChange(revisao.id, v)}
+                            />
+                          </TableCell>
+                          <TableCell>
+                            <NotaFiscalUpload
+                              revisaoId={revisao.id}
+                              value={revisao.nota_fiscal_url}
+                              onChange={(url) => onNotaFiscalChange(revisao.id, url)}
+                              disabled={isUpdating}
+                              compact
+                            />
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <Button
+                              size="sm"
+                              variant={revisao.status === 'critical' ? 'default' : 'outline'}
+                              onClick={() => onMarcarRealizada(revisao.id)}
+                              disabled={isMarking}
+                            >
+                              <CheckCircle2 className="h-4 w-4 mr-1" /> Realizada
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                  </TableBody>
+                </Table>
+              </div>
+
+              {/* Mobile: Cards */}
+              <div className="md:hidden grid gap-3">
+                {[...veiculo.revisoes]
+                  .sort((a, b) => a.faltam - b.faltam)
+                  .map((revisao) => {
+                    const statusClass =
+                      revisao.status === 'critical' ? 'text-status-critical' :
+                      revisao.status === 'warning' ? 'text-status-warning' :
+                      'text-status-ok';
+                    const variant: 'destructive' | 'secondary' | 'outline' =
+                      revisao.status === 'critical' ? 'destructive' :
+                      revisao.status === 'warning' ? 'secondary' : 'outline';
+                    return (
+                      <Card key={revisao.id} className="border border-border/60">
+                        <CardContent className="p-4 space-y-3">
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="min-w-0">
+                              <p className="font-medium truncate">{revisao.tipo_revisao?.nome || 'Revisão'}</p>
+                              <p className={cn('text-sm font-semibold mt-0.5', statusClass)}>
+                                {revisao.faltam <= 0 ? 'Vencida' : `Faltam ${formatarKmOuHora(revisao.faltam, revisao.unidade)}`}
+                              </p>
+                            </div>
+                            <Badge variant={variant} className="capitalize shrink-0">
+                              {revisao.status_execucao?.replace('_', ' ') || 'pendente'}
+                            </Badge>
+                          </div>
+
+                          <div className="flex gap-2">
+                            <Button
+                              size="sm"
+                              variant={revisao.status === 'critical' ? 'default' : 'outline'}
+                              onClick={() => onMarcarRealizada(revisao.id)}
+                              disabled={isMarking}
+                              className="flex-1"
+                            >
+                              <CheckCircle2 className="h-4 w-4 mr-1" /> Realizada
+                            </Button>
+                            <Sheet>
+                              <SheetTrigger asChild>
+                                <Button size="sm" variant="ghost" className="flex-1">
+                                  Ver detalhes <ChevronRight className="h-4 w-4 ml-1" />
+                                </Button>
+                              </SheetTrigger>
+                              <SheetContent side="bottom" className="max-h-[90vh] overflow-y-auto">
+                                <SheetHeader>
+                                  <SheetTitle>{revisao.tipo_revisao?.nome || 'Revisão'}</SheetTitle>
+                                </SheetHeader>
+                                <div className="mt-4 space-y-4">
+                                  <div className="grid grid-cols-2 gap-3 text-sm">
+                                    <div>
+                                      <p className="text-muted-foreground text-xs">Última realizada</p>
+                                      <p className="font-medium">
+                                        {revisao.unidade === 'Km'
+                                          ? revisao.km_revisao ? `${revisao.km_revisao.toLocaleString('pt-BR')} km` : '-'
+                                          : revisao.hora_revisao ? `${revisao.hora_revisao.toLocaleString('pt-BR')} h` : '-'}
+                                      </p>
+                                      {revisao.data_revisao && (
+                                        <p className="text-xs text-muted-foreground">
+                                          {format(new Date(revisao.data_revisao), 'dd/MM/yy')}
+                                        </p>
+                                      )}
+                                    </div>
+                                    <div>
+                                      <p className="text-muted-foreground text-xs">Faltam</p>
+                                      <p className={cn('font-medium', statusClass)}>
+                                        {revisao.faltam <= 0 ? 'Vencida' : formatarKmOuHora(revisao.faltam, revisao.unidade)}
+                                      </p>
+                                    </div>
+                                  </div>
+
+                                  <div className="space-y-1">
+                                    <p className="text-xs text-muted-foreground">Execução</p>
+                                    <StatusExecucaoSelect
+                                      value={revisao.status_execucao}
+                                      onChange={(s) => onStatusChange(revisao.id, s)}
+                                      isVencida={revisao.status === 'critical'}
+                                      disabled={isUpdating || isMarking}
+                                    />
+                                  </div>
+                                  <div className="space-y-1">
+                                    <p className="text-xs text-muted-foreground">Mecânicos</p>
+                                    <OficinaSelect
+                                      value={revisao.oficina_id}
+                                      onChange={(id) => onOficinaChange(revisao.id, id)}
+                                      disabled={isUpdating}
+                                    />
+                                  </div>
+                                  <div className="space-y-1">
+                                    <p className="text-xs text-muted-foreground">Previsão de Entrega</p>
+                                    <PrevisaoEntregaInput
+                                      value={revisao.previsao_entrega}
+                                      onChange={(d) => onPrevisaoChange(revisao.id, d)}
+                                      disabled={isUpdating}
+                                    />
+                                  </div>
+                                  <div className="space-y-1">
+                                    <p className="text-xs text-muted-foreground">Ordem de Serviço</p>
+                                    <OrdemServicoInput
+                                      value={revisao.ordem_servico}
+                                      onChange={(os) => onOrdemServicoChange(revisao.id, os)}
+                                      disabled={isUpdating}
+                                    />
+                                  </div>
+                                  <div className="space-y-1">
+                                    <p className="text-xs text-muted-foreground">Valor (R$)</p>
+                                    <ValorRevisaoInput
+                                      value={revisao.valor}
+                                      onChange={(v) => onValorChange(revisao.id, v)}
+                                    />
+                                  </div>
+                                  <div className="space-y-1">
+                                    <p className="text-xs text-muted-foreground">Nota Fiscal</p>
+                                    <NotaFiscalUpload
+                                      revisaoId={revisao.id}
+                                      value={revisao.nota_fiscal_url}
+                                      onChange={(url) => onNotaFiscalChange(revisao.id, url)}
+                                      disabled={isUpdating}
+                                    />
+                                  </div>
+                                </div>
+                              </SheetContent>
+                            </Sheet>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
+              </div>
+            </>
+
           )}
         </CardContent>
       </Card>
