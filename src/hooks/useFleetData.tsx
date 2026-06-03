@@ -254,42 +254,105 @@ export function useVeiculoDetalhe(id: string) {
 }
 
 // Mutation to mark revision as done
+// Atualiza a revisao E grava registro em historico_revisoes para alimentar Relatórios.
 export function useMarcarRevisaoRealizada() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ 
-      revisaoId, 
-      kmAtual, 
-      horaAtual 
-    }: { 
-      revisaoId: string; 
-      kmAtual: number; 
+    mutationFn: async ({
+      revisaoId,
+      kmAtual,
+      horaAtual,
+    }: {
+      revisaoId: string;
+      kmAtual: number;
       horaAtual: number;
     }) => {
+      // 1) Buscar dados da revisão para montar o histórico
       const { data: revisao, error: fetchError } = await supabase
         .from('revisoes')
-        .select('unidade')
+        .select(
+          'id, veiculo_id, tipo_revisao_id, oficina_id, ordem_servico, nota_fiscal_url, observacoes, valor, unidade',
+        )
         .eq('id', revisaoId)
         .single();
 
       if (fetchError) throw fetchError;
+      if (!revisao) throw new Error('Revisão não encontrada');
 
-      const { error } = await supabase
+      const hoje = new Date().toISOString().split('T')[0];
+      const kmRealizacao = revisao.unidade === 'Km' ? kmAtual : null;
+      const horaRealizacao = revisao.unidade === 'Hr' ? horaAtual : null;
+
+      // 2) Calcular tempo_servico_dias a partir da OS aberta vinculada (veículo + tipo)
+      let tempoServicoDias: number | null = null;
+      try {
+        const { data: os } = await supabase
+          .from('ordens_servico')
+          .select('id, data_entrada')
+          .eq('veiculo_id', revisao.veiculo_id)
+          .eq('tipo_revisao_id', revisao.tipo_revisao_id)
+          .is('data_saida', null)
+          .order('data_entrada', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
+        if (os?.data_entrada) {
+          const entrada = new Date(os.data_entrada);
+          const saida = new Date(hoje);
+          const diff = Math.floor(
+            (saida.getTime() - entrada.getTime()) / (1000 * 60 * 60 * 24),
+          );
+          tempoServicoDias = diff >= 0 ? diff : null;
+        }
+      } catch (e) {
+        // Se a busca da OS falhar, seguimos sem tempo_servico_dias.
+        console.warn('Falha ao calcular tempo_servico_dias:', e);
+      }
+
+      // 3) Inserir no histórico (executado antes do update para evitar perda de dados)
+      const { error: histError } = await supabase.from('historico_revisoes').insert({
+        revisao_id: revisao.id,
+        veiculo_id: revisao.veiculo_id,
+        tipo_revisao_id: revisao.tipo_revisao_id,
+        oficina_id: revisao.oficina_id,
+        data_realizacao: hoje,
+        km_realizacao: kmRealizacao,
+        hora_realizacao: horaRealizacao,
+        valor: revisao.valor,
+        ordem_servico: revisao.ordem_servico,
+        nota_fiscal_url: revisao.nota_fiscal_url,
+        observacoes: revisao.observacoes,
+        tempo_servico_dias: tempoServicoDias,
+      });
+
+      if (histError) throw histError;
+
+      // 4) Atualizar a revisao com o ciclo realizado
+      const { error: updateError } = await supabase
         .from('revisoes')
-        .update({ 
-          data_revisao: new Date().toISOString().split('T')[0],
-          km_revisao: revisao.unidade === 'Km' ? kmAtual : null,
-          hora_revisao: revisao.unidade === 'Hr' ? horaAtual : null,
+        .update({
+          data_revisao: hoje,
+          km_revisao: kmRealizacao,
+          hora_revisao: horaRealizacao,
           status_execucao: 'realizada',
         })
         .eq('id', revisaoId);
 
-      if (error) throw error;
+      if (updateError) throw updateError;
+
+      return { revisaoId, veiculoId: revisao.veiculo_id };
     },
-    onSuccess: () => {
+    onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ['revisoes'] });
-      queryClient.invalidateQueries({ queryKey: ['veiculo'] });
+      queryClient.invalidateQueries({ queryKey: ['historico_revisoes'] });
+      queryClient.invalidateQueries({ queryKey: ['fleet_analytics'] });
+      queryClient.invalidateQueries({ queryKey: ['fleet_kpis'] });
+      if (result?.veiculoId) {
+        queryClient.invalidateQueries({ queryKey: ['veiculo', result.veiculoId] });
+      } else {
+        queryClient.invalidateQueries({ queryKey: ['veiculo'] });
+      }
     },
   });
 }
