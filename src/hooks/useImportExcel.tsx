@@ -188,9 +188,10 @@ export function useImportExcel() {
 
       // ============ STAGE 2: Tipos de revisão ============
       setStage('tipos');
-      const tiposMap = new Map<string, { nome: string; intervalo_padrao: number | null; unidade_padrao: string | null }>();
+      const tiposMap = new Map<string, { nome: string; intervalo_padrao: number | null; unidade_padrao: RevisionUnit | null }>();
       rows.forEach((r) => {
         if (!r.tipo_revisao) return;
+
         const nome = r.tipo_revisao.trim();
         if (!nome || tiposMap.has(nome)) return;
         tiposMap.set(nome, {
