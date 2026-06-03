@@ -268,38 +268,62 @@ Deno.serve(async (req) => {
 
     mensagem += "\n\n_Mensagem automática do Sistema de Gestão de Frota_";
 
-    const results: Array<{ status: number; ok: boolean }> = [];
-    for (const phone of phoneNumbers) {
+    const results: Array<{ index: number; ok: boolean; status: number | null; error?: string }> = [];
+    for (let i = 0; i < phoneNumbers.length; i++) {
+      const phone = phoneNumbers[i];
       const zapiUrl = `https://api.z-api.io/instances/${ZAPI_INSTANCE_ID}/token/${ZAPI_TOKEN}/send-text`;
 
-      const response = await fetch(zapiUrl, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Client-Token": ZAPI_CLIENT_TOKEN,
-        },
-        body: JSON.stringify({
-          phone: phone.replace(/\D/g, ""),
-          message: mensagem,
-        }),
-      });
+      try {
+        const response = await fetch(zapiUrl, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Client-Token": ZAPI_CLIENT_TOKEN,
+          },
+          body: JSON.stringify({
+            phone: phone.replace(/\D/g, ""),
+            message: mensagem,
+          }),
+        });
 
-      // Não logar números nem corpo (PII). Apenas status agregado.
-      results.push({ status: response.status, ok: response.ok });
+        const ok = response.status >= 200 && response.status < 300;
+        if (!ok) {
+          // Loga corpo internamente para diagnóstico, sem expor ao cliente.
+          const bodyText = await response.text().catch(() => "");
+          console.error(
+            `Z-API falhou para destinatário #${i}: status=${response.status} body=${bodyText.slice(0, 500)}`,
+          );
+        }
+        results.push({ index: i, ok, status: response.status });
+      } catch (err) {
+        console.error(`Z-API exceção para destinatário #${i}:`, err);
+        results.push({
+          index: i,
+          ok: false,
+          status: null,
+          error: "network_error",
+        });
+      }
     }
 
+    const sucessos = results.filter((r) => r.ok).length;
+    const falhas = results.length - sucessos;
+
     console.log(
-      `WhatsApp alerts dispatch summary: total=${results.length} ok=${
-        results.filter((r) => r.ok).length
-      }`,
+      `WhatsApp alerts dispatch summary: total=${results.length} ok=${sucessos} fail=${falhas}`,
     );
 
     return jsonResponse(
       {
-        success: true,
-        message: `Alertas enviados para ${phoneNumbers.length} destinatário(s)`,
+        success: falhas === 0,
+        message: `Alertas enviados: ${sucessos} sucesso(s), ${falhas} falha(s) de ${results.length} destinatário(s)`,
         vencidas: vencidasList.length,
         proximasAVencer: proximasAVencer.length,
+        totalDestinatarios: results.length,
+        sucessos,
+        falhas,
+        // Apenas índice e status — sem números de telefone.
+        detalhes: results,
       },
       200,
       cors,
