@@ -21,6 +21,7 @@ const TiposRevisao = lazy(() => import("./pages/TiposRevisao"));
 const Empresas = lazy(() => import("./pages/Empresas"));
 const Oficinas = lazy(() => import("./pages/Oficinas"));
 const AdminUsuarios = lazy(() => import("./pages/AdminUsuarios"));
+const AdminExportarOrdens = lazy(() => import("./pages/AdminExportarOrdens"));
 const Configuracoes = lazy(() => import("./pages/Configuracoes"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
