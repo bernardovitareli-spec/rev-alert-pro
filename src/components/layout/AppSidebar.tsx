@@ -11,6 +11,7 @@ import {
   Truck,
   ChevronRight,
   Users,
+  Download,
   SlidersHorizontal
 } from 'lucide-react';
 import logoMC from '@/assets/logo-mc-20anos.jpg';
