@@ -41,63 +41,85 @@ export function VehiclesList() {
     if (!veiculos) return [];
 
     const hoje = new Date();
-    const result = veiculos.filter((veiculo: VeiculoComRevisoes) => {
+    const result = veiculos.flatMap((veiculo: VeiculoComRevisoes) => {
       // Search filter
       if (filters.search) {
         const searchLower = filters.search.toLowerCase();
         const matchesPlaca = veiculo.placa_serie.toLowerCase().includes(searchLower);
         const matchesTag = veiculo.tag_obra?.toLowerCase().includes(searchLower);
-        if (!matchesPlaca && !matchesTag) return false;
-      }
-
-      // Status filter
-      if (filters.status !== 'all' && veiculo.statusGeral !== filters.status) {
-        return false;
+        if (!matchesPlaca && !matchesTag) return [];
       }
 
       // Empresa filter
       if (filters.empresaId !== 'all' && veiculo.empresa_id !== filters.empresaId) {
-        return false;
+        return [];
       }
 
-      // Tipo revisao filter
+      // Scope revisões when a tipo de revisão is selected, so cards reflect
+      // ONLY the chosen revision type (status, counts, etc).
+      let scoped: VeiculoComRevisoes = veiculo;
       if (filters.tipoRevisaoId !== 'all') {
-        const hasRevisionType = veiculo.revisoes.some(
-          r => r.tipo_revisao_id === filters.tipoRevisaoId
+        const revisoesFiltradas = veiculo.revisoes.filter(
+          r => r.tipo_revisao_id === filters.tipoRevisaoId,
         );
-        if (!hasRevisionType) return false;
+        if (revisoesFiltradas.length === 0) return [];
+
+        const revisoesCriticas = revisoesFiltradas.filter(r => r.status === 'critical').length;
+        const revisoesAtencao = revisoesFiltradas.filter(r => r.status === 'warning').length;
+        const revisoesOk = revisoesFiltradas.filter(r => r.status === 'ok').length;
+        const statusGeral = revisoesCriticas > 0
+          ? 'critical'
+          : revisoesAtencao > 0
+            ? 'warning'
+            : 'ok';
+
+        scoped = {
+          ...veiculo,
+          revisoes: revisoesFiltradas,
+          revisoesCriticas,
+          revisoesAtencao,
+          revisoesOk,
+          statusGeral,
+        };
       }
 
-      // Status execução filter
+      // Status filter (applied to scoped status)
+      if (filters.status !== 'all' && scoped.statusGeral !== filters.status) {
+        return [];
+      }
+
+      // Status execução filter (applied to scoped revisions)
       if (filters.statusExecucao !== 'all') {
-        const hasStatusExecucao = veiculo.revisoes.some(
-          r => r.status_execucao === filters.statusExecucao
+        const hasStatusExecucao = scoped.revisoes.some(
+          r => r.status_execucao === filters.statusExecucao,
         );
-        if (!hasStatusExecucao) return false;
+        if (!hasStatusExecucao) return [];
       }
 
       // Insight filters
       if (filters.insightFilter === 'km_desatualizado') {
-        if (!veiculo.ultima_atualizacao) return true;
+        if (!scoped.ultima_atualizacao) return [scoped];
         const dataLimite = new Date();
         dataLimite.setDate(dataLimite.getDate() - diasLimite);
-        return parseISO(veiculo.ultima_atualizacao) < dataLimite;
+        if (parseISO(scoped.ultima_atualizacao) >= dataLimite) return [];
       }
 
       if (filters.insightFilter === 'retorno_atrasado') {
-        if (!veiculo.retorno_patio) return false;
-        return parseISO(veiculo.retorno_patio) < hoje;
+        if (!scoped.retorno_patio) return [];
+        if (parseISO(scoped.retorno_patio) >= hoje) return [];
       }
 
       if (filters.insightFilter === 'entregas_atrasadas') {
-        return veiculo.revisoes.some(r => {
+        const hasAtrasada = scoped.revisoes.some(r => {
           if (r.status_execucao !== 'em_servico' || !r.previsao_entrega) return false;
           return parseISO(r.previsao_entrega) < hoje;
         });
+        if (!hasAtrasada) return [];
       }
 
-      return true;
+      return [scoped];
     });
+
 
     // Sort by days (most outdated first) for insight filters
     if (filters.insightFilter === 'km_desatualizado') {
