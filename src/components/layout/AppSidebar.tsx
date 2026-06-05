@@ -121,6 +121,11 @@ export function AppSidebar() {
           icon: Users,
           path: '/admin/usuarios',
           tooltip: 'Gerenciar usuários e convites',
+        }, {
+          title: 'Exportar Dados',
+          icon: Download,
+          path: '/admin/exportar-ordens',
+          tooltip: 'Baixar CSV de ordens de serviço',
         }]
       : []),
   ];
