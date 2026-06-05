@@ -82,6 +82,7 @@ function AppRoutes() {
         <Route path="/empresas" element={<ProtectedRoute><Empresas /></ProtectedRoute>} />
         <Route path="/oficinas" element={<ProtectedRoute><Oficinas /></ProtectedRoute>} />
         <Route path="/admin/usuarios" element={<ProtectedRoute><AdminUsuarios /></ProtectedRoute>} />
+        <Route path="/admin/exportar-ordens" element={<ProtectedRoute><AdminExportarOrdens /></ProtectedRoute>} />
         <Route path="/configuracoes" element={<ProtectedRoute><Configuracoes /></ProtectedRoute>} />
         <Route path="*" element={<NotFound />} />
       </Routes>
