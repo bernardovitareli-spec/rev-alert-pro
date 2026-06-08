@@ -18,11 +18,21 @@ interface ProfileRow {
   created_at: string;
 }
 
+function generatePassword(len = 12) {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@#$';
+  let out = '';
+  const arr = new Uint32Array(len);
+  crypto.getRandomValues(arr);
+  for (let i = 0; i < len; i++) out += chars[arr[i] % chars.length];
+  return out;
+}
+
 export default function AdminUsuarios() {
   const { data: isAdmin, isLoading: loadingAdmin } = useIsAdmin();
   const queryClient = useQueryClient();
   const [email, setEmail] = useState('');
   const [nome, setNome] = useState('');
+  const [password, setPassword] = useState(() => generatePassword());
   const [inviting, setInviting] = useState(false);
 
   const { data: profiles, isLoading: loadingProfiles } = useQuery({
