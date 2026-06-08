@@ -1,4 +1,4 @@
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Navigate } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
 import {
   useVeiculoDetalhe,
@@ -8,6 +8,7 @@ import {
   useEmpresas,
 } from '@/hooks/useFleetData';
 import { useContratos } from '@/hooks/useContratos';
+import { useUserRole } from '@/hooks/useUserRole';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
