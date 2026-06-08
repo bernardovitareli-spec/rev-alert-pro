@@ -17,7 +17,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Loader2, UserPlus, Users, Shield } from 'lucide-react';
+import { Loader2, UserPlus, Users, Shield, AlertTriangle, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
 
 type Role = 'admin' | 'apontador' | 'user';
@@ -74,6 +74,65 @@ export default function AdminUsuarios() {
   const [editing, setEditing] = useState<{ userId: string; email: string; currentRole: Role } | null>(null);
   const [newRole, setNewRole] = useState<Role>('user');
   const [savingRole, setSavingRole] = useState(false);
+  const [syncing, setSyncing] = useState(false);
+
+  interface Diagnostico {
+    total_auth: number;
+    total_profiles: number;
+    total_roles: number;
+    orfaos_encontrados?: { sem_profile: string[]; sem_role: string[] };
+  }
+
+  const { data: diagnostico, refetch: refetchDiag } = useQuery<Diagnostico | null>({
+    queryKey: ['admin', 'sync-users', 'dry'],
+    enabled: !!isAdmin,
+    staleTime: 30_000,
+    queryFn: async () => {
+      const { data, error } = await supabase.functions.invoke('admin-sync-users', {
+        body: { dryRun: true },
+      });
+      if (error) return null;
+      return {
+        total_auth: data?.diagnostico?.total_auth ?? 0,
+        total_profiles: data?.diagnostico?.total_profiles ?? 0,
+        total_roles: data?.diagnostico?.total_roles ?? 0,
+        orfaos_encontrados: data?.orfaos_encontrados,
+      };
+    },
+  });
+
+  const handleSync = async () => {
+    setSyncing(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('admin-sync-users', {
+        body: {},
+      });
+      if (error) {
+        let serverMsg: string | null = null;
+        try {
+          const ctx = (error as unknown as { context?: Response }).context;
+          if (ctx && typeof ctx.json === 'function') {
+            const body = await ctx.clone().json();
+            serverMsg = body?.error ?? null;
+          }
+        } catch { /* ignore */ }
+        throw new Error(serverMsg ?? error.message);
+      }
+      if (data?.error) throw new Error(data.error);
+      toast.success('Sincronização concluída', {
+        description: data?.mensagem ?? 'Usuários sincronizados.',
+      });
+      await Promise.all([
+        refetchDiag(),
+        queryClient.invalidateQueries({ queryKey: ['admin', 'profiles'] }),
+        queryClient.invalidateQueries({ queryKey: ['admin', 'user_roles'] }),
+      ]);
+    } catch (err) {
+      toast.error('Falha ao sincronizar', { description: (err as Error).message });
+    } finally {
+      setSyncing(false);
+    }
+  };
 
   const { data: profiles, isLoading: loadingProfiles } = useQuery({
     queryKey: ['admin', 'profiles'],
@@ -292,6 +351,70 @@ export default function AdminUsuarios() {
             </form>
           </CardContent>
         </Card>
+
+        {diagnostico && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base flex items-center gap-2">
+                <Shield className="h-4 w-4 text-primary" /> Diagnóstico de cadastros
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="flex flex-wrap gap-3 text-sm">
+                <div className="px-3 py-2 rounded-md bg-secondary/40 border border-border/50">
+                  Total auth: <span className="font-semibold">{diagnostico.total_auth}</span>
+                </div>
+                <div className="px-3 py-2 rounded-md bg-secondary/40 border border-border/50">
+                  Com perfil: <span className="font-semibold">{diagnostico.total_profiles}</span>
+                </div>
+                <div className="px-3 py-2 rounded-md bg-secondary/40 border border-border/50">
+                  Com papel: <span className="font-semibold">{diagnostico.total_roles}</span>
+                </div>
+              </div>
+              {(diagnostico.total_auth !== diagnostico.total_profiles ||
+                diagnostico.total_auth !== diagnostico.total_roles) && (
+                <div className="rounded-md border border-amber-500/40 bg-amber-500/10 p-3 flex items-start justify-between gap-3">
+                  <div className="flex items-start gap-2 text-amber-300 text-sm">
+                    <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" />
+                    <div>
+                      Existem{' '}
+                      <strong>
+                        {Math.max(
+                          diagnostico.total_auth - diagnostico.total_profiles,
+                          diagnostico.total_auth - diagnostico.total_roles,
+                        )}
+                      </strong>{' '}
+                      usuário(s) com cadastro incompleto.
+                      {diagnostico.orfaos_encontrados && (
+                        <div className="text-xs mt-1 text-amber-200/80">
+                          {diagnostico.orfaos_encontrados.sem_profile.length > 0 && (
+                            <div>Sem perfil: {diagnostico.orfaos_encontrados.sem_profile.join(', ')}</div>
+                          )}
+                          {diagnostico.orfaos_encontrados.sem_role.length > 0 && (
+                            <div>Sem papel: {diagnostico.orfaos_encontrados.sem_role.join(', ')}</div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  <Button
+                    onClick={handleSync}
+                    disabled={syncing}
+                    className="bg-orange-500 hover:bg-orange-600 text-white shrink-0"
+                  >
+                    {syncing ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <>
+                        <RefreshCw className="h-4 w-4 mr-1.5" /> Sincronizar Agora
+                      </>
+                    )}
+                  </Button>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
 
         <Card>
           <CardHeader>

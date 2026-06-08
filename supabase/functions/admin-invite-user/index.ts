@@ -110,18 +110,49 @@ Deno.serve(async (req) => {
 
     const newUserId = created.user?.id;
 
-    // Atribui o papel escolhido. Se for admin/apontador, remove o 'user' default
-    // criado pelo trigger handle_new_user para a UI listar o papel correto.
-    if (newUserId && role !== 'user') {
-      // Garante que o role exista (o trigger pode rodar antes)
+    // Garante profile (não depender do trigger handle_new_user) ─────────
+    if (newUserId) {
+      // empresa padrão
+      let empresaId: string | null = null;
+      const { data: mc } = await admin
+        .from('empresas')
+        .select('id')
+        .eq('nome', 'MC Terraplenagem')
+        .maybeSingle();
+      if (mc?.id) {
+        empresaId = mc.id;
+      } else {
+        const { data: anyEmp } = await admin
+          .from('empresas')
+          .select('id')
+          .order('nome', { ascending: true })
+          .limit(1)
+          .maybeSingle();
+        empresaId = anyEmp?.id ?? null;
+      }
+
+      const { error: profErr } = await admin
+        .from('profiles')
+        .upsert(
+          { user_id: newUserId, email, nome: nome ?? null, empresa_id: empresaId },
+          { onConflict: 'user_id', ignoreDuplicates: false },
+        );
+      if (profErr) {
+        console.error('[admin-invite-user] upsert profile error', profErr);
+      }
+
+      // Garante o papel escolhido
       const { error: insertRoleErr } = await admin
         .from('user_roles')
-        .insert({ user_id: newUserId, role });
-      if (insertRoleErr && !String(insertRoleErr.message).includes('duplicate')) {
-        console.error('[admin-invite-user] insert role error', insertRoleErr);
+        .upsert({ user_id: newUserId, role }, { onConflict: 'user_id,role', ignoreDuplicates: true });
+      if (insertRoleErr) {
+        console.error('[admin-invite-user] upsert role error', insertRoleErr);
       }
-      // Remove o 'user' default
-      await admin.from('user_roles').delete().eq('user_id', newUserId).eq('role', 'user');
+
+      // Se papel ≠ 'user', remove o 'user' default criado pelo trigger
+      if (role !== 'user') {
+        await admin.from('user_roles').delete().eq('user_id', newUserId).eq('role', 'user');
+      }
     }
 
     return new Response(
