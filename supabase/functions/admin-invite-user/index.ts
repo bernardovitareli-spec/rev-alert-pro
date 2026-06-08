@@ -62,6 +62,7 @@ Deno.serve(async (req) => {
     const body = await req.json().catch(() => ({}));
     const email = String(body.email ?? '').trim().toLowerCase();
     const nome = body.nome ? String(body.nome).trim() : undefined;
+    const password = body.password ? String(body.password) : undefined;
 
     if (!email || !/^\S+@\S+\.\S+$/.test(email)) {
       return new Response(JSON.stringify({ error: 'E-mail inválido' }), {
@@ -70,44 +71,47 @@ Deno.serve(async (req) => {
       });
     }
 
-    const redirectTo = req.headers.get('origin')
-      ? `${req.headers.get('origin')}/reset-password`
-      : undefined;
+    if (!password || password.length < 8) {
+      return new Response(JSON.stringify({ error: 'Senha obrigatória (mínimo 8 caracteres)' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
 
-    const { data: invited, error: inviteError } = await admin.auth.admin.inviteUserByEmail(email, {
-      data: nome ? { nome } : undefined,
-      redirectTo,
+    // Cria usuário diretamente com senha definida pelo admin (não usa convite Lovable/Supabase via email)
+    const { data: created, error: createError } = await admin.auth.admin.createUser({
+      email,
+      password,
+      email_confirm: true,
+      user_metadata: nome ? { nome } : undefined,
     });
 
-    if (inviteError) {
-      const code = (inviteError as any)?.code;
-      const isExisting = code === 'email_exists' || inviteError.message?.toLowerCase().includes('already been registered');
+    if (createError) {
+      const code = (createError as any)?.code;
+      const msg = createError.message?.toLowerCase() ?? '';
+      const isExisting = code === 'email_exists' || msg.includes('already been registered') || msg.includes('already registered');
 
       if (isExisting) {
-        // Usuário já existe — enviar link de recuperação de senha como reconvite
-        const { error: resetError } = await admin.auth.resetPasswordForEmail(email, { redirectTo });
-        if (resetError) {
-          console.error('[admin-invite-user] reset error', resetError);
-          return new Response(JSON.stringify({ error: 'Usuário já cadastrado e falha ao reenviar link: ' + resetError.message }), {
-            status: 400,
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          });
-        }
         return new Response(
-          JSON.stringify({ ok: true, alreadyExisted: true, message: 'Usuário já cadastrado. Um link para redefinir a senha foi enviado para o e-mail.' }),
-          { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
+          JSON.stringify({ error: 'Já existe um usuário cadastrado com este e-mail.' }),
+          { status: 409, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
         );
       }
 
-      console.error('[admin-invite-user] invite error', inviteError);
-      return new Response(JSON.stringify({ error: inviteError.message }), {
+      console.error('[admin-invite-user] create error', createError);
+      return new Response(JSON.stringify({ error: createError.message }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
     return new Response(
-      JSON.stringify({ ok: true, user: { id: invited.user?.id, email: invited.user?.email } }),
+      JSON.stringify({
+        ok: true,
+        created: true,
+        message: `Usuário ${email} criado com sucesso. Compartilhe a senha com ele de forma segura.`,
+        user: { id: created.user?.id, email: created.user?.email },
+      }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
     );
   } catch (err) {
