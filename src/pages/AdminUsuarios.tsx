@@ -17,7 +17,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Loader2, UserPlus, Users, Shield } from 'lucide-react';
+import { Loader2, UserPlus, Users, Shield, AlertTriangle, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
 
 type Role = 'admin' | 'apontador' | 'user';
