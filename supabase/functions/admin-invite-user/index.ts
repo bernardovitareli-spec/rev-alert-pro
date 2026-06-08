@@ -80,6 +80,25 @@ Deno.serve(async (req) => {
     });
 
     if (inviteError) {
+      const code = (inviteError as any)?.code;
+      const isExisting = code === 'email_exists' || inviteError.message?.toLowerCase().includes('already been registered');
+
+      if (isExisting) {
+        // Usuário já existe — enviar link de recuperação de senha como reconvite
+        const { error: resetError } = await admin.auth.resetPasswordForEmail(email, { redirectTo });
+        if (resetError) {
+          console.error('[admin-invite-user] reset error', resetError);
+          return new Response(JSON.stringify({ error: 'Usuário já cadastrado e falha ao reenviar link: ' + resetError.message }), {
+            status: 400,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          });
+        }
+        return new Response(
+          JSON.stringify({ ok: true, alreadyExisted: true, message: 'Usuário já cadastrado. Um link para redefinir a senha foi enviado para o e-mail.' }),
+          { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
+        );
+      }
+
       console.error('[admin-invite-user] invite error', inviteError);
       return new Response(JSON.stringify({ error: inviteError.message }), {
         status: 400,
