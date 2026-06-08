@@ -23,12 +23,17 @@ import { VeiculoHistorico } from '@/components/vehicles/detalhe/VeiculoHistorico
 export default function VeiculoDetalhe() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { isApontador } = useUserRole();
   const { data: veiculo, isLoading, error } = useVeiculoDetalhe(id || '');
   const updateVeiculo = useUpdateVeiculo();
   const marcarRevisao = useMarcarRevisaoRealizada();
   const updateStatusExecucao = useUpdateStatusExecucao();
   const { data: empresas } = useEmpresas();
   const { data: contratos } = useContratos(veiculo?.empresa_id || undefined);
+
+  if (isApontador) {
+    return <Navigate to="/veiculos" replace />;
+  }
 
   if (isLoading) {
     return (
