@@ -74,7 +74,20 @@ export default function AdminUsuarios() {
       const { data, error } = await supabase.functions.invoke('admin-invite-user', {
         body: { email: email.trim(), nome: nome.trim() || undefined, password },
       });
-      if (error) throw error;
+      if (error) {
+        // Tenta extrair a mensagem do corpo da resposta (ex.: 409 e-mail já existe)
+        let serverMsg: string | null = null;
+        try {
+          const ctx = (error as unknown as { context?: Response }).context;
+          if (ctx && typeof ctx.json === 'function') {
+            const body = await ctx.clone().json();
+            serverMsg = body?.error ?? null;
+          }
+        } catch {
+          // ignore
+        }
+        throw new Error(serverMsg ?? error.message);
+      }
       if (data?.error) throw new Error(data.error);
       toast.success('Usuário criado', {
         description: data?.message ?? `${email} foi cadastrado. Compartilhe a senha com o usuário de forma segura.`,
