@@ -4,6 +4,20 @@
 
 **URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
 
+## Matriz de permissões
+
+| Funcionalidade           | Admin | Apontador | User (legado) |
+|--------------------------|-------|-----------|---------------|
+| Atualizar Km/Hr veículo  | ✓     | ✓         | ✓             |
+| Editar cadastros         | ✓     | ✗         | ✓             |
+| Importar/Exportar        | ✓     | ✗         | ✓             |
+| Gerenciar usuários       | ✓     | ✗         | ✗             |
+| Relatórios               | ✓     | ✗         | ✓             |
+| Controle Entrada/Saída   | ✓     | ✗         | ✓             |
+
+O papel "Apontador" é restrito: só consegue alterar `km_atual`, `hora_atual`, `ultima_atualizacao` e `retorno_patio` na tabela `veiculos`. Qualquer outra alteração é bloqueada por trigger no banco. A UI também esconde menus, rotas e ações fora desse escopo.
+
+
 ## How can I edit this code?
 
 There are several ways of editing your application.

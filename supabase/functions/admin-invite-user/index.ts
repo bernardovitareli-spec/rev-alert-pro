@@ -6,6 +6,8 @@ const corsHeaders = {
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 };
 
+type Role = 'admin' | 'apontador' | 'user';
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
@@ -53,7 +55,7 @@ Deno.serve(async (req) => {
       });
     }
     if (!isAdminData) {
-      return new Response(JSON.stringify({ error: 'Apenas administradores podem convidar usuários' }), {
+      return new Response(JSON.stringify({ error: 'Apenas administradores podem cadastrar usuários' }), {
         status: 403,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
@@ -63,6 +65,8 @@ Deno.serve(async (req) => {
     const email = String(body.email ?? '').trim().toLowerCase();
     const nome = body.nome ? String(body.nome).trim() : undefined;
     const password = body.password ? String(body.password) : undefined;
+    const rawRole = String(body.role ?? 'user').toLowerCase();
+    const role: Role = (['admin', 'apontador', 'user'].includes(rawRole) ? rawRole : 'user') as Role;
 
     if (!email || !/^\S+@\S+\.\S+$/.test(email)) {
       return new Response(JSON.stringify({ error: 'E-mail inválido' }), {
@@ -78,7 +82,6 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Cria usuário diretamente com senha definida pelo admin (não usa convite Lovable/Supabase via email)
     const { data: created, error: createError } = await admin.auth.admin.createUser({
       email,
       password,
@@ -105,12 +108,28 @@ Deno.serve(async (req) => {
       });
     }
 
+    const newUserId = created.user?.id;
+
+    // Atribui o papel escolhido. Se for admin/apontador, remove o 'user' default
+    // criado pelo trigger handle_new_user para a UI listar o papel correto.
+    if (newUserId && role !== 'user') {
+      // Garante que o role exista (o trigger pode rodar antes)
+      const { error: insertRoleErr } = await admin
+        .from('user_roles')
+        .insert({ user_id: newUserId, role });
+      if (insertRoleErr && !String(insertRoleErr.message).includes('duplicate')) {
+        console.error('[admin-invite-user] insert role error', insertRoleErr);
+      }
+      // Remove o 'user' default
+      await admin.from('user_roles').delete().eq('user_id', newUserId).eq('role', 'user');
+    }
+
     return new Response(
       JSON.stringify({
         ok: true,
         created: true,
-        message: `Usuário ${email} criado com sucesso. Compartilhe a senha com ele de forma segura.`,
-        user: { id: created.user?.id, email: created.user?.email },
+        message: `Usuário ${email} criado como ${role}. Compartilhe a senha com ele de forma segura.`,
+        user: { id: newUserId, email: created.user?.email, role },
       }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
     );

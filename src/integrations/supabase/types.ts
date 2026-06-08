@@ -580,13 +580,14 @@ export type Database = {
         Returns: boolean
       }
       is_admin: { Args: never; Returns: boolean }
+      is_apontador: { Args: never; Returns: boolean }
       ordem_servico_empresa_id: { Args: { _os_id: string }; Returns: string }
       revisao_empresa_id: { Args: { _revisao_id: string }; Returns: string }
       user_empresa_id: { Args: never; Returns: string }
       veiculo_empresa_id: { Args: { _veiculo_id: string }; Returns: string }
     }
     Enums: {
-      app_role: "admin" | "user"
+      app_role: "admin" | "user" | "apontador"
       execution_status: "nao_realizada" | "em_servico" | "realizada"
       revision_unit: "Km" | "Hr"
       status_ordem_servico: "aberta" | "em_andamento" | "concluida"
@@ -724,7 +725,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "user"],
+      app_role: ["admin", "user", "apontador"],
       execution_status: ["nao_realizada", "em_servico", "realizada"],
       revision_unit: ["Km", "Hr"],
       status_ordem_servico: ["aberta", "em_andamento", "concluida"],

@@ -48,6 +48,7 @@ export default function Login() {
       }
       toast.error('Erro ao entrar', { description: error.message });
     } else {
+      // Após login, ApontadorGate em /  redireciona para /veiculos se for apontador
       navigate('/');
     }
   };

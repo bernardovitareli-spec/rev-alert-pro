@@ -1,4 +1,4 @@
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Navigate } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
 import {
   useVeiculoDetalhe,
@@ -8,6 +8,7 @@ import {
   useEmpresas,
 } from '@/hooks/useFleetData';
 import { useContratos } from '@/hooks/useContratos';
+import { useUserRole } from '@/hooks/useUserRole';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
@@ -22,12 +23,17 @@ import { VeiculoHistorico } from '@/components/vehicles/detalhe/VeiculoHistorico
 export default function VeiculoDetalhe() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { isApontador } = useUserRole();
   const { data: veiculo, isLoading, error } = useVeiculoDetalhe(id || '');
   const updateVeiculo = useUpdateVeiculo();
   const marcarRevisao = useMarcarRevisaoRealizada();
   const updateStatusExecucao = useUpdateStatusExecucao();
   const { data: empresas } = useEmpresas();
   const { data: contratos } = useContratos(veiculo?.empresa_id || undefined);
+
+  if (isApontador) {
+    return <Navigate to="/veiculos" replace />;
+  }
 
   if (isLoading) {
     return (
