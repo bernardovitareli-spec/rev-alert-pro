@@ -101,18 +101,18 @@ export default function AdminUsuarios() {
             <Users className="h-6 w-6 text-primary" /> Usuários
           </h1>
           <p className="text-sm text-muted-foreground">
-            Convide novos usuários e gerencie quem tem acesso ao sistema.
+            Cadastre novos usuários definindo uma senha inicial e gerencie quem tem acesso ao sistema.
           </p>
         </div>
 
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
-              <UserPlus className="h-4 w-4 text-primary" /> Convidar novo usuário
+              <UserPlus className="h-4 w-4 text-primary" /> Cadastrar novo usuário
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleInvite} className="grid gap-4 sm:grid-cols-[1fr_1fr_auto] items-end">
+            <form onSubmit={handleInvite} className="grid gap-4 sm:grid-cols-2 items-end">
               <div className="space-y-1.5">
                 <Label htmlFor="invite-email">E-mail</Label>
                 <Input
@@ -133,12 +133,50 @@ export default function AdminUsuarios() {
                   onChange={(e) => setNome(e.target.value)}
                 />
               </div>
-              <Button type="submit" disabled={inviting} className="h-10">
-                {inviting ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Enviar convite'}
-              </Button>
+              <div className="space-y-1.5 sm:col-span-2">
+                <Label htmlFor="invite-password">Senha inicial (mínimo 8 caracteres)</Label>
+                <div className="flex gap-2">
+                  <Input
+                    id="invite-password"
+                    type="text"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    minLength={8}
+                    className="font-mono"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setPassword(generatePassword())}
+                    title="Gerar nova senha"
+                  >
+                    Gerar
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => {
+                      navigator.clipboard.writeText(password);
+                      toast.success('Senha copiada');
+                    }}
+                  >
+                    Copiar
+                  </Button>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Compartilhe a senha com o usuário por um canal seguro. Ele poderá alterá-la depois em "Esqueci minha senha".
+                </p>
+              </div>
+              <div className="sm:col-span-2 flex justify-end">
+                <Button type="submit" disabled={inviting} className="h-10 min-w-[160px]">
+                  {inviting ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Cadastrar usuário'}
+                </Button>
+              </div>
             </form>
           </CardContent>
         </Card>
+
 
         <Card>
           <CardHeader>
