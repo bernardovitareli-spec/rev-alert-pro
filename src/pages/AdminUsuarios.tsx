@@ -62,8 +62,8 @@ export default function AdminUsuarios() {
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
-      toast.success('Convite enviado', {
-        description: `Um e-mail de convite foi enviado para ${email}.`,
+      toast.success(data?.alreadyExisted ? 'Usuário já cadastrado' : 'Convite enviado', {
+        description: data?.message ?? `Um e-mail de convite foi enviado para ${email}.`,
       });
       setEmail('');
       setNome('');
