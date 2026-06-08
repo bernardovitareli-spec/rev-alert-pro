@@ -65,21 +65,27 @@ export default function AdminUsuarios() {
   const handleInvite = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email.trim()) return;
+    if (password.length < 8) {
+      toast.error('Senha muito curta', { description: 'Use no mínimo 8 caracteres.' });
+      return;
+    }
     setInviting(true);
     try {
       const { data, error } = await supabase.functions.invoke('admin-invite-user', {
-        body: { email: email.trim(), nome: nome.trim() || undefined },
+        body: { email: email.trim(), nome: nome.trim() || undefined, password },
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
-      toast.success(data?.alreadyExisted ? 'Usuário já cadastrado' : 'Convite enviado', {
-        description: data?.message ?? `Um e-mail de convite foi enviado para ${email}.`,
+      toast.success('Usuário criado', {
+        description: data?.message ?? `${email} foi cadastrado. Compartilhe a senha com o usuário de forma segura.`,
+        duration: 10000,
       });
       setEmail('');
       setNome('');
+      setPassword(generatePassword());
       queryClient.invalidateQueries({ queryKey: ['admin', 'profiles'] });
     } catch (err) {
-      toast.error('Falha ao convidar usuário', {
+      toast.error('Falha ao cadastrar usuário', {
         description: (err as Error).message,
       });
     } finally {
