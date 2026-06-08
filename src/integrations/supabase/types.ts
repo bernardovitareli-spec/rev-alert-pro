@@ -586,7 +586,7 @@ export type Database = {
       veiculo_empresa_id: { Args: { _veiculo_id: string }; Returns: string }
     }
     Enums: {
-      app_role: "admin" | "user"
+      app_role: "admin" | "user" | "apontador"
       execution_status: "nao_realizada" | "em_servico" | "realizada"
       revision_unit: "Km" | "Hr"
       status_ordem_servico: "aberta" | "em_andamento" | "concluida"
@@ -724,7 +724,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "user"],
+      app_role: ["admin", "user", "apontador"],
       execution_status: ["nao_realizada", "em_servico", "realizada"],
       revision_unit: ["Km", "Hr"],
       status_ordem_servico: ["aberta", "em_andamento", "concluida"],

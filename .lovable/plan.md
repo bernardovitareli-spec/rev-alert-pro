@@ -1,59 +1,81 @@
-## Contexto importante sobre o ambiente Lovable
+# Plano: Papel "Apontador"
 
-Antes do plano, dois pontos do prompt **não se aplicam ao Lovable** e precisam ser ajustados:
+Adiciona um terceiro papel restrito ao sistema. O Apontador só consegue atualizar 4 campos de veículos (KM, Horímetro, Última Atualização, Retorno ao Pátio). Tudo o mais fica bloqueado por RLS, trigger no banco, rotas e UI.
 
-1. **`.env` no Lovable** — o arquivo `.env` deste projeto é **gerado automaticamente** pelo Lovable Cloud (contém `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`, `VITE_SUPABASE_PROJECT_ID`). Ele **nunca vai para o GitHub** quando você conectar o repositório — o Lovable já o trata como ambiente local. Além disso, as chaves contidas nele são **publishable/anon keys**, projetadas para ficar expostas no client (a segurança real está nas RLS policies, que já estão ativas). Mesmo assim, adicionar ao `.gitignore` e criar um `.env.example` é boa prática e **vou fazer**.
+## 1. Banco (migração única)
 
-2. **`git rm --cached .env`** — não posso executar comandos `git` no sandbox do Lovable (o estado do git é gerenciado internamente). Quando você conectar ao GitHub, o `.env` **não será commitado** porque estará no `.gitignore`. Se o repo já estiver conectado e o `.env` já tiver sido enviado antes, você precisará rodar `git rm --cached .env && git commit` **localmente no clone do GitHub** — eu posso te passar os comandos exatos, mas não consigo executá-los daqui.
+- `ALTER TYPE public.app_role ADD VALUE IF NOT EXISTS 'apontador'` (precisa de COMMIT antes de ser usado em policies — fazer em migração separada da que cria policies, ou usar dois migrations sequenciais).
+- Função `public.is_apontador()` security definer (espelha `is_admin()`).
+- Trigger `BEFORE UPDATE` em `veiculos`: se `is_apontador()` é true, comparar `OLD` vs `NEW` em todas as colunas; se qualquer coluna fora de `{km_atual, hora_atual, ultima_atualizacao, retorno_patio}` mudou → `RAISE EXCEPTION 'Apontador só pode atualizar Km/Hr e Retorno ao Pátio'`.
+- Policy adicional em `veiculos`: `FOR UPDATE TO authenticated USING (is_apontador()) WITH CHECK (is_apontador())`. As policies de admin/user existentes continuam.
+- INSERT/DELETE em `veiculos` e todas as demais tabelas (`empresas`, `tipos_revisao`, `oficinas`, `revisoes`, `ordens_servico`, `avarias_fotos`, `historico_revisoes`, `import_logs`) ficam como estão (admin-only). O trigger já blinda alterações via apontador.
+- Trigger `handle_new_user` permanece inserindo `'user'` — papel `apontador` é atribuído pelo Admin via edge function.
 
-3. **`supabase/types.ts`** — este arquivo é **regenerado automaticamente pelo Lovable** a cada migração do banco. **Não devo editá-lo manualmente** (e a doc do Lovable proíbe explicitamente). Olhando o arquivo atual (já em contexto), os campos `art_url`, `art_validade` e `contrato_id` **já estão presentes** na tabela `veiculos`. Portanto a "defasagem" não existe mais — os `@ts-ignore` e `(x as any)` em `VeiculoDetalhe.tsx` são resquícios antigos e podem ser removidos com segurança.
+## 2. Hook `useUserRole`
 
----
+`src/hooks/useUserRole.tsx`: query única que lê `user_roles` do user atual, retorna `{ role, isAdmin, isApontador, isLoading }`. Prioridade: admin > apontador > user. `useIsAdmin` vira alias.
 
-## Plano
+## 3. Cadastro com papel (AdminUsuarios + edge function)
 
-### 1. Atualizar `.gitignore`
-Adicionar as entradas de ambiente:
-```
-.env
-.env.local
-.env.*.local
-```
+- Form de cadastro ganha `<select>` nativo "Papel" (Admin / Apontador) — obrigatório.
+- Edge `admin-invite-user` aceita `role: 'admin' | 'apontador'`, e após `createUser` faz `INSERT INTO user_roles (user_id, role)` com o papel escolhido (deduplicando o `'user'` criado pelo trigger se necessário — substituir/adicionar).
+- Tabela "Usuários cadastrados" passa a listar a coluna **Papel** (badge vermelho=Admin, azul=Apontador, cinza=User) e botão **Alterar Papel** abrindo um dialog com `<select>` nativo. Salvar = `delete` dos papéis antigos e `insert` do novo (mantendo segurança).
 
-### 2. Criar `.env.example`
-Espelhar as chaves reais do `.env` com placeholders:
-```
-VITE_SUPABASE_PROJECT_ID="YOUR_SUPABASE_PROJECT_ID_HERE"
-VITE_SUPABASE_PUBLISHABLE_KEY="YOUR_SUPABASE_PUBLISHABLE_KEY_HERE"
-VITE_SUPABASE_URL="YOUR_SUPABASE_URL_HERE"
-```
+## 4. AppSidebar
 
-### 3. Limpar `src/pages/VeiculoDetalhe.tsx`
-Remover os workarounds de tipagem nas 4 ocorrências identificadas:
+Se `isApontador` → renderizar apenas item "Veículos" + footer (Sair). Admin e user legado: comportamento atual.
 
-- **Linha 130-131**: remover comentário `@ts-ignore` e o cast `(veiculo as any).contrato_id` → usar `veiculo.contrato_id` diretamente.
-- **Linha 479**: `(veiculo as any).contrato_id` → `veiculo.contrato_id`.
-- **Linha 712**: `(veiculo as any).art_url` → `veiculo.art_url`.
-- **Linha 719**: `(veiculo as any).art_validade` → `veiculo.art_validade`.
+## 5. App.tsx — redirecionamento por papel
 
-### 4. Não alterar
-- `.env` (gerenciado pelo Lovable)
-- `src/integrations/supabase/types.ts` (já está atualizado e é auto-gerado)
-- `src/integrations/supabase/client.ts` (auto-gerado)
+- Novo wrapper `RoleGate` em rotas. Se `isApontador` e path ≠ `/veiculos` e ≠ `/veiculos/:id` e ≠ `/perfil` → `Navigate to="/veiculos"` + `toast.error("Acesso restrito ao seu perfil")`.
+- Após login, se `isApontador`, redirecionar `/` → `/veiculos`.
 
-### 5. Validação
-- Build automático do Lovable deve passar sem erros de TS após remoção dos casts.
+## 6. Página Veículos para Apontador
 
----
+Em `VehiclesList` e `VeiculoDetalhe`, detectar `isApontador`:
 
-## O que você precisa fazer manualmente (fora do Lovable)
+- Esconder botões Novo/Editar/Excluir, esconder Revisões, Documentos, Histórico.
+- Renderizar um componente novo `ApontadorVehicleList` (lista enxuta de veículos com placa/tag/empresa) e `ApontadorUpdateForm` com 4 inputs nativos:
+  - KM Atual (number)
+  - Horímetro Atual (number)
+  - Última Atualização (date, default hoje)
+  - Retorno ao Pátio (date, opcional)
+- Busca por placa/tag no topo.
+- Salvar = `update veiculos set ... where id = ?`, toast "Atualização salva".
 
-Se já conectou o projeto ao GitHub **antes** desta correção e o `.env` foi enviado, rode no clone local:
-```bash
-git rm --cached .env
-git commit -m "chore: untrack .env"
-git push
-```
-Como as chaves do `.env` deste projeto são **publishable keys** (não secretas), não há necessidade urgente de rotação — mas você pode rotacioná-las em Cloud Settings se quiser.
+## 7. Página `/perfil`
 
-Confirma para eu prosseguir com as 3 mudanças (gitignore + .env.example + limpeza do VeiculoDetalhe.tsx)?
+Nova `src/pages/MeuPerfil.tsx` acessível por todos os papéis:
+- Nome, email, papel (badge), descrição do papel, botão "Alterar senha" (reusa `ForgotPasswordDialog`/`resetPasswordForEmail`), botão "Sair".
+- Link "Meu Perfil" no footer da sidebar (todos os papéis).
+
+## 8. README
+
+Adicionar a matriz de permissões fornecida pelo usuário.
+
+## Detalhes técnicos
+
+- Enum + uso em policy no mesmo transaction quebra (Postgres exige commit do novo enum value antes de ser referenciado). Solução: **duas migrações** consecutivas — (a) só `ALTER TYPE`; (b) função/trigger/policy.
+- Trigger usa `to_jsonb(OLD) - 'km_atual' - 'hora_atual' - 'ultima_atualizacao' - 'retorno_patio'` vs idem em `NEW` para detectar mudanças fora do permitido — robusto e independente de adicionar novas colunas no futuro.
+- Edge function: após `createUser`, faz `upsert` em `user_roles` com o role escolhido. Se `admin`, remove o `'user'` redundante para a UI listar corretamente.
+- Selects e date pickers nos modais usam HTML nativo (regra do projeto).
+- Sem alteração em `client.ts`, `types.ts`, `.env`, `config.toml`.
+
+## Arquivos
+
+Novos:
+- `src/hooks/useUserRole.tsx`
+- `src/components/vehicles/ApontadorVehicleList.tsx`
+- `src/pages/MeuPerfil.tsx`
+- Migrações em `supabase/migrations/`
+
+Editados:
+- `src/hooks/useIsAdmin.tsx` (alias)
+- `src/pages/AdminUsuarios.tsx`
+- `src/components/layout/AppSidebar.tsx`
+- `src/pages/Veiculos.tsx` / `src/components/vehicles/VehiclesList.tsx` / `src/pages/VeiculoDetalhe.tsx`
+- `src/App.tsx`
+- `supabase/functions/admin-invite-user/index.ts`
+- `README.md`
+
+Confirma para eu seguir?
