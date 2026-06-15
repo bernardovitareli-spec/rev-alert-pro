@@ -149,8 +149,10 @@ export function useUpdateVeiculo() {
       crlv_url,
       tacografo_url,
       documento_url,
+      art_url,
       crlv_validade,
       tacografo_validade,
+      art_validade,
       tag_obra,
       empresa_id,
       contrato,
@@ -162,8 +164,10 @@ export function useUpdateVeiculo() {
       crlv_url?: string | null;
       tacografo_url?: string | null;
       documento_url?: string | null;
+      art_url?: string | null;
       crlv_validade?: string | null;
       tacografo_validade?: string | null;
+      art_validade?: string | null;
       tag_obra?: string | null;
       empresa_id?: string | null;
       contrato?: string | null;
@@ -176,8 +180,10 @@ export function useUpdateVeiculo() {
       if (crlv_url !== undefined) updateData.crlv_url = crlv_url;
       if (tacografo_url !== undefined) updateData.tacografo_url = tacografo_url;
       if (documento_url !== undefined) updateData.documento_url = documento_url;
+      if (art_url !== undefined) updateData.art_url = art_url;
       if (crlv_validade !== undefined) updateData.crlv_validade = crlv_validade;
       if (tacografo_validade !== undefined) updateData.tacografo_validade = tacografo_validade;
+      if (art_validade !== undefined) updateData.art_validade = art_validade;
       if (tag_obra !== undefined) updateData.tag_obra = tag_obra;
       if (empresa_id !== undefined) updateData.empresa_id = empresa_id;
       if (contrato !== undefined) updateData.contrato = contrato;
@@ -187,6 +193,7 @@ export function useUpdateVeiculo() {
       if (km_atual !== undefined || hora_atual !== undefined) {
         updateData.ultima_atualizacao = new Date().toISOString().split('T')[0];
       }
+
 
       const { error } = await supabase
         .from('veiculos')
