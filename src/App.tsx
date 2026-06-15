@@ -18,6 +18,7 @@ const VeiculoDetalhe = lazy(() => import("./pages/VeiculoDetalhe"));
 const Importar = lazy(() => import("./pages/Importar"));
 const Calendario = lazy(() => import("./pages/Calendario"));
 const Relatorios = lazy(() => import("./pages/Relatorios"));
+const RelatoriosOficina = lazy(() => import("./pages/RelatoriosOficina"));
 const ControleEntradaSaida = lazy(() => import("./pages/ControleEntradaSaida"));
 const TiposRevisao = lazy(() => import("./pages/TiposRevisao"));
 const Empresas = lazy(() => import("./pages/Empresas"));
@@ -106,6 +107,7 @@ function AppRoutes() {
         <Route path="/calendario" element={<ProtectedRoute><ApontadorGate><Calendario /></ApontadorGate></ProtectedRoute>} />
         <Route path="/controle-entrada-saida" element={<ProtectedRoute><ApontadorGate><ControleEntradaSaida /></ApontadorGate></ProtectedRoute>} />
         <Route path="/relatorios" element={<ProtectedRoute><ApontadorGate><Relatorios /></ApontadorGate></ProtectedRoute>} />
+        <Route path="/relatorios/oficina" element={<ProtectedRoute><ApontadorGate><RelatoriosOficina /></ApontadorGate></ProtectedRoute>} />
         <Route path="/importar" element={<ProtectedRoute><ApontadorGate><Importar /></ApontadorGate></ProtectedRoute>} />
         <Route path="/tipos-revisao" element={<ProtectedRoute><ApontadorGate><TiposRevisao /></ApontadorGate></ProtectedRoute>} />
         <Route path="/empresas" element={<ProtectedRoute><ApontadorGate><Empresas /></ApontadorGate></ProtectedRoute>} />
