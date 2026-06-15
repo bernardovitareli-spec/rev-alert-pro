@@ -13,7 +13,8 @@ import {
   Users,
   Download,
   SlidersHorizontal,
-  UserCircle
+  UserCircle,
+  BarChart3
 } from 'lucide-react';
 import logoMC from '@/assets/logo-mc-20anos.jpg';
 import { Link, useLocation } from 'react-router-dom';
@@ -87,6 +88,13 @@ export function AppSidebar() {
           icon: FileBarChart,
           path: '/relatorios',
           tooltip: 'Análises e gastos da frota',
+          badge: null,
+        },
+        {
+          title: 'Relatórios da Oficina',
+          icon: BarChart3,
+          path: '/relatorios/oficina',
+          tooltip: 'Indicadores de entrada/saída de equipamentos',
           badge: null,
         },
         {
