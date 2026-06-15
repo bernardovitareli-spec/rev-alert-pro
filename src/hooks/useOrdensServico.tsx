@@ -72,6 +72,51 @@ export function useOrdensServicoPaginated(
 }
 
 
+/**
+ * Sincroniza os dados de utilização do veículo (km_atual, hora_atual,
+ * ultima_atualizacao) a partir de uma ordem de serviço.
+ * - Usa o maior valor entre entrada e saída.
+ * - Só atualiza se o novo valor for maior que o atual (evita regressões).
+ * - Data de referência: data_saida || data_entrada.
+ */
+async function syncVeiculoFromOrdem(veiculoId: string) {
+  if (!veiculoId) return;
+  // Busca o estado mais recente da OS e do veículo
+  const [{ data: ordens }, { data: veiculo }] = await Promise.all([
+    supabase
+      .from('ordens_servico')
+      .select('km_entrada, km_saida, horimetro_entrada, horimetro_saida, data_entrada, data_saida')
+      .eq('veiculo_id', veiculoId),
+    supabase
+      .from('veiculos')
+      .select('km_atual, hora_atual, ultima_atualizacao')
+      .eq('id', veiculoId)
+      .maybeSingle(),
+  ]);
+  if (!ordens || ordens.length === 0) return;
+
+  let maxKm: number | null = null;
+  let maxHor: number | null = null;
+  let latestDate: string | null = null;
+  for (const o of ordens as any[]) {
+    const km = Math.max(Number(o.km_saida ?? 0) || 0, Number(o.km_entrada ?? 0) || 0);
+    const hr = Math.max(Number(o.horimetro_saida ?? 0) || 0, Number(o.horimetro_entrada ?? 0) || 0);
+    const dt = (o.data_saida || o.data_entrada) as string | null;
+    if (km > 0 && (maxKm === null || km > maxKm)) maxKm = km;
+    if (hr > 0 && (maxHor === null || hr > maxHor)) maxHor = hr;
+    if (dt && (!latestDate || dt > latestDate)) latestDate = dt;
+  }
+
+  const patch: Record<string, any> = {};
+  if (maxKm !== null && maxKm > Number(veiculo?.km_atual ?? 0)) patch.km_atual = maxKm;
+  if (maxHor !== null && maxHor > Number(veiculo?.hora_atual ?? 0)) patch.hora_atual = maxHor;
+  if (latestDate && (!veiculo?.ultima_atualizacao || latestDate > String(veiculo.ultima_atualizacao).slice(0, 10))) {
+    patch.ultima_atualizacao = latestDate;
+  }
+  if (Object.keys(patch).length === 0) return;
+  await supabase.from('veiculos').update(patch).eq('id', veiculoId);
+}
+
 export function useCreateOrdemServico() {
   const qc = useQueryClient();
   return useMutation({
@@ -94,9 +139,14 @@ export function useCreateOrdemServico() {
         .select()
         .single();
       if (error) throw error;
+      await syncVeiculoFromOrdem(os.veiculo_id);
       return data;
     },
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ['ordens_servico'] }); qc.invalidateQueries({ queryKey: ['ordens_servico_paginated'] }); },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['ordens_servico'] });
+      qc.invalidateQueries({ queryKey: ['ordens_servico_paginated'] });
+      qc.invalidateQueries({ queryKey: ['veiculos'] });
+    },
   });
 }
 
@@ -104,13 +154,20 @@ export function useUpdateOrdemServico() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, ...updates }: { id: string; [key: string]: any }) => {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('ordens_servico')
         .update(updates as any)
-        .eq('id', id);
+        .eq('id', id)
+        .select('veiculo_id')
+        .single();
       if (error) throw error;
+      if (data?.veiculo_id) await syncVeiculoFromOrdem(data.veiculo_id);
     },
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ['ordens_servico'] }); qc.invalidateQueries({ queryKey: ['ordens_servico_paginated'] }); },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['ordens_servico'] });
+      qc.invalidateQueries({ queryKey: ['ordens_servico_paginated'] });
+      qc.invalidateQueries({ queryKey: ['veiculos'] });
+    },
   });
 }
 
