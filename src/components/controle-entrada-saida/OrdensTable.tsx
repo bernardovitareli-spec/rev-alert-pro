@@ -13,6 +13,7 @@ import { OrdemServico, StatusOrdemServico, TipoRevisao } from '@/types/fleet';
 import { AvariasDetailDialog } from './AvariasDetailDialog';
 import { RegistrarSaidaDialog } from './RegistrarSaidaDialog';
 import { EditOrdemDialog } from './EditOrdemDialog';
+import { InformeDialog } from './InformeDialog';
 import { SUBCATEGORIAS, STATUS_CONFIG, formatDateSafe } from './constants';
 import { useDeleteOrdemServico } from '@/hooks/useOrdensServico';
 
@@ -137,6 +138,7 @@ export function OrdensTable({ ordens, isAdmin, onChanged }: Props) {
                             Saiu em {formatDateSafe(o.data_saida)}
                           </span>
                         )}
+                        <InformeDialog ordem={o} iconOnly />
                         {isAdmin && (
                           <>
                             <EditOrdemDialog ordem={o} onSuccess={onChanged} />
@@ -250,12 +252,15 @@ export function OrdensTable({ ordens, isAdmin, onChanged }: Props) {
                           </div>
                         </dl>
 
-                        {isAdmin && (
-                          <div className="mt-6 flex items-center gap-2 border-t pt-4">
-                            <EditOrdemDialog ordem={o} onSuccess={onChanged} />
-                            {renderDeleteDialog(o)}
-                          </div>
-                        )}
+                        <div className="mt-6 flex items-center gap-2 border-t pt-4 flex-wrap">
+                          <InformeDialog ordem={o} triggerVariant="outline" />
+                          {isAdmin && (
+                            <>
+                              <EditOrdemDialog ordem={o} onSuccess={onChanged} />
+                              {renderDeleteDialog(o)}
+                            </>
+                          )}
+                        </div>
                       </SheetContent>
                     </Sheet>
                   </div>
