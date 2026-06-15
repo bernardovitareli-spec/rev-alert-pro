@@ -8,6 +8,7 @@ import { ClipboardList, ChevronLeft, ChevronRight } from 'lucide-react';
 import { StatusOrdemServico } from '@/types/fleet';
 import { useIsAdmin } from '@/hooks/useIsAdmin';
 import { NovaEntradaDialog } from '@/components/controle-entrada-saida/NovaEntradaDialog';
+import { ExportOrdensButton } from '@/components/controle-entrada-saida/ExportOrdensButton';
 import { OrdensFilters } from '@/components/controle-entrada-saida/OrdensFilters';
 import { OrdensTable } from '@/components/controle-entrada-saida/OrdensTable';
 import { PAGE_SIZE } from '@/components/controle-entrada-saida/constants';
@@ -63,7 +64,10 @@ export default function ControleEntradaSaida() {
             </h1>
             <p className="text-muted-foreground">Registre a entrada e saída de equipamentos na oficina</p>
           </div>
-          <NovaEntradaDialog onSuccess={() => refetch()} />
+          <div className="flex items-center gap-2">
+            <ExportOrdensButton filters={filters} />
+            <NovaEntradaDialog onSuccess={() => refetch()} />
+          </div>
         </div>
 
         <OrdensFilters
